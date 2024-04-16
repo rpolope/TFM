@@ -1,0 +1,452 @@
+\begin{thebibliography}{10}
+
+\bibitem{procedural-generation-overview}
+Kent Pawson.
+\newblock Procedural generation: An overview.
+\newblock
+  \url{https://kentpawson123.medium.com/procedural-generation-an-overview-1b054a0f8d41},
+  2024.
+
+\bibitem{generacion-procedimental-wikipedia}
+Wikipedia.
+\newblock Generación procedimental, 2024.
+
+\bibitem{ProceduralContentCreation}
+Timothy Roden and Ian Parberry.
+\newblock From artistry to automation: A structured methodology for procedural
+  content creation.
+\newblock In Matthias Rauterberg, editor, {\em Entertainment Computing -- ICEC
+  2004}, pages 151--156, Berlin, Heidelberg, 2004. Springer Berlin Heidelberg.
+
+\bibitem{Peachey1985}
+Darwyn~R. Peachey.
+\newblock Solid texturing of complex surfaces.
+\newblock In {\em Proceedings of the 12th Annual Conference on Computer
+  Graphics and Interactive Techniques, SIGGRAPH '85}, pages 279--286, New York,
+  NY, USA, 1985. ACM.
+
+\bibitem{LeeUrban2016}
+Stephen Lee-Urban.
+\newblock Procedural content generation, 2016.
+
+\bibitem{Oppenheimer1986}
+Peter~E. Oppenheimer.
+\newblock Real time design and animation of fractal plants and trees.
+\newblock {\em ACM SiGGRAPH Computer Graphics}, 20:55--64, 1986.
+
+\bibitem{WikipediaKkrieger}
+Wikipedia.
+\newblock .kkrieger, 2024.
+
+\bibitem{unity-assetstore-terrain-generator-vista-pro}
+Vista pro - graph based terrain generator gpu.
+\newblock
+  \url{https://assetstore.unity.com/packages/tools/terrain/vista-pro-graph-based-terrain-generator-gpu-264414},
+  2024.
+\newblock Unity Asset Store.
+
+\bibitem{unity-assetstore-mapmagic-world-generator}
+Mapmagic world generator.
+\newblock
+  \url{https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762},
+  2024.
+\newblock Unity Asset Store.
+
+\bibitem{unity-assetstore-terrain-composer-2}
+Terrain composer 2.
+\newblock
+  \url{https://assetstore.unity.com/packages/tools/terrain/terrain-composer-2-65563},
+  2024.
+\newblock Unity Asset Store.
+
+\bibitem{TerragenOverview}
+Planetside.
+\newblock What is terragen?
+\newblock https://planetside.co.uk/terragen-overview/, 2024.
+
+\bibitem{GaiaPro}
+Procedural Worlds.
+\newblock Gaia pro - all in one scene creation.
+\newblock https://www.procedural-worlds.com/products/professional/gaia-pro/,
+  2024.
+
+\bibitem{QuadSpinner}
+QuadSpinner.
+\newblock Quadspinner.com official website for gaea.
+\newblock https://quadspinner.com/, Unknown.
+
+\bibitem{world-creator-website}
+World creator - the real-time terrain generator and landscape generator.
+\newblock \url{https://www.world-creator.com}.
+
+\bibitem{world-machine}
+World machine.
+\newblock \url{https://www.world-machine.com/features.php}.
+\newblock Accessed: 2024-02-08.
+
+\bibitem{VUEOverview}
+e-on Software.
+\newblock Vue: Overview.
+\newblock https://info.e-onsoftware.com/vue/overview, 2024.
+
+\bibitem{sidefx}
+SideFX.
+\newblock Landscapes in houdini for unreal.
+\newblock
+  \url{https://www.sidefx.com/docs/houdini/unreal/landscape/index.html}, 2023.
+\newblock Accessed: March 14, 2024.
+
+\bibitem{creativebloq}
+Creative Bloq.
+\newblock Creating stunning landscapes in houdini.
+\newblock
+  \url{https://www.creativebloq.com/how-to/create-stunning-landscapes-in-houdini},
+  Year.
+\newblock Accessed: March 14, 2024.
+
+\bibitem{easyroads3d}
+Unity~Asset Store.
+\newblock Easyroads3d pro v3.
+\newblock
+  \url{https://assetstore.unity.com/packages/tools/terrain/easyroads3d-pro-v3-469},
+  2024.
+\newblock Version 3.2.3f3.
+
+\bibitem{CityGen3DUnityAssetStore}
+Unity~Asset Store.
+\newblock Citygen3d - unity asset store.
+\newblock
+  \url{https://assetstore.unity.com/packages/tools/terrain/citygen3d-162468},
+  2021.
+
+\bibitem{CityGen3DWebsite}
+CityGen~Technologies Ltd.
+\newblock Citygen3d website.
+\newblock \url{https://www.citygen3d.com/}, 2022.
+
+\bibitem{BuildingGenerator}
+Building generator.
+\newblock Unity Asset Store, 2024.
+
+\bibitem{EsriCityEngine}
+Esri.
+\newblock Software avanzado de diseño de ciudades en 3d esri cityengine.
+\newblock https://www.esri.es/es-es/arcgis/productos/esri-cityengine/overview,
+  2023.
+
+\bibitem{UnityAssetStoreVegetationStudioPro}
+Unity~Asset Store.
+\newblock Vegetation studio pro extensions, 2022.
+
+\bibitem{UnitySpeedTree}
+Unity.
+\newblock Speedtree.
+\newblock \url{https://unity.com/es/products/speedtree}, January 2024.
+
+\bibitem{Ebert2003}
+D.~Ebert, F.~Kenton Musgrave, D.~Peachey, et~al.
+\newblock {\em Texturing and Modeling - A Procedural Approach}.
+\newblock Morgan Kaufmann, 2003.
+
+\bibitem{Valencia-Rosado2019}
+Luis~Oswaldo Valencia-Rosado and Oleg Starostenko.
+\newblock Methods for procedural terrain generation: A review.
+\newblock In {\em Advances in Intelligent Systems and Computing}, Cham, 2019.
+  Springer.
+
+\bibitem{PerlinNoise}
+Khan Academy.
+\newblock Ruido perlin.
+\newblock 2024.
+
+\bibitem{worley-noise}
+Wikipedia.
+\newblock Worley noise, 2024.
+
+\bibitem{DesplazamientoPuntoMedio}
+Midpoint displacement algorithm.
+
+\bibitem{DiamanteCuadrado}
+A.~Krista Bird B. Thomas Dickerson C.~Jessica George.
+\newblock Diamond-square algorithm.
+\newblock
+  \url{https://web.williams.edu/Mathematics/sjmiller/public_html/hudson/Dickerson_Terrain.pdf}.
+
+\bibitem{Marak_97}
+I.~Marák.
+\newblock Procedural generation of landscapes with water bodies using
+  artificial drainage basins, 1997.
+
+\bibitem{olsen2004realtime}
+Jacob Olsen.
+\newblock Realtime synthesis of eroded fractal terrain for use in computer
+  games.
+\newblock {\em Department of Mathematics And Computer Science (IMADA),
+  University of Southern Denmark}, October 2004.
+
+\bibitem{Choros2016}
+Kazimierz Choroś and Jacek Topolski.
+\newblock Parameterized and dynamic generation of an infinite virtual terrain
+  with various biomes using extended voronoi diagram.
+\newblock {\em Journal of Universal Computer Science}, 22(6):836--855, 2016.
+
+\bibitem{Yin2013}
+Hua~Fei Yin and Changwen Zheng.
+\newblock A practical terrain generation method using sketch map and simple
+  parameters.
+\newblock {\em IEICE Transactions on Information and Systems},
+  E96.D(8):1836--1844, 2013.
+
+\bibitem{AlgoritmosHidrologia}
+Terrain generation using procedural models based on hydrology.
+
+\bibitem{HidrologiaDocumento}
+Hydrology-based terrain generation.
+
+\bibitem{Fischer2022}
+Roland Fischer, Judith Boeckers, and Gabriel Zachmann.
+\newblock Procedural generation of landscapes with water bodies using
+  artificial drainage basins.
+\newblock 2022.
+
+\bibitem{AlgoritmosErosion}
+Erosion and other algorithms in chunk-based terrain.
+
+\bibitem{ErosionReddit}
+Terrain erosion - 3 ways.
+
+\bibitem{Cordonnier2016}
+G.~Cordonnier, J.~Braun, M.-P. Cani, B.~Benes, É. Galin, A.~Peytavie, and É.
+  Guérin.
+\newblock Large scale terrain generation from tectonic uplift and fluvial
+  erosion.
+\newblock {\em Comput. Graph. Forum}, 35:165--175, 2016.
+
+\bibitem{autobiomes}
+Autobiomes: procedural generation of multi-biome landscapes.
+\newblock 2024.
+
+\bibitem{Cordonnier2017}
+Guillaume Cordonnier, Jean Braun, Marie-Paule Cani, Bedrich Benes, Eric Galin,
+  Adrien Peytavie, and Eric Guérin.
+\newblock Authoring landscapes by combining ecosystem and terrain erosion
+  simulation.
+\newblock {\em ACM Trans. Graph. TOG}, 36(134), 2017.
+
+\bibitem{AnalisisAlgoritmosAmbientesVirtuales}
+Mario~Alberto Rivera~Legarreta, Mónica Pérez~Castañeda, Héctor~Adrián
+  Díaz~Furlong, and Alberto Roman~Flores.
+\newblock Análisis de los algoritmos para generación de ambientes virtuales
+  aleatorios.
+\newblock {\em Revista de Análisis de Algoritmos y Estructuras de Datos},
+  4(1), Septiembre-Diciembre 2016.
+
+\bibitem{Doran2010}
+Michael Doran and Ian Parberry.
+\newblock Controlled procedural terrain generation using software agents.
+\newblock {\em IEEE Trans. Comput. Intellig. and AI in Games}, 2(2):111--119,
+  2010.
+
+\bibitem{mxgmn-WaveFunctionCollapse}
+mxgmn.
+\newblock Wavefunctioncollapse.
+\newblock \url{https://github.com/mxgmn/WaveFunctionCollapse}, Year.
+
+\bibitem{procjam-WFC}
+ProcJam.
+\newblock Generating worlds with wave function collapse.
+\newblock \url{https://www.procjam.com/tutorials/wfc/}, 2024.
+
+\bibitem{Srivastava2024Comparative}
+Ishaan Srivastava.
+\newblock A comparative analysis of generative models for terrain generation in
+  open-world video games.
+\newblock {\em Journal of High School Science}, 2024.
+\newblock Submitted: October 16, 2023, Revised: version 1, November 30, 2023,
+  version 2, January 21, 2024, Accepted: February 1, 2024.
+
+\bibitem{CognizantEvolutionaryAlgorithm}
+Cognizant.
+\newblock Algoritmo evolutivo.
+\newblock
+  \url{https://www.cognizant.com/es/es/glossary/evolutionary-algorithm}, 2024.
+\newblock Accessed: 2024-03-29.
+
+\bibitem{Raffe2012}
+William~L. Raffe, Fabio Zambetta, and Xiaodong Li.
+\newblock A survey of procedural terrain generation techniques using
+  evolutionary algorithms.
+\newblock In {\em 2012 IEEE Congress on Evolutionary Computation}, pages 1--8,
+  2012.
+
+\bibitem{Emilien2015}
+A.~Emilien, U.~Vimont, M.-P. Cani, P.~Poulin, and B.~Benes.
+\newblock Worldbrush: interactive example-based synthesis of procedural virtual
+  worlds.
+\newblock {\em ACM Trans. Graph. TOG}, 34(4):106, 2015.
+
+\bibitem{kelly2006survey}
+George Kelly and Hugh McCabe.
+\newblock A survey of procedural techniques for city generation.
+\newblock {\em The ITB Journal}, 7(2):87--97, 2006.
+
+\bibitem{Greuter2002}
+Stefan Greuter, Nigel Stewart, Jeremy Parker, and Geoff Leach.
+\newblock Undiscovered worlds - towards a framework for real-time procedural
+  generation of virtual worlds.
+\newblock In {\em MelbourneDAC 2003 Proceedings, ACM Press}, pages 120--127,
+  2002.
+
+\bibitem{Greuter2003}
+Stefan Greuter, Jeremy Parker, Nigel Stewart, and Geoff Leach.
+\newblock Real-time procedural generation of `pseudo infinite' cities.
+\newblock {\em Proceedings of GRAPHITE 2003, ACM Press}, pages 87--95, 2003.
+
+\bibitem{Parish2001}
+Yoav I~H Parish and Pascal Mueller.
+\newblock Procedural modeling of cities.
+\newblock {\em Computer Graphics Laboratory ETH Zurich}, 2001.
+
+\bibitem{Watson2003}
+Thomas Lechner, Ben Watson, Uri Wilensky, and Martin Felsen.
+\newblock Procedural city modeling.
+\newblock {\em Computer Graphics Laboratory ETH Zurich}, 2003.
+
+\bibitem{Sun2002}
+J.~Sun and G.~Baciu.
+\newblock Template-based generation of road networks for city modeling.
+\newblock {\em Proceedings of GRAPHITE 2002}, pages 87--95, 2002.
+
+\bibitem{Wonka2003}
+Peter Wonka, Michael Wimmer, Francois Sillion, and William Ribarsky.
+\newblock Instant architecture.
+\newblock {\em ACM Transactions on Graphics}, 22(3):725--732, 2003.
+
+\bibitem{Emilien2012}
+Arnaud Emilien, Adrien Bernhardt, Adrien Peytavie, Marie-Paule Cani, and Eric
+  Galin.
+\newblock Procedural generation of villages on arbitrary terrains.
+\newblock {\em Vis. Comput.}, 28(6-8):723--738, 2012.
+
+\bibitem{linkedinmeshsimplification}
+Er.~Isha K.
+\newblock ¿cuáles son algunos de los escollos comunes y las mejores
+  prácticas para la simplificación de malla en la representación 3d?
+\newblock
+  \url{https://www.linkedin.com/advice/0/what-some-common-pitfalls-best-practices-mesh-simplification?lang=es&originalSubdomain=es},
+  2023.
+
+\bibitem{Rossignac1993}
+Jarek Rossignac and Paul Borrel.
+\newblock Multi-resolution 3d approximations for rendering complex scenes.
+\newblock In B.~Falcidieno and T.~Kunii, editors, {\em Modeling in Computer
+  Graphics: Methods and Applications}, pages 455--465, 1993.
+
+\bibitem{Jinete2015}
+Marco Jinete, Flavio Prieto, and Augusto Salazar.
+\newblock Metodología de remallado basado en la curvatura y orientado a
+  modelos 3d del rostro humano.
+\newblock {\em Revista Ingenierías Universidad de Medellín}, 14(26):208,
+  enero-junio 2015.
+
+\bibitem{RamerDouglasPeucker}
+Urs Ramer, David~H. Douglas, and Thomas~K. Peucker.
+\newblock Algorithms for the reduction of the number of points required to
+  represent a digitized line or its caricature.
+\newblock {\em Cartographica}, 10:112--122, 1973.
+
+\bibitem{Schroeder1992}
+William~J Schroeder, Jonathan~A Zarge, and William~E Lorensen.
+\newblock Decimation of triangle meshes.
+\newblock {\em Computer Graphics (SIGGRAPH ’92 Proc.)}, 26(2):65--70, 1992.
+
+\bibitem{Jain2022}
+Aryamaan Jain, Avinash Sharma, and K~S Rajan.
+\newblock Learning based infinite terrain generation with level of detailing.
+\newblock {\em Computer Science}, 1:1--10, 2022.
+\newblock IIIT Hyderabad, India; Inria, Universite C' ote d'Azur, France; IIT
+  Jodhpur, India.
+
+\bibitem{Wu2010ANQ}
+Jian Wu, Yuanfeng Yang, Shengrong Gong, and Zhiming Cui.
+\newblock A new quadtree-based terrain lod algorithm.
+\newblock {\em J. Softw.}, 5:769--776, 2010.
+
+\bibitem{landmasses-terrain}
+Procedural generation of landmasses and terrain.
+\newblock 2024.
+
+\bibitem{GaschGarcia2021}
+Cristina~Gasch Garcia.
+\newblock {\em PROCEDURAL GENERATION OF NATURAL ENVIRONMENTS}.
+\newblock PhD thesis, Universitat Jaume I, January 2021.
+
+\bibitem{texturing2024}
+CG~Wire.
+\newblock Texturing and shading in animation: Definition, process \&
+  challenges, 2024.
+
+\bibitem{unityGPUInstancing}
+Unity.
+\newblock Gpu instancing.
+\newblock \url{https://docs.unity3d.com/Manual/GPUInstancing.html}, 2024-04-02.
+\newblock Accessed: April 05, 2024.
+
+\bibitem{fastercapital}
+Optimización del rendimiento en realidad virtual y aumentada nativa -
+  fastercapital.
+\newblock
+  \url{https://fastercapital.com/es/tema/optimizaci%C3%B3n-del-rendimiento-en-realidad-virtual-y-aumentada-nativa.html},
+  2024.
+\newblock Accessed on April 05, 2024.
+
+\bibitem{linkedinoptimization}
+Cómo optimizar el rendimiento de la realidad virtual para narrativas
+  complejas.
+\newblock
+  \url{https://es.linkedin.com/advice/0/how-can-you-optimize-vr-performance-complex-narratives-5oohf?lang=es},
+  Unknown Year.
+\newblock Accessed on Unknown Date.
+
+\bibitem{unrealengineVR}
+Virtual reality best practices.
+\newblock
+  \url{https://docs.unrealengine.com/4.26/en-US/SharingAndReleasing/XRDevelopment/VR/DevelopVR/ContentSetup/},
+  2024.
+\newblock Accessed on January 26, 2024.
+
+\bibitem{unity-job-system}
+{Jobs} overview.
+\newblock \url{https://docs.unity3d.com/Manual/job-system-jobs.html}.
+\newblock Accessed: 2024-04-13.
+
+\bibitem{UnityBurst}
+Unity Technologies.
+\newblock Burst user guide.
+\newblock
+  \url{https://docs.unity3d.com/Packages/com.unity.burst@1.2/manual/index.html},
+  2023.
+\newblock Accessed: 2024-03-29.
+
+\bibitem{UnityECS}
+Unity Technologies.
+\newblock Ecs for unity.
+\newblock \url{https://unity.com/ecs}, 2024.
+\newblock Accessed: 2024-03-29.
+
+\bibitem{unityblog}
+What is a job system? unity blog.
+\newblock \url{https://blog.unity.com/engine-platform/what-is-a-job-system},
+  2024.
+\newblock Accessed: March 20, 2024.
+
+\bibitem{agencia_tributaria_tabla_2024}
+3.5.4 tabla de amortización simplificada, March 2024.
+\newblock Tabla de amortización simplificada de la Agencia Tributaria para
+  edificios y otras construcciones, instalaciones, mobiliario, enseres y resto
+  del inmovilizado material, maquinaria, elementos de transporte, equipos para
+  tratamiento de la información y sistemas y programas informáticos, útiles
+  y herramientas, ganado vacuno, porcino, ovino y caprino, ganado equino y
+  frutales no cítricos, frutales cítricos y viñedos, olivar.
+
+\end{thebibliography}

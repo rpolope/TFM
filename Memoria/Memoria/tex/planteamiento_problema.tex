@@ -1,0 +1,54 @@
+Para el desarrollo de una herramienta de las características descritas se plantean diferentes cuestionas a resolver para cada uno de los apartados que se pretenden implementar en este proyecto.
+
+\section{Problemáticas en la Generación de Terreno}
+
+En la generación de la malla del terreno aparecen varias problemáticas a abordar que describo a continuación:
+
+\begin{itemize}
+    \item La creación de chunks de terreno conforme se mueve el jugador.
+    \item La coherencia entre distintos chunks, es decir, que no hayan discontinuidades entre chunks.
+    \item Los chunks han de almacenarse de manera eficiente para poder acceder a ellos rápidamente cuando se deban volver a mostrar.
+    \item Implementación de LOD.
+    \item Implementación de la herramienta para modificar los vértices del terreno a posteriori.
+    \item Mantener la concordancia entre chunks con diferente nivel de detalle mediante teselación.
+    \item Texturización del terreno generado mediante shaders tripalanares.
+    \item Adecuación de los nombres para un uso lo más sencillo posible y mejorar la UX.
+\end{itemize}
+
+\section{Problemáticas en la Generación de Biomas}
+
+Para la generación de biomas se han de tener en cuenta los siguientes aspectos:
+\begin{itemize}
+    \item Manejo de los algoritmos de generación para usar aquellos que produzcan resultados que mejor se ajusten a cada tipo de bioma por su orografía característica.
+    \item La diferenciación de texturas entre mallas de terreno pertenecientes a diferentes biomas contiguos para que haya discontinuidades muy notables.
+    \item Los cambios en la parametrización para ajustar la orografía del terreno a su bioma. 
+    \item La generación de assets propios para cada bioma y su distribución, como rocas o vegetación. 
+    \item Generación de flora y fauna (agentes autónomos) coherente (en sitios correctos y con una distribución correcta).
+    % \item Simulación de fenómenos climáticos y físicos como ciclos de día y noche, niebla, lluvias o ventiscas y tormentas de arena en momentos aleatorios.
+    \item Generación de sonidos para cada tipo de biomas con transiciones suaves.
+    \item Ajuste mediante teselación entre mallas de chunks pertenecientes a diferentes biomas.
+    \item Presencia de cuerpos de agua como lagos, mares o ríos han de ser considerados a la hora de generar los terrenos de cada bioma.
+    \item Instanciación eficiente de los assets mencionados mediante el uso de estructuras de datos o algoritmos específicos.
+\end{itemize}
+
+\section{Problemáticas en la Generación de Poblaciones}
+
+En cuanto a la generación de poblaciones se han considerado que hay que prestar atención a los siguientes factores:
+\begin{itemize}
+    \item La distribución de edificios ha de ser coherente y regida por ciertas reglas.
+    \item Debe haber un diversidad visual entre los edificios, por lo que se deberán distribuir las diferentes constricciones de manera que cree un resultado realista.
+    \item Las poblaciones deben ser coherentes con el entrono donde se implanten.
+\end{itemize}
+
+\section{Problemáticas en la Compatibilidad con Realidad Virtual}
+
+Por último, para la compatibilidad con RV, se necesitará integrar las siguientes funcionalidades.
+\begin{itemize}
+    \item Uso de DOTS de Unity para paralelización del código.
+    \item Prevención de los \textit{'memory leaks'} para su rendimiento óptimo en tiempo de ejecución, etc.
+    \item Optimización del cálculo de colisiones y físicas para un mejor rendimiento.
+    \item Optimización del ambiente inmersivo para una mejor experiencia de juego.
+    \item Ajuste de la escala de los elementos.
+\end{itemize}
+
+% \newpage

@@ -1,0 +1,77 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: memoria.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: unsrt.bst
+Reallocating 'name_of_file' (item size: 1) to 17 items.
+Database file #1: bib/bibliografia.bib
+Warning--entry type for "generacion-procedimental-wikipedia" isn't style-file defined
+--line 79 of file bib/bibliografia.bib
+Warning--entry type for "LeeUrban2016" isn't style-file defined
+--line 197 of file bib/bibliografia.bib
+Warning--entry type for "WikipediaKkrieger" isn't style-file defined
+--line 205 of file bib/bibliografia.bib
+Warning--entry type for "UnityAssetStoreVegetationStudioPro" isn't style-file defined
+--line 247 of file bib/bibliografia.bib
+Warning--entry type for "worley-noise" isn't style-file defined
+--line 483 of file bib/bibliografia.bib
+Warning--entry type for "DiamanteCuadrado" isn't style-file defined
+--line 491 of file bib/bibliografia.bib
+Warning--entry type for "DesplazamientoPuntoMedio" isn't style-file defined
+--line 499 of file bib/bibliografia.bib
+Warning--entry type for "AlgoritmosHidrologia" isn't style-file defined
+--line 506 of file bib/bibliografia.bib
+Warning--entry type for "HidrologiaDocumento" isn't style-file defined
+--line 512 of file bib/bibliografia.bib
+Warning--entry type for "AlgoritmosErosion" isn't style-file defined
+--line 518 of file bib/bibliografia.bib
+Warning--entry type for "ErosionReddit" isn't style-file defined
+--line 524 of file bib/bibliografia.bib
+Warning--empty journal in PerlinNoise
+Warning--empty journal in Fischer2022
+Warning--empty author in autobiomes
+Warning--empty journal in autobiomes
+Warning--empty author in landmasses-terrain
+Warning--empty journal in landmasses-terrain
+You've used 78 entries,
+            1791 wiz_defined-function locations,
+            852 strings with 15488 characters,
+and the built_in function-call counts, 12984 in all, are:
+= -- 1111
+> -- 479
+< -- 7
++ -- 202
+- -- 124
+* -- 547
+:= -- 1930
+add.period$ -- 224
+call.type$ -- 78
+change.case$ -- 76
+chr.to.int$ -- 0
+cite$ -- 84
+duplicate$ -- 588
+empty$ -- 1538
+format.name$ -- 124
+if$ -- 3051
+int.to.chr$ -- 0
+int.to.str$ -- 78
+missing$ -- 34
+newline$ -- 380
+num.names$ -- 63
+pop$ -- 384
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 346
+stack$ -- 0
+substring$ -- 441
+swap$ -- 132
+text.length$ -- 7
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 6
+while$ -- 96
+width$ -- 80
+write$ -- 773
+(There were 17 warnings)

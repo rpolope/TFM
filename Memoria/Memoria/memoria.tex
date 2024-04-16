@@ -1,0 +1,142 @@
+\documentclass[book,spanish,a4paper,12pt]{tfg}
+\usepackage{graphicx}
+\usepackage[utf8
+]{inputenc}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage[spanish]{babel}
+\usepackage{subcaption}
+\usepackage{afterpage}
+
+
+% Editar la titulación
+\titulacion{Máster en Computación Gráfica, Realidad Virtual y Simulación}
+
+% Editar el título
+\title{Generación de terreno Procedural, Biomas y Ciudades para Realidad Virtual en Unity}
+
+% Si es una alumna se debe usar
+% \authorlabel{Autora}
+\authorlabel{Autor}
+% Editar el nombre
+\author{Rafael Polope Contreras}
+
+
+% Si hay varios tutores:
+% \tutorlabel{Tutores}
+% \tutor{Nombre del tutor 1 \\[2mm] Nombre del turor2}
+% Si el tutor es masculino:
+\tutorlabel{Tutor}
+% \tutorlabel{Tutora}
+% Editar
+\tutor{Álvaro San Juan Cervera}
+
+% Editar: Poner mes y año de la convocatoria de lectura del TFM
+\convocatoria{Junio 2024}
+
+\begin{document}
+
+% NO QUITAR ESTOS ELEMENTOS
+\portada
+\cleardoublepage
+% \contraportada
+% \cleardoublepage
+% \declaracion
+% \cleardoublepage
+
+
+% Editar: Resumen en Español (obligatorio)
+\begin{resumen}
+Este trabajo presenta una propuesta para la generación de terreno infinito de manera procedural incluyendo generación de biomas y poblaciones para el motor Unity en tiempo real, además permitiendo la compatibilidad con la realidad virtual haciendo uso del sistema DOTS de Unity junto a otras varias técnicas de optimización. \\
+\\
+La generación del terreno estará parametrizada para permitir control al usuario.\\
+\\
+\textbf{Palabras Clave:} Generación Procedural, Biomas, Poblaciones, Realidad Virtual, Job System, Optimización, Parametrización.
+\end{resumen}
+
+\cleardoublepage
+
+\begin{abstract}
+
+This work presents a proposal for the procedural generation of infinite terrain, including biome and population generation, for the Unity engine in real-time. Additionally, it enables compatibility with virtual reality by leveraging Unity's DOTS system along with various optimization techniques.\\
+\\
+The terrain generation will be parameterized to allow user control.\\
+\\
+\textbf{Keywords:} Procedural Generation, Biomes, Populations, Virtual Reality, Job System, Optimization, Parametrization.
+\end{abstract}
+
+\cleardoublepage
+
+% Editar: Agradecimientos (opcional)\documentclass[10pt]{•}
+\begin{agradecimientos}
+%   A Álvaro San Juan, mi tutor en este proyecto, por ofrecerme la oportunidad de desarrollar este proyecto final a pesar de las dificultades presentadas para llevarlo a cabo en último momento.\\
+% \\
+%   A todo el equipo de RRHH de U-TAD y de Lãberit, la empresa en la que he estado trabajando durante el curso de este Máster, por haber hecho lo posible para llevar a cabo las prácticas de manera tan entregada y cercana.\\
+% \\
+%   A mi familia por soportarme este año especialmente duro, tanto para ellos como para mí, y a mis amigos por tener paciencia y entender el esfuerzo que me ha supuesto la decisión de llevar a cabo este máster y haber estado tan ausente.\\
+
+\end{agradecimientos}
+\cleardoublepage
+
+\tableofcontents
+
+\pagestyle{tfg}
+\justify
+
+% Las figuras se buscan en el directorio figs
+
+% Cada capítulo está en su propio fichero tex. Ver el directorio tex.
+
+% La bibliografía está dentro del directorio bib
+
+\renewcommand{\thechapter}{I} % Puedes usar "I" en lugar de "0" si prefieres números romanos
+
+% Prefacio
+\chapter*{\centering I. GUÍA DE LA MEMORIA}
+\input{tex/guia_memoria.tex}
+
+\chapter*{\centering II. MEMORIA}
+
+\addcontentsline{toc}{chapter}{I. GUÍA DE LA MEMORIA}
+\addcontentsline{toc}{chapter}{II. MEMORIA}
+
+\renewcommand{\thechapter}{\arabic{chapter}}
+
+\chapter{Introducción}
+\input{tex/introduccion.tex}
+
+\chapter{Planteamiento del problema}
+\input{tex/planteamiento_problema.tex}
+
+\chapter{Objetivos}
+\input{tex/objetivos.tex}
+
+\chapter{Estado del arte}
+\input{tex/estado_arte.tex}
+
+\chapter{Desarrollo de la solución}
+\input{tex/desarrollo.tex}
+
+\chapter{Análisis de Resultados}
+\input{tex/Resultados.tex}
+
+\chapter{Conclusiones}
+\input{tex/conclusiones.tex}
+
+
+\pagestyle{appendix}
+
+\appendix
+\chapter{Apéndice}
+\input{tex/apendice.tex}
+
+\addcontentsline{toc}{chapter}{Bibliografía}
+\bibliographystyle{unsrt}
+\bibliography{bib/bibliografia}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
