@@ -6,18 +6,17 @@ using UnityEngine;
 
 public class LandscapeManager : MonoBehaviour
 {
-    private Material _terrainMaterial;
-    
-    public Material TerrainMaterial => _terrainMaterial;
+    private readonly int _terrainChunkSize;
+
+    public int TerrainChunkSize
+    {
+        get => _terrainChunkSize;
+    }
+
     public TerrainChunksGenerator terrainChunksGenerator;
     public SettingsConfiguration settings;
     public int viewThreshold;
     public static LandscapeManager Instance;
-     
-    void Start()
-    {
-        _terrainMaterial = new Material(Shader.Find("Standard"));
-    }
 
     void Awake()
     {

@@ -38,8 +38,8 @@ public struct MeshJob : IJobParallelFor
     {
         int x = index % _size;
         int y = index / _size;
-        float h = _meshSettings.meshHeightMultiplier * _heightMap[index];
-        _vertices[index] = new Vector3(x - _offsetX,  h, y - _offsetZ);
+        // float h = _meshSettings.meshHeightMultiplier * _heightMap[index];
+        _vertices[index] = new Vector3(x - _offsetX,  _heightMap[index], y - _offsetZ);
         _uvs[index] = new Vector2(x/(float)_size, y/(float)_size);
                 
         if ((y < _size - 2) && (x < _size - 1))

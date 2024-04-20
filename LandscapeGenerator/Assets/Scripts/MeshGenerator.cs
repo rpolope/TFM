@@ -33,26 +33,26 @@ public struct MeshData
 
 public static class MeshGenerator
 {
-    public static Mesh GenerateMesh(int width, int height, float[] heightMap)
+    public static Mesh GenerateMesh(int size, float[] heightMap)
     {
-        return GenerateMeshWithJobs(width, heightMap);
-        MeshData meshData = new MeshData(width, height);
-        int offsetX = (width - 1) / 2;
-        int offsetZ = (height - 1) / 2;
+        return GenerateMeshWithJobs(size, heightMap);
+        MeshData meshData = new MeshData(size, size);
+        int offsetX = (size - 1) / 2;
+        int offsetY = (size - 1) / 2;
         
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < size; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < size; x++)
             {
-                int index = x + y * height;
+                int index = x + y * size;
                 float h = LandscapeManager.Instance.settings.NoiseSettings.Amplitude * heightMap[index];
-                meshData.vertices[index] = new Vector3(x - offsetX,  heightMap[index], y - offsetZ);
-                meshData.uvs[index] = new Vector2(x/(float)width, y/(float)height);
+                meshData.vertices[index] = new Vector3(x - offsetX,  heightMap[index], y - offsetY);
+                meshData.uvs[index] = new Vector2(x/(float)size, y/(float)size);
                 
-                if ((y < height - 1) && (x < width - 1))
+                if ((y < size - 1) && (x < size - 1))
                 {
-                    meshData.AddTriangle(index,index + width, index + width + 1);
-                    meshData.AddTriangle(index, index + width + 1,index + 1);
+                    meshData.AddTriangle(index,index + size, index + size + 1);
+                    meshData.AddTriangle(index, index + size + 1,index + 1);
                 }
             }
         }
