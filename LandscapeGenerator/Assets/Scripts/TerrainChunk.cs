@@ -14,6 +14,7 @@ public class TerrainChunk
     private MeshFilter _meshFilter;
     private MeshCollider _meshCollider;
     private Material _material;
+    private static Transform _parent;
 
     public TerrainChunk(Vector2 position, int width, int height, float[] heightMap, Material material)
     {
@@ -23,6 +24,7 @@ public class TerrainChunk
         _material = material;
         _mesh = MeshGenerator.GenerateMesh(_width, _height, heightMap);
         _material.mainTexture = MapVisualizer.Instance.GetTextureFromMap(heightMap);
+        _parent = GameObject.Find("TerrainChunksGenerator").transform;
         
         Instantiate();
     }

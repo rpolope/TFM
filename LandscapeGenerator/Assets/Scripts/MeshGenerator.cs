@@ -45,7 +45,7 @@ public static class MeshGenerator
             for (int x = 0; x < width; x++)
             {
                 int index = x + y * height;
-                float h = SettingsContainer.NoiseProperties.Amplitude * heightMap[index];
+                float h = LandscapeManager.Instance.settings.NoiseSettings.Amplitude * heightMap[index];
                 meshData.vertices[index] = new Vector3(x - offsetX,  heightMap[index], y - offsetZ);
                 meshData.uvs[index] = new Vector2(x/(float)width, y/(float)height);
                 
