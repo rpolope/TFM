@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class LandscapeManager : MonoBehaviour
 {
-    private readonly int _terrainChunkSize;
+    private const int _terrainChunkSize = 5;
 
     public int TerrainChunkSize
     {

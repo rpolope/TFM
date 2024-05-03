@@ -54,7 +54,7 @@ public class TerrainChunksGenerator : MonoBehaviour
                         _terrainChunksVisibleLastUpdate.Add(_terrainChunkDictionary[viewedChunkCoord]);
                     }
                 } else {
-                    _terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk (viewedChunkCoord, _chunkSize, MapGenerator.GenerateMap(_chunkSize)));
+                    _terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk (viewedChunkCoord, _chunkSize, MapGenerator.GenerateContinuousMap(_chunkSize, viewedChunkCoord * LandscapeManager.Instance.TerrainChunkSize)));
                 }
             }
         }
@@ -83,7 +83,7 @@ public class TerrainChunksGenerator : MonoBehaviour
     
         public TerrainChunk(Vector2 position, int size, float[] heightMap)
         {
-            _position = position * size;
+            _position = position * (size - 1);
             _material = new Material(Shader.Find("Standard"));
             _mesh = MeshGenerator.GenerateMesh(size, heightMap);
             _material.mainTexture = MapVisualizer.Instance.GetTextureFromMap(heightMap);

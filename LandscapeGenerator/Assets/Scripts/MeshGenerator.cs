@@ -63,22 +63,22 @@ public static class MeshGenerator
     {
         NativeArray<Vector3> vertices = new NativeArray<Vector3>(size * size, Allocator.TempJob);
         NativeArray<Vector2> uvs = new NativeArray<Vector2>(size * size, Allocator.TempJob);
-        NativeArray<int> triangles = new NativeArray<int>((size - 1) * (size - 1) * 6, Allocator.TempJob);
+        NativeArray<int> trianglesIndices = new NativeArray<int>((size) * (size) * 6, Allocator.TempJob);
         NativeArray<float> heightMap = new NativeArray<float>(noiseMap, Allocator.TempJob);
     
-        MeshJob meshGenerationJob = new MeshJob(size, heightMap, vertices, uvs, triangles, LandscapeManager.Instance.settings.meshSettings);
+        MeshJob meshGenerationJob = new MeshJob(size, heightMap, vertices, uvs, trianglesIndices, LandscapeManager.Instance.settings.meshSettings);
     
-        meshGenerationJob.Schedule(vertices.Length, 64).Complete();
+        meshGenerationJob.Schedule(vertices.Length, 10000).Complete();
     
         MeshData meshData = new MeshData(size, size);
 
         meshData.vertices = vertices.ToArray();
-        meshData.triangles = triangles.ToArray();
+        meshData.triangles = trianglesIndices.ToArray();
         meshData.uvs = uvs.ToArray();
     
         vertices.Dispose();
         uvs.Dispose();
-        triangles.Dispose();
+        trianglesIndices.Dispose();
         heightMap.Dispose();
     
         return CreateMesh(meshData);

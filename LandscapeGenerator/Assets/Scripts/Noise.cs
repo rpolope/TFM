@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class Noise
 {
-    public static float GetPerlinFractalValue(float x, float y, NoiseSettings noiseSettings)
+    public static float GetPerlinFractalValue(float x, float y, Vector2 center, NoiseSettings noiseSettings)
     {
         
         float noiseValue = 0f;
@@ -12,8 +12,9 @@ public static class Noise
 
         for (int i = 0; i < noiseSettings.Octaves; i++)
         {
-            float perlinValue = Mathf.PerlinNoise(x / noiseSettings.Scale * frequency, y / noiseSettings.Scale * frequency);
-            noiseValue += perlinValue * amplitude;
+            float perlinValue = Mathf.PerlinNoise((center.x + x) / noiseSettings.Scale * frequency, (center.y + y) / noiseSettings.Scale * frequency);
+            
+            noiseValue += (perlinValue * 2 - 1) * amplitude;
 
             maxAmplitude += amplitude;
             amplitude *= noiseSettings.Persistence;

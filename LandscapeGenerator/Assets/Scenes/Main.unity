@@ -361,11 +361,11 @@ MonoBehaviour:
   settings:
     NoiseSettings:
       _noiseType: 0
-      _scale: 1
-      _amplitude: 1
-      _octaves: 6
+      _scale: 20
+      _amplitude: 1000
+      _octaves: 4
       _frequency: 1
-      _persistence: 0.846
+      _persistence: 0.505
       _lacunarity: 1.75
     meshSettings:
       meshHeightMultiplier: 10
