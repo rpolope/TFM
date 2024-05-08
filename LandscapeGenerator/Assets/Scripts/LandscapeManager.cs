@@ -11,8 +11,9 @@ public class LandscapeManager : MonoBehaviour
 	public const float ViewerRotateThresholdForChunkUpdate = 5f * Mathf.PI / 180;
 	
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	public static float maxViewDst = (TerrainChunkSize - 1) * 5f;
-	
+	public static float maxViewDst = Scale * (TerrainChunkSize - 1) * 5f;
+	public LODInfo[] detailLevels;
+
 	private Transform _transform;
 	private Vector2 _viewerPositionOld;
 	private float _viewerRotationYOld;
@@ -44,13 +45,14 @@ public class LandscapeManager : MonoBehaviour
 	}
 	void Start()
 	{
+		/*
 		_meshFilter = GetComponent<MeshFilter>();
 		_meshRenderer = GetComponent<MeshRenderer>();
 		
 		GenerateSimpleTerrainChunk(_meshFilter, _meshRenderer);
 		/**/
 		
-		/*
+		
 		_chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / (TerrainChunkSize - 1));
 		_transform = transform;
 		UpdateVisibleChunks ();
@@ -59,7 +61,6 @@ public class LandscapeManager : MonoBehaviour
 
 	void Update() {
 		
-		/*
 		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / Scale;
 		viewerRotationY = viewer.rotation.y;
 		
@@ -114,7 +115,7 @@ public class LandscapeManager : MonoBehaviour
 	 
 	public static void GenerateSimpleTerrainChunk(MeshFilter meshFilter, MeshRenderer meshRenderer)
 	{
-		Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, Instance.terrainParameters.meshParameters.resolution, Scale, new float2());
+		Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, Instance.terrainParameters.meshParameters.resolution, Scale, new float2(), 0);
 		meshFilter.sharedMesh = mesh;
 
 		Texture2D heightTexture = GenerateHeightTexture(mesh);
@@ -147,12 +148,17 @@ public class LandscapeManager : MonoBehaviour
 		GameObject _meshObject;
 		float2 _position;
 		Bounds _bounds;
-		
+		LOD[] _lods;
+		LODMesh[] _lodMeshes;
+		LODInfo[] _detailLevels;
+
+		int _previousLODIndex = -1;
+
 		MeshRenderer _meshRenderer;
 		MeshFilter _meshFilter;
 		MeshCollider _meshCollider;
 		
-		public Vector3 Position => new Vector3(_position.x, 0, _position.y);
+		public Vector3 Position => new(_position.x, 0, _position.y);
 		
 		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material)
 		{
@@ -169,9 +175,11 @@ public class LandscapeManager : MonoBehaviour
 			_meshObject.transform.parent = parent;
 			_bounds = _meshRenderer.bounds;
 
-			Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, size, Scale, _position);
-			_meshFilter.mesh = mesh;
-			_meshCollider.sharedMesh = mesh;
+			_detailLevels = Instance.detailLevels;
+			_lodMeshes = new LODMesh[_detailLevels.Length];
+			for (int i = 0; i < _detailLevels.Length; i++) {
+				_lodMeshes[i] = new LODMesh(_detailLevels[i].lod, UpdateTerrainChunk);
+			}
 
 			UpdateTerrainChunk();
 		}
@@ -183,6 +191,37 @@ public class LandscapeManager : MonoBehaviour
 			                CustomCameraCulling.IsObjectVisible(Position));
 
 			if (visible){
+				
+				int lodIndex = 0;
+				
+				for (int i = 0; i < _detailLevels.Length - 1; i++) {
+					if (viewerDstFromNearestEdge > _detailLevels [i].visibleDstThreshold) {
+						lodIndex = i + 1;
+					} else {
+						break;
+					}
+				}
+				
+				if (lodIndex != _previousLODIndex)
+				{
+					LODMesh lodMesh = _lodMeshes[lodIndex];
+					_previousLODIndex = lodIndex;
+					
+					if (lodMesh.mesh != null)
+					{
+						_meshFilter.mesh = lodMesh.mesh;
+						_meshCollider.sharedMesh = lodMesh.mesh;
+					}
+					else
+					{
+						Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, TerrainChunkSize, Scale, _position, lodIndex);
+						lodMesh.mesh = mesh;
+						_meshFilter.mesh = lodMesh.mesh;
+						_meshCollider.sharedMesh = lodMesh.mesh;
+						
+					}
+				}
+
 				_terrainChunksVisibleLastUpdate.Add(this);
 			}
 			
@@ -198,4 +237,24 @@ public class LandscapeManager : MonoBehaviour
 		}
 
 	}
+	
+	class LODMesh {
+
+		public Mesh mesh;
+		int _lod;
+		Action _callback;
+
+		public LODMesh(int lod, Action callback) {
+			_lod = lod;
+			mesh = null;
+			_callback = callback;
+		}
+	}
+
+	[Serializable]
+	public struct LODInfo {
+		public int lod;
+		public float visibleDstThreshold;
+	}
+
 }

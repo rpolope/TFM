@@ -83,14 +83,14 @@ public static class MeshGenerator
         }
     }
 
-    public static Mesh GenerateTerrainMesh(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod = 1)
+    public static Mesh GenerateTerrainMesh(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod)
     {
         return ParallelMeshGeneration(terrainParameters, resolution, center, scale, lod);
     }
 
     private static Mesh ParallelMeshGeneration(TerrainParameters terrainParameters, int resolution, float2 center, float scale, int lod)
     {
-        int lodScale = (1 << terrainParameters.meshParameters.editorPreviewLOD);
+        int lodScale = (1 << lod);
         resolution = (resolution - 1) / lodScale + 1;
         
         Mesh mesh = new Mesh();

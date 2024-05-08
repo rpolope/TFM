@@ -59,5 +59,5 @@ public struct MeshParameters
     [Range(0,1)]
     public float waterLevel;
     [Range(0,6)]
-    public int editorPreviewLOD;
+    public int levelsOfDetail;
 }
