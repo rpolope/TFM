@@ -389,7 +389,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   terrainParameters:
     noiseParameters:
-      noiseType: 1
+      noiseType: 0
       seed: 1
       scale: 100
       offset: {x: 0, y: 0}
@@ -398,12 +398,12 @@ MonoBehaviour:
       frequency: 1.5
       persistence: 0.75
       lacunarity: 1.5
-      ridgeRoughness: 2.5
+      ridgeRoughness: 5
     meshParameters:
-      resolution: 241
+      resolution: 17
       heightScale: 1
       waterLevel: 0
-      editorPreviewLOD: 0
+      editorPreviewLOD: 1
   viewer: {fileID: 797567966}
   viewerPosition: {x: 0, y: 0}
   viewerRotationY: 0

@@ -14,18 +14,27 @@ public static class MeshGenerator
         public int Resolution;
         public float Scale;
         public float2 Center;
+        public int LODScale;
+
 
         public void Execute(int index)
         {
             int x = index % Resolution;
             int z = index / Resolution;
             
-            float offset = (Resolution - 1) * Scale;
-            float xPos = x * Scale - offset;
-            float zPos = z * Scale - offset;
+            float offset = (Resolution - 1) * 0.5f * Scale;
+            float xPos = LODScale * (x * Scale - offset);
+            float zPos = LODScale * (z * Scale - offset);
+
+            float height = GenerateHeight(Center + new float2(x, z));
             
-            float noiseValue = NoiseGenerator.GetNoiseValue(Center + new float2(x, z) , TerrainParameters.noiseParameters);
-            noiseValue += NoiseGenerator.GetOctavedRidgeNoise(Center + new float2(x, z), TerrainParameters.noiseParameters);
+            Vertices[index] = new Vector3(xPos, height, zPos);
+        }
+
+        private float GenerateHeight(float2 samplePos)
+        {
+            float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            noiseValue += NoiseGenerator.GetOctavedRidgeNoise(samplePos, TerrainParameters.noiseParameters);
 
             noiseValue = Mathf.Pow(noiseValue/2f, TerrainParameters.noiseParameters.ridgeRoughness);
             
@@ -33,9 +42,7 @@ public static class MeshGenerator
                 TerrainParameters.meshParameters.waterLevel :  noiseValue;
 
             
-            float height = Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
-            
-            Vertices[index] = new Vector3(xPos, height, zPos);
+            return Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
         }
     }
 
@@ -76,25 +83,30 @@ public static class MeshGenerator
         }
     }
 
-    public static Mesh GenerateTerrainMesh(TerrainParameters terrainParameters, int resolution, float scale, float2 center)
+    public static Mesh GenerateTerrainMesh(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod = 1)
     {
-        return ParallelMeshGeneration(terrainParameters, resolution, center, scale, terrainParameters.meshParameters.heightScale);
+        return ParallelMeshGeneration(terrainParameters, resolution, center, scale, lod);
     }
 
-    private static Mesh ParallelMeshGeneration(TerrainParameters terrainParameters, int resolution, float2 center, float scale, float heightScale)
+    private static Mesh ParallelMeshGeneration(TerrainParameters terrainParameters, int resolution, float2 center, float scale, int lod)
     {
+        int lodScale = (1 << terrainParameters.meshParameters.editorPreviewLOD);
+        resolution = (resolution - 1) / lodScale + 1;
+        
         Mesh mesh = new Mesh();
         NativeArray<Vector3> vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.TempJob);
         NativeArray<int> triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.TempJob);
         NativeArray<float2> uvs = new NativeArray<float2>(resolution * resolution, Allocator.TempJob);
-
+        
         var generateVerticesJob = new GenerateVerticesJob
         {
             Vertices = vertices,
             Resolution = resolution,
             Center = center,
             Scale = scale,
+            LODScale = lodScale,
             TerrainParameters = terrainParameters
+            
         };
         var generateVerticesHandle = generateVerticesJob.Schedule(vertices.Length, 64);
 
