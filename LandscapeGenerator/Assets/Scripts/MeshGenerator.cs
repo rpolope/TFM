@@ -19,14 +19,21 @@ public static class MeshGenerator
         {
             int x = index % Resolution;
             int z = index / Resolution;
-            float xPos = (float)x * Scale - (Resolution - 1) * Scale;
-            float zPos = (float)z * Scale - (Resolution - 1) * Scale;
             
-            // float height = Mathf.PerlinNoise(xPos, zPos) * HeightScale;
+            float offset = (Resolution - 1) * Scale;
+            float xPos = x * Scale - offset;
+            float zPos = z * Scale - offset;
+            
             float noiseValue = NoiseGenerator.GetNoiseValue(Center + new float2(x, z) , TerrainParameters.noiseParameters);
+            noiseValue += NoiseGenerator.GetOctavedRidgeNoise(Center + new float2(x, z), TerrainParameters.noiseParameters);
+
+            noiseValue = Mathf.Pow(noiseValue/2f, TerrainParameters.noiseParameters.ridgeRoughness);
+            
+            noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
+                TerrainParameters.meshParameters.waterLevel :  noiseValue;
+
+            
             float height = Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
-            height = height < TerrainParameters.meshParameters.waterLevel ? 
-                     TerrainParameters.meshParameters.waterLevel :  height;
             
             Vertices[index] = new Vector3(xPos, height, zPos);
         }

@@ -12,12 +12,12 @@ public class LandscapeManager : MonoBehaviour
 	
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	public static float maxViewDst = (TerrainChunkSize - 1) * 5f;
-
-	private MeshFilter _meshFilter; 
-	private MeshRenderer _meshRenderer;
+	
 	private Transform _transform;
 	private Vector2 _viewerPositionOld;
 	private float _viewerRotationYOld;
+	private MeshRenderer _meshRenderer;
+	private MeshFilter _meshFilter;
 
 	public static LandscapeManager Instance;
 	public TerrainParameters terrainParameters;
@@ -42,14 +42,24 @@ public class LandscapeManager : MonoBehaviour
 			Destroy(Instance);
 		}
 	}
-	void Start() {
-
+	void Start()
+	{
+		_meshFilter = GetComponent<MeshFilter>();
+		_meshRenderer = GetComponent<MeshRenderer>();
+		
+		GenerateSimpleTerrainChunk(_meshFilter, _meshRenderer);
+		/**/
+		
+		/*
 		_chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / (TerrainChunkSize - 1));
 		_transform = transform;
 		UpdateVisibleChunks ();
+		/**/
 	}
 
 	void Update() {
+		
+		/*
 		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / Scale;
 		viewerRotationY = viewer.rotation.y;
 		
@@ -57,7 +67,8 @@ public class LandscapeManager : MonoBehaviour
 			_viewerPositionOld = viewerPosition;
 			UpdateVisibleChunks();
 		}
-
+		/* */
+		
 		// if (Math.Abs(viewerRotationY - _viewerRotationYOld) > ViewerRotateThresholdForChunkUpdate)
 		// {
 		// 	_viewerRotationYOld = viewerRotationY;
@@ -101,18 +112,36 @@ public class LandscapeManager : MonoBehaviour
 		CustomCameraCulling.UpdateVisibleChunks(_surrounderTerrainChunks, _terrainChunksVisibleLastUpdate);
 	}
 	 
-	void GenerateSimpleTerrainChunk()
+	public static void GenerateSimpleTerrainChunk(MeshFilter meshFilter, MeshRenderer meshRenderer)
 	{
-		_meshFilter = GetComponent<MeshFilter>();
-		_meshRenderer = GetComponent<MeshRenderer>();
+		Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, Instance.terrainParameters.meshParameters.resolution, Scale, new float2());
+		meshFilter.sharedMesh = mesh;
 
-		Mesh mesh = MeshGenerator.GenerateTerrainMesh(terrainParameters, terrainParameters.meshParameters.resolution, Scale, new float2());
+		Texture2D heightTexture = GenerateHeightTexture(mesh);
 
-		_meshFilter.sharedMesh = mesh;
-		_meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
-		// MapGenerator.GenerateMap(TerrainSize, Scale);
+		Material material = new Material(Shader.Find("Standard"));
+		material.mainTexture = heightTexture;
+		meshRenderer.sharedMaterial = material;
 	}
 
+	private static Texture2D GenerateHeightTexture(Mesh mesh)
+	{
+		Vector3[] vertices = mesh.vertices;
+		Texture2D texture = new Texture2D(Instance.terrainParameters.meshParameters.resolution, Instance.terrainParameters.meshParameters.resolution, TextureFormat.RFloat, false);
+
+		for (int i = 0; i < vertices.Length; i++)
+		{
+			float height = vertices[i].y;
+			float normalizedHeight = Mathf.Lerp(0, Instance.terrainParameters.meshParameters.heightScale, height);
+
+			texture.SetPixel(i, 0, new Color(normalizedHeight, normalizedHeight, normalizedHeight));
+		}
+
+		texture.Apply();
+
+		return texture;
+	}
+	
 	public class TerrainChunk {
 
 		GameObject _meshObject;

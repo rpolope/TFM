@@ -1,7 +1,42 @@
+using UnityEditor;
 using UnityEngine;
+
+[CustomEditor(typeof(MapVisualizer))]
+public class MapVisualizerEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+        
+        MapVisualizer mapVisualizer = (MapVisualizer)target;
+         
+        if (GUILayout.Button("Generate Simple Map"))
+        {
+            if (mapVisualizer != null)
+            {
+                MeshFilter meshFilter = mapVisualizer.GetComponent<MeshFilter>();
+                MeshRenderer meshRenderer = mapVisualizer.GetComponent<MeshRenderer>();
+
+                if (meshFilter != null && meshRenderer != null)
+                {
+                    LandscapeManager.GenerateSimpleTerrainChunk(meshFilter, meshRenderer);
+                }
+                else
+                {
+                    Debug.LogError("El objeto MapVisualizer no tiene MeshFilter o MeshRenderer adjuntos.");
+                }
+            }
+            else
+            {
+                Debug.LogError("El objeto MapVisualizer es nulo.");
+            }
+        }
+    }
+}
 
 public class MapVisualizer : MonoBehaviour
 {
+    
     public void VisualizeMap()
     {
         int size = LandscapeManager.TerrainChunkSize;

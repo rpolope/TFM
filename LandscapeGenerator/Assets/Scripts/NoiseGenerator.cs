@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
@@ -48,6 +49,31 @@ public static class NoiseGenerator
         
         return noiseHeight;
     }
+    
+    public static float GetRidgeNoiseSample(float2 sample) {
+        return 2 * (0.5f - Mathf.Abs(0.5f - Mathf.PerlinNoise(sample.x, sample.y)));
+    }
+
+    public static float GetOctavedRidgeNoise(float2 sample, NoiseParameters parameters)
+    {
+
+        float[] heights = new float[parameters.octaves];
+        float ampl = parameters.amplitude;
+        float freq = parameters.frequency;
+        float accum = 1f, maxAmpl = 0.0f;
+        
+        for (int o = 0; o < parameters.octaves; o++)
+        {
+            heights[o] = ampl * GetRidgeNoiseSample(sample / parameters.scale * freq) * accum;
+            accum += heights[o];
+            maxAmpl += ampl;
+
+            ampl *= parameters.persistence;
+            freq *= parameters.lacunarity;
+        }
+ 
+        return accum / maxAmpl; 
+    }
 
     private static float SampleNoiseValue(float2 sample, NoiseType type)
     {
@@ -58,7 +84,7 @@ public static class NoiseGenerator
                 noiseValue = Mathf.PerlinNoise(sample.x, sample.y);
                 break;
             case NoiseType.Simplex:
-                noiseValue = noise.snoise(sample) * 2 - 1;
+                noiseValue = (noise.snoise(sample) + 1) * 0.5f;
                 break;
             case NoiseType.Ridged:
                 noiseValue = 0f;
