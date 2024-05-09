@@ -389,7 +389,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detailLevels:
   - lod: 0
-    visibleDstThreshold: 50000
+    visibleDstThreshold: 200
+  - lod: 1
+    visibleDstThreshold: 400
+  - lod: 2
+    visibleDstThreshold: 600
   terrainParameters:
     noiseParameters:
       noiseType: 0

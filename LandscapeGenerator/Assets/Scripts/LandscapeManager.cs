@@ -218,7 +218,6 @@ public class LandscapeManager : MonoBehaviour
 						lodMesh.mesh = mesh;
 						_meshFilter.mesh = lodMesh.mesh;
 						_meshCollider.sharedMesh = lodMesh.mesh;
-						
 					}
 				}
 

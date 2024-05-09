@@ -26,7 +26,7 @@ public static class MeshGenerator
             float xPos = LODScale * (x * Scale - offset);
             float zPos = LODScale * (z * Scale - offset);
 
-            float height = GenerateHeight(Center + new float2(x, z));
+            float height = GenerateHeight(Center + LODScale * new float2(x, z));
             
             Vertices[index] = new Vector3(xPos, height, zPos);
         }
