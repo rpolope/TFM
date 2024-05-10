@@ -108,14 +108,14 @@ public static class MeshGenerator
             TerrainParameters = terrainParameters
             
         };
-        var generateVerticesHandle = generateVerticesJob.Schedule(vertices.Length, 64);
+        var generateVerticesHandle = generateVerticesJob.Schedule(vertices.Length, 10000);
 
         var generateTrianglesJob = new GenerateTrianglesJob
         {
             Triangles = triangles,
             Resolution = resolution
         };
-        var generateTrianglesHandle = generateTrianglesJob.Schedule(triangles.Length / 6, 64);
+        var generateTrianglesHandle = generateTrianglesJob.Schedule(triangles.Length / 6, 10000);
 
         var generateUVsJob = new GenerateUVsJob
         {
@@ -123,7 +123,7 @@ public static class MeshGenerator
             Resolution = resolution,
             Scale = scale
         };
-        var generateUVsHandle = generateUVsJob.Schedule(uvs.Length, 64);
+        var generateUVsHandle = generateUVsJob.Schedule(uvs.Length, 10000);
 
         JobHandle.CombineDependencies(generateVerticesHandle, generateTrianglesHandle, generateUVsHandle).Complete();
 

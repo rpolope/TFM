@@ -6,12 +6,12 @@ using UnityEngine;
 public class LandscapeManager : MonoBehaviour
 {
 	public const float Scale = 3f;
-	public const int TerrainChunkSize = 65;
+	public const int TerrainChunkSize = 17;
 	public const float ViewerMoveThresholdForChunkUpdate = 25f;
-	public const float ViewerRotateThresholdForChunkUpdate = 5f * Mathf.PI / 180;
+	public const float ViewerRotateThresholdForChunkUpdate = 5f;
 	
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	public static float maxViewDst = Scale * (TerrainChunkSize - 1) * 5f;
+	public static float maxViewDst = (TerrainChunkSize - 1) * 5f;
 	public LODInfo[] detailLevels;
 
 	private Transform _transform;
@@ -19,13 +19,14 @@ public class LandscapeManager : MonoBehaviour
 	private float _viewerRotationYOld;
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
+	private TerrainChunk _currentChunk;
 
 	public static LandscapeManager Instance;
 	public TerrainParameters terrainParameters;
+	public Material chunkMaterial;
 	public Transform viewer;
 	public Vector2 viewerPosition;
 	public float viewerRotationY;
-	public Material chunkMaterial;
 
 	int _chunksVisibleInViewDst;
 	Dictionary<Vector2, TerrainChunk> _terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
@@ -43,12 +44,13 @@ public class LandscapeManager : MonoBehaviour
 			Destroy(Instance);
 		}
 	}
+
 	void Start()
 	{
 		/*
-		_meshFilter = GetComponent<MeshFilter>();
-		_meshRenderer = GetComponent<MeshRenderer>();
-		
+		_meshFilter ??= GetComponent<MeshFilter>();
+		_meshRenderer ??= GetComponent<MeshRenderer>();
+
 		GenerateSimpleTerrainChunk(_meshFilter, _meshRenderer);
 		/**/
 		
@@ -62,7 +64,7 @@ public class LandscapeManager : MonoBehaviour
 	void Update() {
 		
 		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / Scale;
-		viewerRotationY = viewer.rotation.y;
+		viewerRotationY = viewer.rotation.eulerAngles.y;
 		
 		if ((_viewerPositionOld - viewerPosition).sqrMagnitude > SqrViewerMoveThresholdForChunkUpdate) {
 			_viewerPositionOld = viewerPosition;
@@ -70,11 +72,11 @@ public class LandscapeManager : MonoBehaviour
 		}
 		/* */
 		
-		// if (Math.Abs(viewerRotationY - _viewerRotationYOld) > ViewerRotateThresholdForChunkUpdate)
-		// {
-		// 	_viewerRotationYOld = viewerRotationY;
-		// 	UpdateCulledChunks();
-		// }
+		if (Math.Abs(viewerRotationY - _viewerRotationYOld) > ViewerRotateThresholdForChunkUpdate)
+		{
+			_viewerRotationYOld = viewerRotationY;
+			UpdateCulledChunks();
+		}
 	}
 		
 	void UpdateVisibleChunks() {
@@ -106,11 +108,33 @@ public class LandscapeManager : MonoBehaviour
 				}
 			}
 		}
+
+		_currentChunk = _terrainChunkDictionary[new (currentChunkCoordX, currentChunkCoordY)];
 	}
 
 	void UpdateCulledChunks()
 	{
-		CustomCameraCulling.UpdateVisibleChunks(_surrounderTerrainChunks, _terrainChunksVisibleLastUpdate);
+		foreach (TerrainChunk chunk in _surrounderTerrainChunks)
+		{
+			if (chunk == _currentChunk) continue;
+			
+			Vector2 chunkDirection = (new Vector2(chunk.Position.x, chunk.Position.z) - viewerPosition).normalized;
+			Vector2 viewerForward = new Vector2(viewer.forward.x, viewer.forward.z).normalized;
+
+			float dot = Vector2.Dot(viewerForward, chunkDirection);
+			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+			
+			if ((dot < 0 && chunkAngle < (180f - 30f)) || dot > 0)
+			{
+				chunk.SetVisible(true);
+				_terrainChunksVisibleLastUpdate.Add(chunk);
+			}
+			else
+			{
+				chunk.SetVisible(false);
+				_terrainChunksVisibleLastUpdate.Remove(chunk);
+			}
+		}
 	}
 	 
 	public static void GenerateSimpleTerrainChunk(MeshFilter meshFilter, MeshRenderer meshRenderer)

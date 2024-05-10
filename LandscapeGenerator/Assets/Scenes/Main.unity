@@ -389,11 +389,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detailLevels:
   - lod: 0
-    visibleDstThreshold: 200
-  - lod: 1
     visibleDstThreshold: 400
-  - lod: 2
+  - lod: 1
     visibleDstThreshold: 600
+  - lod: 2
+    visibleDstThreshold: 800
   terrainParameters:
     noiseParameters:
       noiseType: 0
@@ -411,10 +411,10 @@ MonoBehaviour:
       heightScale: 1
       waterLevel: 0
       levelsOfDetail: 1
+  chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
   viewer: {fileID: 797567966}
   viewerPosition: {x: 0, y: 0}
   viewerRotationY: 0
-  chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
 --- !u!23 &1462233072
 MeshRenderer:
   m_ObjectHideFlags: 0
