@@ -7,11 +7,15 @@ using UnityEditor;
 
 public static class MeshGenerator
 {
-    private struct GenerateVerticesJob : IJobParallelFor
+    private struct GenerateMeshJob : IJobParallelFor
     {
         public NativeArray<Vector3> Vertices;
+        public NativeArray<float2> UVs;
+        [NativeDisableParallelForRestriction]
+        public NativeArray<int> Triangles;
         public TerrainParameters TerrainParameters;
         public int Resolution;
+        public int FacesCount;
         public float Scale;
         public float2 Center;
         public int LODScale;
@@ -29,6 +33,23 @@ public static class MeshGenerator
             float height = GenerateHeight(Center + LODScale * new float2(x, z));
             
             Vertices[index] = new Vector3(xPos, height, zPos);
+            UVs[index] = new float2((float)x / (Resolution - 1) * Scale, (float)z / (Resolution - 1) * Scale);
+
+            if (index < FacesCount)
+            {
+                int row = index / (Resolution - 1);
+                int col = index % (Resolution - 1);
+                int vertexIndex = row * Resolution + col;
+
+                int baseIndex = index * 6;
+
+                Triangles[baseIndex + 0] = vertexIndex;
+                Triangles[baseIndex + 1] = vertexIndex + Resolution;
+                Triangles[baseIndex + 2] = vertexIndex + Resolution + 1;
+                Triangles[baseIndex + 3] = vertexIndex;
+                Triangles[baseIndex + 4] = vertexIndex + Resolution + 1;
+                Triangles[baseIndex + 5] = vertexIndex + 1;
+            }
         }
 
         private float GenerateHeight(float2 samplePos)
@@ -43,43 +64,6 @@ public static class MeshGenerator
 
             
             return Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
-        }
-    }
-
-    private struct GenerateTrianglesJob : IJobParallelFor
-    {
-        [ReadOnly] public int Resolution;
-        [NativeDisableParallelForRestriction]
-        public NativeArray<int> Triangles;
-
-        public void Execute(int index)
-        {
-            int row = index / (Resolution - 1);
-            int col = index % (Resolution - 1);
-            int vertexIndex = row * Resolution + col;
-
-            int baseIndex = index * 6;
-
-            Triangles[baseIndex + 0] = vertexIndex;
-            Triangles[baseIndex + 1] = vertexIndex + Resolution;
-            Triangles[baseIndex + 2] = vertexIndex + Resolution + 1;
-            Triangles[baseIndex + 3] = vertexIndex;
-            Triangles[baseIndex + 4] = vertexIndex + Resolution + 1;
-            Triangles[baseIndex + 5] = vertexIndex + 1;
-        }
-    }
-
-    private struct GenerateUVsJob : IJobParallelFor
-    {
-        public NativeArray<float2> UVs;
-        public int Resolution;
-        public float Scale;
-
-        public void Execute(int index)
-        {
-            int x = index % Resolution;
-            int z = index / Resolution;
-            UVs[index] = new float2((float)x / (Resolution - 1) * Scale, (float)z / (Resolution - 1) * Scale);
         }
     }
 
@@ -98,35 +82,23 @@ public static class MeshGenerator
         NativeArray<int> triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.TempJob);
         NativeArray<float2> uvs = new NativeArray<float2>(resolution * resolution, Allocator.TempJob);
         
-        var generateVerticesJob = new GenerateVerticesJob
+        var generateMeshJob = new GenerateMeshJob
         {
             Vertices = vertices,
+            UVs = uvs,
+            Triangles = triangles,
             Resolution = resolution,
+            FacesCount = triangles.Length / 6,
             Center = center,
             Scale = scale,
             LODScale = lodScale,
             TerrainParameters = terrainParameters
             
         };
-        var generateVerticesHandle = generateVerticesJob.Schedule(vertices.Length, 10000);
-
-        var generateTrianglesJob = new GenerateTrianglesJob
-        {
-            Triangles = triangles,
-            Resolution = resolution
-        };
-        var generateTrianglesHandle = generateTrianglesJob.Schedule(triangles.Length / 6, 10000);
-
-        var generateUVsJob = new GenerateUVsJob
-        {
-            UVs = uvs,
-            Resolution = resolution,
-            Scale = scale
-        };
-        var generateUVsHandle = generateUVsJob.Schedule(uvs.Length, 10000);
-
-        JobHandle.CombineDependencies(generateVerticesHandle, generateTrianglesHandle, generateUVsHandle).Complete();
-
+        var jobHandle = generateMeshJob.Schedule(vertices.Length, 10000);
+        
+        jobHandle.Complete();
+        
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles.ToList(), 0);
         mesh.SetUVs(0, uvs);
