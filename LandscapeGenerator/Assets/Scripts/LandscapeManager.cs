@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 public class LandscapeManager : MonoBehaviour
 {
 	public const float Scale = 3f;
 	public const int TerrainChunkSize = 17;
 	public const float ViewerMoveThresholdForChunkUpdate = 25f;
 	public const float ViewerRotateThresholdForChunkUpdate = 5f;
+	public const float AngleThresholdForChunkVisibility = 90f; 
 	
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	public static float maxViewDst = (TerrainChunkSize - 1) * 5f;
+	public static float maxViewDst = (TerrainChunkSize - 1) * 1;
 	public LODInfo[] detailLevels;
 
 	private Transform _transform;
@@ -19,19 +22,26 @@ public class LandscapeManager : MonoBehaviour
 	private float _viewerRotationYOld;
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
-	private TerrainChunk _currentChunk;
+	public TerrainChunk _currentChunk;
+	[Range(-90, 90)]
+	private int _lastLatitude;
+	[Range(-90, 90)]
+	private int _lastLongitude;
+	int _chunksVisibleInViewDst;
+	Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
+	static HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
+	static List<TerrainChunk> _surrounderTerrainChunks = new List<TerrainChunk>();
 
 	public static LandscapeManager Instance;
+	public int initialLatitude = 0;
+	public int initialLongitude = 0;
 	public TerrainParameters terrainParameters;
 	public Material chunkMaterial;
 	public Transform viewer;
 	public Vector2 viewerPosition;
 	public float viewerRotationY;
+	public TerrainChunk CurrentChunk => _currentChunk;
 
-	int _chunksVisibleInViewDst;
-	Dictionary<Vector2, TerrainChunk> _terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-	static HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
-	static List<TerrainChunk> _surrounderTerrainChunks = new List<TerrainChunk>();
 	
 	void Awake()
 	{
@@ -57,13 +67,16 @@ public class LandscapeManager : MonoBehaviour
 		
 		_chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / (TerrainChunkSize - 1));
 		_transform = transform;
+		_lastLatitude = initialLatitude + 90;
+		_lastLongitude = initialLongitude + 90;
+		
 		UpdateVisibleChunks ();
 		/**/
 	}
 
 	void Update() {
 		
-		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / Scale;
+		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z);
 		viewerRotationY = viewer.rotation.eulerAngles.y;
 		
 		if ((_viewerPositionOld - viewerPosition).sqrMagnitude > SqrViewerMoveThresholdForChunkUpdate) {
@@ -91,14 +104,15 @@ public class LandscapeManager : MonoBehaviour
 			
 		int currentChunkCoordX = Mathf.RoundToInt (viewerPosition.x / TerrainChunkSize);
 		int currentChunkCoordY = Mathf.RoundToInt (viewerPosition.y / TerrainChunkSize);
-
+		
 		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
 			for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
 				
-				Vector2 viewedChunkCoord = new Vector2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-
-				if (_terrainChunkDictionary.ContainsKey (viewedChunkCoord)) {
-					_surrounderTerrainChunks.Add(_terrainChunkDictionary [viewedChunkCoord]);
+				int2 viewedChunkCoord = new int2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+				
+				if (_terrainChunkDictionary.ContainsKey (viewedChunkCoord))
+				{
+					_surrounderTerrainChunks.Add(_terrainChunkDictionary[viewedChunkCoord]);
 					_terrainChunkDictionary [viewedChunkCoord].UpdateTerrainChunk ();
 				} else
 				{
@@ -106,36 +120,30 @@ public class LandscapeManager : MonoBehaviour
 					_terrainChunkDictionary.Add(viewedChunkCoord, chunk);
 					_surrounderTerrainChunks.Add(chunk);
 				}
+				_lastLatitude = (_lastLatitude + yOffset) % 180;
+				_lastLongitude = (_lastLongitude + yOffset) % 180;
 			}
 		}
-
 		_currentChunk = _terrainChunkDictionary[new (currentChunkCoordX, currentChunkCoordY)];
+
 	}
 
 	void UpdateCulledChunks()
 	{
+		Vector2 viewerForward = new Vector2(viewer.forward.x, viewer.forward.z).normalized;
 		foreach (TerrainChunk chunk in _surrounderTerrainChunks)
 		{
-			if (chunk == _currentChunk) continue;
-			
-			Vector2 chunkDirection = (new Vector2(chunk.Position.x, chunk.Position.z) - viewerPosition).normalized;
-			Vector2 viewerForward = new Vector2(viewer.forward.x, viewer.forward.z).normalized;
+			Vector3 pos = chunk.Position;
+			bool isVisible = !chunk.IsCulled(viewerForward);
+			chunk.SetVisible(isVisible);
 
-			float dot = Vector2.Dot(viewerForward, chunkDirection);
-			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-			
-			if ((dot < 0 && chunkAngle < (180f - 30f)) || dot > 0)
+			if (isVisible)
 			{
-				chunk.SetVisible(true);
 				_terrainChunksVisibleLastUpdate.Add(chunk);
-			}
-			else
-			{
-				chunk.SetVisible(false);
-				_terrainChunksVisibleLastUpdate.Remove(chunk);
 			}
 		}
 	}
+
 	 
 	public static void GenerateSimpleTerrainChunk(MeshFilter meshFilter, MeshRenderer meshRenderer)
 	{
@@ -168,9 +176,10 @@ public class LandscapeManager : MonoBehaviour
 	}
 	
 	public class TerrainChunk {
-
+		
 		GameObject _meshObject;
 		float2 _position;
+		int2 _coord;
 		Bounds _bounds;
 		LOD[] _lods;
 		LODMesh[] _lodMeshes;
@@ -183,9 +192,10 @@ public class LandscapeManager : MonoBehaviour
 		MeshCollider _meshCollider;
 		
 		public Vector3 Position => new(_position.x, 0, _position.y);
-		
-		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material)
+
+		public TerrainChunk(int2 coord, int size, Transform parent, Material material)
 		{
+			_coord = coord;
 			_position = (size - 1) * coord;
 			Vector3 positionV3 = new Vector3(_position.x,0,_position.y);
 
@@ -202,7 +212,7 @@ public class LandscapeManager : MonoBehaviour
 			_detailLevels = Instance.detailLevels;
 			_lodMeshes = new LODMesh[_detailLevels.Length];
 			for (int i = 0; i < _detailLevels.Length; i++) {
-				_lodMeshes[i] = new LODMesh(_detailLevels[i].lod, UpdateTerrainChunk);
+				_lodMeshes[i] = new LODMesh(_detailLevels[i].lod);
 			}
 
 			UpdateTerrainChunk();
@@ -211,10 +221,9 @@ public class LandscapeManager : MonoBehaviour
 
 		public void UpdateTerrainChunk() {
 			float viewerDstFromNearestEdge = (Instance.viewerPosition - new Vector2(_position.x, _position.y)).sqrMagnitude;
-			bool visible = (viewerDstFromNearestEdge <= (maxViewDst * maxViewDst) &&
-			                CustomCameraCulling.IsObjectVisible(Position));
+			bool inDistance = viewerDstFromNearestEdge <= (maxViewDst * maxViewDst);
 
-			if (visible){
+			if (inDistance){
 				
 				int lodIndex = 0;
 				
@@ -231,24 +240,41 @@ public class LandscapeManager : MonoBehaviour
 					LODMesh lodMesh = _lodMeshes[lodIndex];
 					_previousLODIndex = lodIndex;
 					
-					if (lodMesh.mesh != null)
+					if (lodMesh.hasMesh)
 					{
 						_meshFilter.mesh = lodMesh.mesh;
 						_meshCollider.sharedMesh = lodMesh.mesh;
 					}
 					else
 					{
+						// Se pide la mesh y se actualiza en el lateUpdate
 						Mesh mesh = MeshGenerator.GenerateTerrainMesh(Instance.terrainParameters, TerrainChunkSize, Scale, _position, lodIndex);
 						lodMesh.mesh = mesh;
+						lodMesh.hasMesh = true;
 						_meshFilter.mesh = lodMesh.mesh;
 						_meshCollider.sharedMesh = lodMesh.mesh;
 					}
-				}
 
-				_terrainChunksVisibleLastUpdate.Add(this);
+					_meshCollider.enabled = lodIndex == 0;
+				}
 			}
 			
+			var forward = Instance.viewer.forward;
+			bool visible = inDistance && !IsCulled(new (forward.x, forward.z));
 			SetVisible(visible);
+			if (visible)
+				_terrainChunksVisibleLastUpdate.Add(this);
+		}
+
+		public bool IsCulled(Vector2 viewerForward)
+		{
+			if (this == Instance.CurrentChunk) return false;
+        
+			Vector2 chunkDirection = new Vector2(Position.x - Instance.viewerPosition.x, Position.z - Instance.viewerPosition.y).normalized;
+			float dot = Vector2.Dot(viewerForward, chunkDirection);
+			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+			return dot < 0 && chunkAngle > 100f;
 		}
 
 		public void SetVisible(bool visible) {
@@ -264,13 +290,12 @@ public class LandscapeManager : MonoBehaviour
 	class LODMesh {
 
 		public Mesh mesh;
+		public bool hasMesh;
 		int _lod;
-		Action _callback;
 
-		public LODMesh(int lod, Action callback) {
+		public LODMesh(int lod) {
 			_lod = lod;
-			mesh = null;
-			_callback = callback;
+			hasMesh = false;
 		}
 	}
 
