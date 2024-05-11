@@ -11,15 +11,15 @@ public class LandscapeManager : MonoBehaviour
 	public const int TerrainChunkSize = 17;
 	public const float ViewerMoveThresholdForChunkUpdate = 25f;
 	public const float ViewerRotateThresholdForChunkUpdate = 5f;
-	public const float AngleThresholdForChunkVisibility = 90f; 
-	
+	public const float AngleThresholdForChunkCulling = 100f; 
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	public static float maxViewDst = (TerrainChunkSize - 1) * 1;
-	public LODInfo[] detailLevels;
-
+	public static readonly float MaxViewDst = (TerrainChunkSize - 1) * 4;
+	
+	
+	static Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
+	static HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
+	static List<TerrainChunk> _surrounderTerrainChunks = new List<TerrainChunk>();
 	private Transform _transform;
-	private Vector2 _viewerPositionOld;
-	private float _viewerRotationYOld;
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
 	public TerrainChunk _currentChunk;
@@ -28,18 +28,14 @@ public class LandscapeManager : MonoBehaviour
 	[Range(-90, 90)]
 	private int _lastLongitude;
 	int _chunksVisibleInViewDst;
-	Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
-	static HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
-	static List<TerrainChunk> _surrounderTerrainChunks = new List<TerrainChunk>();
 
 	public static LandscapeManager Instance;
+	public LODInfo[] detailLevels;
 	public int initialLatitude = 0;
 	public int initialLongitude = 0;
 	public TerrainParameters terrainParameters;
 	public Material chunkMaterial;
-	public Transform viewer;
-	public Vector2 viewerPosition;
-	public float viewerRotationY;
+	public Viewer viewer;
 	public TerrainChunk CurrentChunk => _currentChunk;
 
 	
@@ -65,7 +61,8 @@ public class LandscapeManager : MonoBehaviour
 		/**/
 		
 		
-		_chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / (TerrainChunkSize - 1));
+		_chunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / (TerrainChunkSize - 1));
+		// _chunksVisibleInViewDst = 0;
 		_transform = transform;
 		_lastLatitude = initialLatitude + 90;
 		_lastLongitude = initialLongitude + 90;
@@ -76,20 +73,18 @@ public class LandscapeManager : MonoBehaviour
 
 	void Update() {
 		
-		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z);
-		viewerRotationY = viewer.rotation.eulerAngles.y;
 		
-		if ((_viewerPositionOld - viewerPosition).sqrMagnitude > SqrViewerMoveThresholdForChunkUpdate) {
-			_viewerPositionOld = viewerPosition;
+		if (viewer.PositionChanged()) {
+			viewer.UpdateOldPosition();
 			UpdateVisibleChunks();
 		}
 		/* */
 		
-		if (Math.Abs(viewerRotationY - _viewerRotationYOld) > ViewerRotateThresholdForChunkUpdate)
-		{
-			_viewerRotationYOld = viewerRotationY;
-			UpdateCulledChunks();
-		}
+		// if (viewer.RotationChanged())
+		// {
+		// 	viewer.UpdateOldRotation();
+		// 	UpdateCulledChunks();
+		// }
 	}
 		
 	void UpdateVisibleChunks() {
@@ -102,8 +97,8 @@ public class LandscapeManager : MonoBehaviour
 		_terrainChunksVisibleLastUpdate.Clear();
 		_surrounderTerrainChunks.Clear();
 			
-		int currentChunkCoordX = Mathf.RoundToInt (viewerPosition.x / TerrainChunkSize);
-		int currentChunkCoordY = Mathf.RoundToInt (viewerPosition.y / TerrainChunkSize);
+		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / TerrainChunkSize);
+		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / TerrainChunkSize);
 		
 		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
 			for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
@@ -130,7 +125,7 @@ public class LandscapeManager : MonoBehaviour
 
 	void UpdateCulledChunks()
 	{
-		Vector2 viewerForward = new Vector2(viewer.forward.x, viewer.forward.z).normalized;
+		Vector2 viewerForward = viewer.ForwardV2.normalized;
 		foreach (TerrainChunk chunk in _surrounderTerrainChunks)
 		{
 			Vector3 pos = chunk.Position;
@@ -207,7 +202,7 @@ public class LandscapeManager : MonoBehaviour
 			
 			_meshObject.transform.position = positionV3 * Scale;
 			_meshObject.transform.parent = parent;
-			_bounds = _meshRenderer.bounds;
+			_bounds = _bounds = new Bounds(positionV3,Vector2.one * size);
 
 			_detailLevels = Instance.detailLevels;
 			_lodMeshes = new LODMesh[_detailLevels.Length];
@@ -219,16 +214,18 @@ public class LandscapeManager : MonoBehaviour
 		}
 	
 
-		public void UpdateTerrainChunk() {
-			float viewerDstFromNearestEdge = (Instance.viewerPosition - new Vector2(_position.x, _position.y)).sqrMagnitude;
-			bool inDistance = viewerDstFromNearestEdge <= (maxViewDst * maxViewDst);
+		public void UpdateTerrainChunk()
+		{
+			var viewerPosV3 = new Vector3(Instance.viewer.PositionV2.x, 0, Instance.viewer.PositionV2.y);
+			float distFromViewer = _bounds.SqrDistance (viewerPosV3);
+			bool inDistance = distFromViewer <= (MaxViewDst * MaxViewDst);
 
 			if (inDistance){
 				
 				int lodIndex = 0;
 				
 				for (int i = 0; i < _detailLevels.Length - 1; i++) {
-					if (viewerDstFromNearestEdge > _detailLevels [i].visibleDstThreshold) {
+					if (distFromViewer > _detailLevels [i].visibleDstThreshold) {
 						lodIndex = i + 1;
 					} else {
 						break;
@@ -259,8 +256,7 @@ public class LandscapeManager : MonoBehaviour
 				}
 			}
 			
-			var forward = Instance.viewer.forward;
-			bool visible = inDistance && !IsCulled(new (forward.x, forward.z));
+			bool visible = inDistance && !IsCulled(Instance.viewer.ForwardV2.normalized);
 			SetVisible(visible);
 			if (visible)
 				_terrainChunksVisibleLastUpdate.Add(this);
@@ -270,11 +266,11 @@ public class LandscapeManager : MonoBehaviour
 		{
 			if (this == Instance.CurrentChunk) return false;
         
-			Vector2 chunkDirection = new Vector2(Position.x - Instance.viewerPosition.x, Position.z - Instance.viewerPosition.y).normalized;
+			Vector2 chunkDirection = new Vector2(Position.x - Instance.viewer.PositionV2.x, Position.z - Instance.viewer.PositionV2.y).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
 			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
 
-			return dot < 0 && chunkAngle > 100f;
+			return dot < 0 && chunkAngle > AngleThresholdForChunkCulling;
 		}
 
 		public void SetVisible(bool visible) {
