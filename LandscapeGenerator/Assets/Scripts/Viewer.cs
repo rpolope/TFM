@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,15 +9,21 @@ public class Viewer : MonoBehaviour
     private Vector2 _viewerOldPosition;
     private float _viewerOldRotationY;
     private int2 _chunkCoord;
+    private Vector3 _velocity;
+    private Camera _mainCamera;
 
+    public float speed;
     public Vector2 PositionV2 { get; private set; }
-    public Vector3 PositionV3 => new Vector3(PositionV2.x, 0, PositionV2.y);
+    public Vector3 PositionV3 => new (PositionV2.x, 0, PositionV2.y);
     public float RotationY { get; private set; }
-    public Vector2 ForwardV2 => new Vector2(_viewerTransform.forward.x, _viewerTransform.forward.z);
+    public Vector2 ForwardV2 => new (_viewerTransform.forward.x, _viewerTransform.forward.z);
     public int2 ChunkCoord { get; set; }
+    public float FOV => _mainCamera.fieldOfView;
     
     void Awake()
     {
+        _velocity = new(0, 0, speed);
+        _mainCamera = Camera.main;
         _viewerTransform = transform;
         
         var position = _viewerTransform.position;
@@ -31,6 +38,7 @@ public class Viewer : MonoBehaviour
 
     void Update()
     {
+        _viewerTransform.position += _velocity * Time.deltaTime;
         PositionV2 = new Vector2(_viewerTransform.position.x, _viewerTransform.position.z);
         RotationY = _viewerTransform.rotation.eulerAngles.y;
     }

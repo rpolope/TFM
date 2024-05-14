@@ -242,8 +242,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 797567965}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 20, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 80, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -262,6 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1d0db706e676c64aa34f1e91bbede90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 250
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,11 +404,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detailLevels:
   - lod: 0
-    visibleDstThreshold: 200
-  - lod: 1
     visibleDstThreshold: 400
+    useForCollider: 0
+  - lod: 1
+    visibleDstThreshold: 800
+    useForCollider: 0
   - lod: 2
-    visibleDstThreshold: 600
+    visibleDstThreshold: 1600
+    useForCollider: 1
   initialLatitude: 0
   initialLongitude: 0
   terrainParameters:
@@ -417,16 +421,16 @@ MonoBehaviour:
       scale: 100
       offset: {x: 0, y: 0}
       amplitude: 1
-      octaves: 5
-      frequency: 1.5
-      persistence: 0.75
+      octaves: 8
+      frequency: 1
+      persistence: 0.5
       lacunarity: 1.5
       ridgeRoughness: 5
     meshParameters:
-      resolution: 17
+      resolution: 241
       heightScale: 1
       waterLevel: 0
-      levelsOfDetail: 1
+      levelsOfDetail: 3
   chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
   viewer: {fileID: 797567967}
 --- !u!23 &1462233072
@@ -491,6 +495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1d0db706e676c64aa34f1e91bbede90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 1
 --- !u!1 &1916827185
 GameObject:
   m_ObjectHideFlags: 0

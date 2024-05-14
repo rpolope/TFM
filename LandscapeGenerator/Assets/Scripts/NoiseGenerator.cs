@@ -1,6 +1,4 @@
-using Unity.Collections;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
@@ -14,6 +12,7 @@ public enum NoiseType
 
 public static class NoiseGenerator
 {
+    // public static float MaxValue = 0f;
     public static float GetNoiseValue(float2 position, NoiseParameters parameters)
     {
         float maxPossibleHeight = 0;
@@ -27,7 +26,7 @@ public static class NoiseGenerator
         {
             parameters.scale = 0.0001f;
         }
-        
+
         for (int i = 0; i < parameters.octaves; i++)
         {
             float offsetX = random.NextFloat(-100000, 100000) + parameters.offset.x;
@@ -37,6 +36,7 @@ public static class NoiseGenerator
             float sampleY = (position.y + offsetY) / parameters.scale * frequency;
 
             float sampledNoiseValue = SampleNoiseValue(new float2(sampleX, sampleY), parameters.noiseType);
+            
             noiseHeight += sampledNoiseValue * amplitude;
 
             maxPossibleHeight += amplitude;
@@ -44,10 +44,21 @@ public static class NoiseGenerator
             frequency *= parameters.lacunarity;
         }
 
+        // ReSharper disable once Unity.BurstLoadingStaticNotReadonly
+        // if (maxPossibleHeight > MaxValue)
+        // {
+        //     // ReSharper disable once Unity.BurstWriteStaticField
+        //     MaxValue = maxPossibleHeight;
+        // }
+
         float normalizedHeight = noiseHeight / (maxPossibleHeight / 0.9f);
         noiseHeight = Mathf.Clamp(normalizedHeight, 0, maxPossibleHeight);
         
         return noiseHeight;
+    }
+    
+    public static float GetRidgeNoiseSample(float sample) {
+        return 2 * (0.5f - Mathf.Abs(0.5f - sample));
     }
     
     public static float GetRidgeNoiseSample(float2 sample) {
@@ -56,16 +67,13 @@ public static class NoiseGenerator
 
     public static float GetOctavedRidgeNoise(float2 sample, NoiseParameters parameters)
     {
-
-        float[] heights = new float[parameters.octaves];
         float ampl = parameters.amplitude;
         float freq = parameters.frequency;
         float accum = 1f, maxAmpl = 0.0f;
         
         for (int o = 0; o < parameters.octaves; o++)
         {
-            heights[o] = ampl * GetRidgeNoiseSample(sample / parameters.scale * freq) * accum;
-            accum += heights[o];
+            accum += ampl * GetRidgeNoiseSample(sample / parameters.scale * freq) * accum;
             maxAmpl += ampl;
 
             ampl *= parameters.persistence;
@@ -87,7 +95,7 @@ public static class NoiseGenerator
                 noiseValue = (noise.snoise(sample) + 1) * 0.5f;
                 break;
             case NoiseType.Ridged:
-                noiseValue = 0f;
+                noiseValue = GetRidgeNoiseSample(sample);
                 break;
             case NoiseType.Voronoi:
                 float2 cellularResult = noise.cellular(sample);
@@ -98,6 +106,4 @@ public static class NoiseGenerator
 
         return noiseValue;
     }
-
-    
 }

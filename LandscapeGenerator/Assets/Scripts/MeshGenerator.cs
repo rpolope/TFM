@@ -1,12 +1,13 @@
 using System.Linq;
+using Unity.Burst;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
 
 public static class MeshGenerator
 {
+    [BurstCompile]
     private struct GenerateMeshJob : IJobParallelFor
     {
         public NativeArray<Vector3> Vertices;
@@ -54,10 +55,13 @@ public static class MeshGenerator
 
         private float GenerateHeight(float2 samplePos)
         {
-            float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            noiseValue += NoiseGenerator.GetOctavedRidgeNoise(samplePos, TerrainParameters.noiseParameters);
-
-            noiseValue = Mathf.Pow(noiseValue/2f, TerrainParameters.noiseParameters.ridgeRoughness);
+            float ridgedFactor = 0.85f;
+            // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            noiseValue += ridgedFactor * NoiseGenerator.GetOctavedRidgeNoise(samplePos, TerrainParameters.noiseParameters);
+            
+            if (ridgedFactor > 0)
+                noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
             
             noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
                 TerrainParameters.meshParameters.waterLevel :  noiseValue;
@@ -67,48 +71,64 @@ public static class MeshGenerator
         }
     }
 
-    public static Mesh GenerateTerrainMesh(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod, ref MeshData meshData)
     {
-        return ParallelMeshGeneration(terrainParameters, resolution, center, scale, lod);
-    }
-
-    private static Mesh ParallelMeshGeneration(TerrainParameters terrainParameters, int resolution, float2 center, float scale, int lod)
-    {
-        int lodScale = (1 << lod);
-        resolution = (resolution - 1) / lodScale + 1;
-        
-        Mesh mesh = new Mesh();
-        NativeArray<Vector3> vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.TempJob);
-        NativeArray<int> triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.TempJob);
-        NativeArray<float2> uvs = new NativeArray<float2>(resolution * resolution, Allocator.TempJob);
-        
         var generateMeshJob = new GenerateMeshJob
         {
-            Vertices = vertices,
-            UVs = uvs,
-            Triangles = triangles,
+            Vertices = meshData.Vertices,
+            UVs = meshData.UVs,
+            Triangles = meshData.Triangles,
             Resolution = resolution,
-            FacesCount = triangles.Length / 6,
+            FacesCount = meshData.Triangles.Length / 6,
             Center = center,
             Scale = scale,
-            LODScale = lodScale,
+            LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters
             
         };
-        var jobHandle = generateMeshJob.Schedule(vertices.Length, 10000);
+        var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         
-        jobHandle.Complete();
         
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles.ToList(), 0);
-        mesh.SetUVs(0, uvs);
+        return jobHandle;
+    }
+
+}
+
+public class MeshData {
+    public NativeArray<Vector3> Vertices;
+    public NativeArray<int> Triangles;
+    public NativeArray<float2> UVs;
+
+    public readonly int LODScale;
+
+    public MeshData(int resolution, int lod) {
+        LODScale = (1 << lod);
+        resolution = (resolution - 1) / LODScale + 1;
+        
+        Vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.Persistent);
+        Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
+        UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
+    }
+
+    public Mesh CreateMesh() {
+        Mesh mesh = new Mesh();
+        
+        mesh.SetVertices(Vertices);
+        mesh.SetTriangles(Triangles.ToList(), 0);
+        mesh.SetUVs(0, UVs);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-
-        vertices.Dispose();
-        triangles.Dispose();
-        uvs.Dispose();
-
+        
+        Dispose();
+        
         return mesh;
     }
+    
+    private void Dispose()
+    {
+        Vertices.Dispose();
+        Triangles.Dispose();
+        UVs.Dispose();
+    }
+
 }
