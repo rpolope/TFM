@@ -112,9 +112,11 @@ public class MeshData {
 
     public Mesh CreateMesh() {
         Mesh mesh = new Mesh();
+        int[] trianglesArray = new int[Triangles.Length];
+        Triangles.CopyTo(trianglesArray);
         
         mesh.SetVertices(Vertices);
-        mesh.SetTriangles(Triangles.ToList(), 0);
+        mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();

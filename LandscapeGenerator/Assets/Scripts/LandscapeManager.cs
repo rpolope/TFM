@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -14,7 +15,7 @@ public class LandscapeManager : MonoBehaviour
 	public static int ChunksVisibleInViewDst = 3;
 	// public const float ViewerMoveThresholdForChunkUpdate = 25f;
 	public const float ViewerMoveThresholdForChunkUpdate = (TerrainChunkSize - 1) * Scale;
-	public const float ViewerRotateThresholdForChunkUpdate = 5f;
+	public const float ViewerRotateThresholdForChunkUpdate = 20f;
 	public const float AngleThresholdForChunkCulling = 120f; 
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	public static float MaxViewDst;
@@ -81,11 +82,11 @@ public class LandscapeManager : MonoBehaviour
 		}
 		/* */
 		
-		// if (viewer.RotationChanged())
-		// {
-		// 	viewer.UpdateOldRotation();
-		// 	UpdateCulledChunks();
-		// }
+		if (viewer.RotationChanged())
+		{
+			viewer.UpdateOldRotation();
+			UpdateCulledChunks();
+		}
 	}
 
 	void LateUpdate()
@@ -135,14 +136,22 @@ public class LandscapeManager : MonoBehaviour
 		{
 			Vector3 pos = chunk.PositionV3;
 			bool isVisible = !chunk.IsCulled(viewerForward);
-			chunk.SetVisible(isVisible);
+			
+			// chunk.SetVisible(isVisible);
 
 			if (isVisible)
 			{
-				TerrainChunksVisibleLastUpdate.Add(chunk);
+				chunk.GameObject.layer = LayerMask.NameToLayer("Default");
+				// TerrainChunksVisibleLastUpdate.Add(chunk);
+			}
+			else
+			{
+				chunk.GameObject.layer = LayerMask.NameToLayer("Culled");
 			}
 		}
 	}
+	
+	
 	
 	
 
@@ -207,6 +216,7 @@ public class LandscapeManager : MonoBehaviour
 		
 		public Vector3 PositionV3 => new(_position.x, 0, _position.y);
 		public float2 Position => _position;
+		public GameObject GameObject => _meshObject;
 
 		public TerrainChunk(int2 coord, int size, Transform parent, Material material)
 		{
@@ -310,13 +320,17 @@ public class LandscapeManager : MonoBehaviour
 				}
 			}
 			
-			bool visible = inDistance && !IsCulled(Instance.viewer.ForwardV2.normalized);
-			// bool visible = inDistance;
+			// bool visible = inDistance && !IsCulled(Instance.viewer.ForwardV2.normalized);
+			bool visible = inDistance;
 			SetVisible(visible);
 			if (visible)
 			{
 				TerrainChunksVisibleLastUpdate.Add(this);
 			}
+
+			var culled = IsCulled(Instance.viewer.ForwardV2.normalized)
+				? _meshObject.layer = LayerMask.NameToLayer("Culled")
+				: _meshObject.layer = LayerMask.NameToLayer("Default");
 		}
 
 		public bool IsCulled(Vector2 viewerForward)
@@ -324,7 +338,7 @@ public class LandscapeManager : MonoBehaviour
 			if (_coord.Equals(Instance.viewer.ChunkCoord)) return false;
 
 			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
-			// chunkCenter += chunkCenter.normalized * (WorldTerrainChunkSize / 2);
+			chunkCenter += chunkCenter.normalized * (WorldTerrainChunkSize / 2);
 			Vector2 chunkDirection = (chunkCenter - Instance.viewer.PositionV2).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
 			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
