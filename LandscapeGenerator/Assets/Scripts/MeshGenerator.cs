@@ -27,14 +27,14 @@ public static class MeshGenerator
             int x = index % Resolution;
             int z = index / Resolution;
             
-            float offset = (Resolution - 1) * 0.5f * Scale;
-            float xPos = LODScale * (x * Scale - offset);
-            float zPos = LODScale * (z * Scale - offset);
+            float offset = (Resolution - 1) * 0.5f;
+            float xPos = LODScale * (x - offset) * Scale;
+            float zPos = LODScale * (z - offset) * Scale;
 
             float height = GenerateHeight(Center + LODScale * new float2(x, z));
             
-            Vertices[index] = new Vector3(xPos, height, zPos);
-            UVs[index] = new float2((float)x / (Resolution - 1) * Scale, (float)z / (Resolution - 1) * Scale);
+            Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
+            UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
 
             if (index < FacesCount)
             {

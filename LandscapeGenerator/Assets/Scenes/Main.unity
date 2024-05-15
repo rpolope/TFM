@@ -243,7 +243,7 @@ Transform:
   m_GameObject: {fileID: 797567965}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 80, z: -10}
+  m_LocalPosition: {x: 0, y: 80, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -367,7 +367,6 @@ GameObject:
   - component: {fileID: 1462233071}
   - component: {fileID: 1462233073}
   - component: {fileID: 1462233072}
-  - component: {fileID: 1462233074}
   m_Layer: 0
   m_Name: Landscape
   m_TagString: Untagged
@@ -404,13 +403,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detailLevels:
   - lod: 0
-    visibleDstThreshold: 150
+    visibleChunksThreshold: 2
     useForCollider: 0
   - lod: 1
-    visibleDstThreshold: 300
-    useForCollider: 0
+    visibleChunksThreshold: 1
+    useForCollider: 1
   - lod: 2
-    visibleDstThreshold: 500
+    visibleChunksThreshold: 0
     useForCollider: 1
   initialLatitude: 0
   initialLongitude: 0
@@ -433,7 +432,7 @@ MonoBehaviour:
       levelsOfDetail: 3
   chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
   viewer: {fileID: 797567967}
-  culling: 1
+  culling: 0
   biomesColorMaps:
   - {fileID: 2800000, guid: 4a1398514144b9c4eb4a524e16e347da, type: 3}
   - {fileID: 2800000, guid: 93f22736ec754f74f8e22719b604ae1f, type: 3}
@@ -487,19 +486,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1462233067}
   m_Mesh: {fileID: 0}
---- !u!114 &1462233074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1462233067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1d0db706e676c64aa34f1e91bbede90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 1
 --- !u!1 &1916827185
 GameObject:
   m_ObjectHideFlags: 0

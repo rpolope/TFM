@@ -1,27 +1,16 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class LandscapeManager : MonoBehaviour
-{
-	public const float Scale = 5f;
-	public const int TerrainChunkSize = 17;
-	public static int ChunksVisibleInViewDst = 3;
-	// public const float ViewerMoveThresholdForChunkUpdate = 25f;
-	public const float ViewerMoveThresholdForChunkUpdate = (TerrainChunkSize - 1) * Scale;
-	public const float ViewerRotateThresholdForChunkUpdate = 20f;
-	public const float AngleThresholdForChunkCulling = 120f; 
-	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	public static float MaxViewDst;
-	public static event Action CompleteMeshGenerationEvent;
+public class LandscapeManager : MonoBehaviour{
 	
-	private static Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
+	private const int TerrainChunkSize = 17;
+	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunkSize - 1) * 0.5f;
+	private static int _chunksVisibleInViewDst = 3;
+	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurrounderTerrainChunks = new List<TerrainChunk>();
 	private static float _worldTerrainChunkSize;
@@ -34,7 +23,14 @@ public class LandscapeManager : MonoBehaviour
 	private int _lastLongitude;
 
 	private BiomeManager _biomeManager;
-
+	
+	public const float Scale = 5f;
+	public const float ViewerRotateThresholdForChunkUpdate = 20f;
+	public const float AngleThresholdForChunkCulling = 120f; 
+	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
+	public static float MaxViewDst;
+	public static event Action CompleteMeshGenerationEvent;
+	
 	public static LandscapeManager Instance;
 	public LODInfo[] detailLevels;
 	public int initialLatitude = 0;
@@ -66,10 +62,16 @@ public class LandscapeManager : MonoBehaviour
 		_lastLongitude = initialLongitude + 90;
 		_biomeManager = new BiomeManager(biomesColorMaps);
 		_worldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
-		MaxViewDst = detailLevels [^1].visibleDstThreshold * Scale;
-		ChunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / _worldTerrainChunkSize);
-		// MaxViewDst = WorldTerrainChunkSize;
-		// TerrainChunk.Current = new TerrainChunk();
+		
+		MaxViewDst = 0;
+		_chunksVisibleInViewDst = 0;
+		foreach (var detailLevel in detailLevels)
+		{
+			_chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
+			MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunkSize - 1);
+		}
+
+		MaxViewDst *= Scale;
 		
 		UpdateVisibleChunks ();
 		/**/
@@ -106,25 +108,30 @@ public class LandscapeManager : MonoBehaviour
 		TerrainChunksVisibleLastUpdate.Clear();
 		SurrounderTerrainChunks.Clear();
 			
-		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / _worldTerrainChunkSize);
-		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / _worldTerrainChunkSize);
-		viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
+		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / (TerrainChunkSize - 1));
+		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / (TerrainChunkSize - 1));
+		Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 		
-		for (int yOffset = -ChunksVisibleInViewDst; yOffset <= ChunksVisibleInViewDst; yOffset++) {
-			for (int xOffset = -ChunksVisibleInViewDst; xOffset <= ChunksVisibleInViewDst; xOffset++) {
+		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
+			for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
 				
 				var viewedChunkCoord = new int2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-				
-				if (_terrainChunkDictionary.ContainsKey (viewedChunkCoord))
+				TerrainChunk chunk;
+				if (TerrainChunkDictionary.TryGetValue(viewedChunkCoord, out var value))
 				{
-					SurrounderTerrainChunks.Add(_terrainChunkDictionary[viewedChunkCoord]);
-					_terrainChunkDictionary [viewedChunkCoord].UpdateTerrainChunk ();
+					chunk = value;
+					SurrounderTerrainChunks.Add(chunk);
+					chunk.Update ();
 				} else
 				{
-					var chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkSize, _transform, chunkMaterial);
-					_terrainChunkDictionary.Add(viewedChunkCoord, chunk);
+					chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkSize, _transform, chunkMaterial);
+					TerrainChunkDictionary.Add(viewedChunkCoord, chunk);
 					SurrounderTerrainChunks.Add(chunk);
 				}
+				
+				if (chunk.IsVisible())
+					TerrainChunksVisibleLastUpdate.Add(chunk);
+				
 				_lastLatitude = (_lastLatitude + yOffset) % 180;
 				_lastLongitude = (_lastLongitude + yOffset) % 180;
 			}
@@ -136,8 +143,6 @@ public class LandscapeManager : MonoBehaviour
 		Vector2 viewerForward = viewer.ForwardV2.normalized;
 		foreach (TerrainChunk chunk in SurrounderTerrainChunks)
 		{
-			Vector3 pos = chunk.PositionV3;
-
 			CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
 		}
 	}
@@ -157,8 +162,6 @@ public class LandscapeManager : MonoBehaviour
 		}
 		
 		chunk.SetVisible(visible);
-		if (visible)
-			TerrainChunksVisibleLastUpdate.Add(chunk);
 	}
 	
 	//  
@@ -205,7 +208,6 @@ public class LandscapeManager : MonoBehaviour
 
 	private class TerrainChunk
 	{
-		private readonly GameObject _meshObject;
 		private readonly float2 _position;
 		private readonly Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
@@ -220,9 +222,8 @@ public class LandscapeManager : MonoBehaviour
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
 		
-		public Vector3 PositionV3 => new(_position.x, 0, _position.y);
 		public float2 Position => _position;
-		public GameObject GameObject => _meshObject;
+		public GameObject GameObject { get; }
 
 		public TerrainChunk(int2 coord, int size, Transform parent, Material material)
 		{
@@ -232,14 +233,14 @@ public class LandscapeManager : MonoBehaviour
 			_position = (size - 1) * coord;
 			_positionV3 = new Vector3(_position.x,0,_position.y) * Scale;
 
-			_meshObject = new GameObject("TerrainChunk");
-			var meshRenderer = _meshObject.AddComponent<MeshRenderer>();
-			_meshFilter = _meshObject.AddComponent<MeshFilter>();
+			GameObject = new GameObject("TerrainChunk");
+			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
+			_meshFilter = GameObject.AddComponent<MeshFilter>();
 			meshRenderer.material = material;
-			_meshCollider = _meshObject.AddComponent<MeshCollider>();
+			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
-			_meshObject.transform.position = _positionV3;
-			_meshObject.transform.parent = parent;
+			GameObject.transform.position = _positionV3;
+			GameObject.transform.parent = parent;
 			_bounds = new Bounds(_positionV3,Vector2.one * (size * Scale));
 
 			_detailLevels = Instance.detailLevels;
@@ -251,9 +252,90 @@ public class LandscapeManager : MonoBehaviour
 				}
 			}
 			
-			UpdateTerrainChunk();
+			Update();
 		}
 
+		public void Update()
+		{
+			var chunksFromViewer = Viewer.ChunkCoord - _coord;
+			chunksFromViewer = new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
+			bool inDistance = chunksFromViewer.x < _chunksVisibleInViewDst && 
+			                  chunksFromViewer.y < _chunksVisibleInViewDst;
+			
+			if (inDistance)
+			{
+				int lodIndex = 0;
+
+				for (int i = 0; i < _detailLevels.Length - 1; i++)
+				{
+					if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
+					    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
+					{
+						break;
+					}
+					
+					lodIndex = i + 1;
+					
+				}
+				if (lodIndex != _lodIndex)
+				{
+					var lodMesh = _lodMeshes[lodIndex];
+					_lodIndex = lodIndex;
+
+					if (lodMesh.HasMesh)
+					{
+						_meshFilter.mesh = lodMesh.Mesh;
+						if (lodIndex == 0)
+						{
+							_meshCollider.enabled = true;
+							_meshCollider.sharedMesh = _colliderMesh.Mesh;
+						}
+					}
+					else
+					{
+						lodMesh.RequestMesh();
+					}
+				}
+				
+				if (_lodIndex == 0 && _coord.Equals(Viewer.ChunkCoord))
+				{
+					_meshCollider.enabled = true;
+					if (_colliderMesh.HasMesh)
+					{
+						_meshCollider.sharedMesh = _colliderMesh.Mesh;
+					}
+					else
+					{
+						_colliderMesh.RequestMesh();
+					}
+				}
+				else
+				{
+					_meshCollider.enabled = false;
+				}
+			}
+
+			CullChunkAndSetVisibility(this, IsCulled(Instance.viewer.ForwardV2.normalized), inDistance);
+			
+		}
+
+		public bool IsCulled(Vector2 viewerForward)
+		{
+			if (_coord.Equals(Viewer.ChunkCoord)) return false;
+
+			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
+			chunkCenter += chunkCenter.normalized * (_worldTerrainChunkSize / 2);
+			Vector2 chunkDirection = (chunkCenter - Instance.viewer.PositionV2).normalized;
+			float dot = Vector2.Dot(viewerForward, chunkDirection);
+			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+			return dot < 0 && chunkAngle > Instance.viewer.FOV;
+		}
+
+		public void SetVisible(bool visible) {
+			GameObject.SetActive (visible);
+		}
+		
 		private void CompleteMeshGeneration()
 		{
 			if (IsVisible())
@@ -273,105 +355,8 @@ public class LandscapeManager : MonoBehaviour
 			}	
 		}
 
-
-		public void UpdateTerrainChunk()
-		{
-			float distFromViewer = _bounds.SqrDistance(Instance.viewer.PositionV3);
-			bool inDistance = distFromViewer <= (MaxViewDst * MaxViewDst);
-
-			if (inDistance)
-			{
-
-				int lodIndex = 0;
-
-				for (int i = 0; i < _detailLevels.Length - 1; i++)
-				{
-					if (distFromViewer > _detailLevels[i].visibleDstThreshold)
-					{
-						lodIndex = i + 1;
-					}
-					else
-					{
-						break;
-					}
-				}
-
-				if (lodIndex != _lodIndex)
-				{
-					var lodMesh = _lodMeshes[lodIndex];
-					_lodIndex = lodIndex;
-
-					if (lodMesh.HasMesh)
-					{
-						_meshFilter.mesh = lodMesh.Mesh;
-						if (lodIndex == 0)
-						{
-							_meshCollider.enabled = true;
-							_meshCollider.sharedMesh = _colliderMesh.Mesh;
-						}
-					}
-					else
-					{
-						lodMesh.RequestMesh();
-
-						if (lodIndex == 0)
-						{
-							_meshCollider.enabled = true;
-							if (_colliderMesh.HasMesh)
-							{
-								_meshCollider.sharedMesh = _colliderMesh.Mesh;
-							}
-							else
-							{
-								_colliderMesh.RequestMesh();
-							}
-						}
-						else
-						{
-							_meshCollider.enabled = false;
-						}
-					}
-				}
-			}
-
-			CullChunkAndSetVisibility(this, IsCulled(Instance.viewer.ForwardV2.normalized), inDistance);
-			
-		}
-
-
-		public bool IsCulled(Vector2 viewerForward)
-		{
-			if (_coord.Equals(Instance.viewer.ChunkCoord)) return false;
-
-			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
-			chunkCenter += chunkCenter.normalized * (_worldTerrainChunkSize / 2);
-			Vector2 chunkDirection = (chunkCenter - Instance.viewer.PositionV2).normalized;
-			float dot = Vector2.Dot(viewerForward, chunkDirection);
-			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-
-			return dot < 0 && chunkAngle > Instance.viewer.FOV;
-		}
-
-		public void SetVisible(bool visible) {
-			_meshObject.SetActive (visible);
-			// ChangeSubscriptionToMeshGeneration();
-		}
-
-		private void ChangeSubscriptionToMeshGeneration()
-		{
-			if(IsVisible())
-			{
-				CompleteMeshGenerationEvent += CompleteMeshGeneration;
-			}
-			else
-			{
-				CompleteMeshGenerationEvent -= CompleteMeshGeneration;
-			}
-		}
-
-
-		private bool IsVisible() {
-			return _meshObject.activeSelf;
+		public bool IsVisible() {
+			return GameObject.activeSelf;
 		}
 
 	}
@@ -418,7 +403,7 @@ public class LandscapeManager : MonoBehaviour
 	[Serializable]
 	public struct LODInfo {
 		public int lod;
-		public float visibleDstThreshold;
+		public int visibleChunksThreshold;
 		public bool useForCollider;
 	}
 
@@ -427,5 +412,4 @@ public class LandscapeManager : MonoBehaviour
 		Layer,
 		Visbility
 	}
-
 }
