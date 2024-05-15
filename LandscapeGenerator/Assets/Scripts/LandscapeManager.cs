@@ -19,14 +19,12 @@ public class LandscapeManager : MonoBehaviour
 	public const float AngleThresholdForChunkCulling = 120f; 
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	public static float MaxViewDst;
-	public static float WorldTerrainChunkSize;
-	
 	public static event Action CompleteMeshGenerationEvent;
-
 	
-	static Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
-	static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
-	static readonly List<TerrainChunk> SurrounderTerrainChunks = new List<TerrainChunk>();
+	private static Dictionary<int2, TerrainChunk> _terrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
+	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
+	private static readonly List<TerrainChunk> SurrounderTerrainChunks = new List<TerrainChunk>();
+	private static float _worldTerrainChunkSize;
 	private Transform _transform;
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
@@ -34,6 +32,8 @@ public class LandscapeManager : MonoBehaviour
 	private int _lastLatitude;
 	[Range(-90, 90)]
 	private int _lastLongitude;
+
+	private BiomeManager _biomeManager;
 
 	public static LandscapeManager Instance;
 	public LODInfo[] detailLevels;
@@ -43,7 +43,9 @@ public class LandscapeManager : MonoBehaviour
 	public Material chunkMaterial;
 	public Viewer viewer;
 	public CullingMode culling;
-	void Awake()
+	public Texture2D[] biomesColorMaps;
+
+	private void Awake()
 	{
 		if (Instance == null)
 		{
@@ -55,18 +57,17 @@ public class LandscapeManager : MonoBehaviour
 		}
 	}
 
-	void Start()
+	private void Start()
 	{
-		
 		// GenerateSimpleTerrainChunk();
 		
 		_transform = transform;
 		_lastLatitude = initialLatitude + 90;
 		_lastLongitude = initialLongitude + 90;
-		
-		WorldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
+		_biomeManager = new BiomeManager(biomesColorMaps);
+		_worldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
 		MaxViewDst = detailLevels [^1].visibleDstThreshold * Scale;
-		ChunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / WorldTerrainChunkSize);
+		ChunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / _worldTerrainChunkSize);
 		// MaxViewDst = WorldTerrainChunkSize;
 		// TerrainChunk.Current = new TerrainChunk();
 		
@@ -74,7 +75,7 @@ public class LandscapeManager : MonoBehaviour
 		/**/
 	}
 
-	void Update() {
+	private void Update() {
 		
 		
 		if (viewer.PositionChanged()) {
@@ -90,12 +91,12 @@ public class LandscapeManager : MonoBehaviour
 		}
 	}
 
-	void LateUpdate()
+	private void LateUpdate()
 	{
 		CompleteMeshGenerationEvent?.Invoke();
 	}
 
-	void UpdateVisibleChunks() {
+	private void UpdateVisibleChunks() {
 
 		foreach (var visibleChunk in TerrainChunksVisibleLastUpdate)
 		{
@@ -105,8 +106,8 @@ public class LandscapeManager : MonoBehaviour
 		TerrainChunksVisibleLastUpdate.Clear();
 		SurrounderTerrainChunks.Clear();
 			
-		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / WorldTerrainChunkSize);
-		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / WorldTerrainChunkSize);
+		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / _worldTerrainChunkSize);
+		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / _worldTerrainChunkSize);
 		viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 		
 		for (int yOffset = -ChunksVisibleInViewDst; yOffset <= ChunksVisibleInViewDst; yOffset++) {
@@ -137,11 +138,11 @@ public class LandscapeManager : MonoBehaviour
 		{
 			Vector3 pos = chunk.PositionV3;
 
-			CullChunk(chunk, chunk.IsCulled(viewerForward));
+			CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
 		}
 	}
 	
-	private static void CullChunk(TerrainChunk chunk, bool isCulled, bool inDistance = true)
+	private static void CullChunkAndSetVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
 	{
 		var visible = inDistance;
 		if (Instance.culling == CullingMode.Layer)
@@ -150,7 +151,7 @@ public class LandscapeManager : MonoBehaviour
 				LayerMask.NameToLayer("Culled") : 
 				LayerMask.NameToLayer("Default");
 		}
-		else
+		else if(Instance.culling == CullingMode.Visbility)
 		{
 			visible = !isCulled && inDistance;
 		}
@@ -160,8 +161,6 @@ public class LandscapeManager : MonoBehaviour
 			TerrainChunksVisibleLastUpdate.Add(chunk);
 	}
 	
-	
-
 	//  
 	// public static void GenerateSimpleTerrainChunk()
 	// {
@@ -335,7 +334,7 @@ public class LandscapeManager : MonoBehaviour
 				}
 			}
 
-			CullChunk(this, IsCulled(Instance.viewer.ForwardV2.normalized), inDistance);
+			CullChunkAndSetVisibility(this, IsCulled(Instance.viewer.ForwardV2.normalized), inDistance);
 			
 		}
 
@@ -345,7 +344,7 @@ public class LandscapeManager : MonoBehaviour
 			if (_coord.Equals(Instance.viewer.ChunkCoord)) return false;
 
 			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
-			chunkCenter += chunkCenter.normalized * (WorldTerrainChunkSize / 2);
+			chunkCenter += chunkCenter.normalized * (_worldTerrainChunkSize / 2);
 			Vector2 chunkDirection = (chunkCenter - Instance.viewer.PositionV2).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
 			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
@@ -355,7 +354,6 @@ public class LandscapeManager : MonoBehaviour
 
 		public void SetVisible(bool visible) {
 			_meshObject.SetActive (visible);
-
 			// ChangeSubscriptionToMeshGeneration();
 		}
 
