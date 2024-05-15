@@ -10,8 +10,8 @@ using UnityEngine.Serialization;
 
 public class LandscapeManager : MonoBehaviour
 {
-	public const float Scale = 2.5f;
-	public const int TerrainChunkSize = 233;
+	public const float Scale = 5f;
+	public const int TerrainChunkSize = 17;
 	public static int ChunksVisibleInViewDst = 3;
 	// public const float ViewerMoveThresholdForChunkUpdate = 25f;
 	public const float ViewerMoveThresholdForChunkUpdate = (TerrainChunkSize - 1) * Scale;
@@ -42,6 +42,7 @@ public class LandscapeManager : MonoBehaviour
 	public TerrainParameters terrainParameters;
 	public Material chunkMaterial;
 	public Viewer viewer;
+	public CullingMode culling;
 	void Awake()
 	{
 		if (Instance == null)
@@ -64,8 +65,8 @@ public class LandscapeManager : MonoBehaviour
 		_lastLongitude = initialLongitude + 90;
 		
 		WorldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
-		MaxViewDst = detailLevels [^1].visibleDstThreshold;;
-		ChunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / (TerrainChunkSize - 1));
+		MaxViewDst = detailLevels [^1].visibleDstThreshold * Scale;
+		ChunksVisibleInViewDst = Mathf.RoundToInt(MaxViewDst / WorldTerrainChunkSize);
 		// MaxViewDst = WorldTerrainChunkSize;
 		// TerrainChunk.Current = new TerrainChunk();
 		
@@ -135,23 +136,29 @@ public class LandscapeManager : MonoBehaviour
 		foreach (TerrainChunk chunk in SurrounderTerrainChunks)
 		{
 			Vector3 pos = chunk.PositionV3;
-			bool isVisible = !chunk.IsCulled(viewerForward);
-			
-			// chunk.SetVisible(isVisible);
 
-			if (isVisible)
-			{
-				chunk.GameObject.layer = LayerMask.NameToLayer("Default");
-				// TerrainChunksVisibleLastUpdate.Add(chunk);
-			}
-			else
-			{
-				chunk.GameObject.layer = LayerMask.NameToLayer("Culled");
-			}
+			CullChunk(chunk, chunk.IsCulled(viewerForward));
 		}
 	}
 	
-	
+	private static void CullChunk(TerrainChunk chunk, bool isCulled, bool inDistance = true)
+	{
+		var visible = inDistance;
+		if (Instance.culling == CullingMode.Layer)
+		{
+			chunk.GameObject.layer = isCulled? 
+				LayerMask.NameToLayer("Culled") : 
+				LayerMask.NameToLayer("Default");
+		}
+		else
+		{
+			visible = !isCulled && inDistance;
+		}
+		
+		chunk.SetVisible(visible);
+		if (visible)
+			TerrainChunksVisibleLastUpdate.Add(chunk);
+	}
 	
 	
 
@@ -265,32 +272,36 @@ public class LandscapeManager : MonoBehaviour
 					}
 				}
 			}	
-			
 		}
-	
+
 
 		public void UpdateTerrainChunk()
 		{
 			float distFromViewer = _bounds.SqrDistance(Instance.viewer.PositionV3);
 			bool inDistance = distFromViewer <= (MaxViewDst * MaxViewDst);
 
-			if (inDistance){
-				
+			if (inDistance)
+			{
+
 				int lodIndex = 0;
-				
-				for (int i = 0; i < _detailLevels.Length - 1; i++) {
-					if (distFromViewer > _detailLevels [i].visibleDstThreshold) {
+
+				for (int i = 0; i < _detailLevels.Length - 1; i++)
+				{
+					if (distFromViewer > _detailLevels[i].visibleDstThreshold)
+					{
 						lodIndex = i + 1;
-					} else {
+					}
+					else
+					{
 						break;
 					}
 				}
-				
+
 				if (lodIndex != _lodIndex)
 				{
 					var lodMesh = _lodMeshes[lodIndex];
 					_lodIndex = lodIndex;
-					
+
 					if (lodMesh.HasMesh)
 					{
 						_meshFilter.mesh = lodMesh.Mesh;
@@ -303,35 +314,31 @@ public class LandscapeManager : MonoBehaviour
 					else
 					{
 						lodMesh.RequestMesh();
-						
+
 						if (lodIndex == 0)
 						{
 							_meshCollider.enabled = true;
-							if (_colliderMesh.HasMesh) {
+							if (_colliderMesh.HasMesh)
+							{
 								_meshCollider.sharedMesh = _colliderMesh.Mesh;
-							} else{
+							}
+							else
+							{
 								_colliderMesh.RequestMesh();
 							}
-						}else
+						}
+						else
 						{
 							_meshCollider.enabled = false;
 						}
 					}
 				}
 			}
-			
-			// bool visible = inDistance && !IsCulled(Instance.viewer.ForwardV2.normalized);
-			bool visible = inDistance;
-			SetVisible(visible);
-			if (visible)
-			{
-				TerrainChunksVisibleLastUpdate.Add(this);
-			}
 
-			var culled = IsCulled(Instance.viewer.ForwardV2.normalized)
-				? _meshObject.layer = LayerMask.NameToLayer("Culled")
-				: _meshObject.layer = LayerMask.NameToLayer("Default");
+			CullChunk(this, IsCulled(Instance.viewer.ForwardV2.normalized), inDistance);
+			
 		}
+
 
 		public bool IsCulled(Vector2 viewerForward)
 		{
@@ -416,4 +423,11 @@ public class LandscapeManager : MonoBehaviour
 		public float visibleDstThreshold;
 		public bool useForCollider;
 	}
+
+	public enum CullingMode
+	{
+		Layer,
+		Visbility
+	}
+
 }
