@@ -12,7 +12,6 @@ public enum NoiseType
 
 public static class NoiseGenerator
 {
-    // public static float MaxValue = 0f;
     public static float GetNoiseValue(float2 position, NoiseParameters parameters)
     {
         float maxPossibleHeight = 0;
@@ -43,13 +42,6 @@ public static class NoiseGenerator
             amplitude *= parameters.persistence;
             frequency *= parameters.lacunarity;
         }
-
-        // ReSharper disable once Unity.BurstLoadingStaticNotReadonly
-        // if (maxPossibleHeight > MaxValue)
-        // {
-        //     // ReSharper disable once Unity.BurstWriteStaticField
-        //     MaxValue = maxPossibleHeight;
-        // }
 
         float normalizedHeight = noiseHeight / (maxPossibleHeight / 0.9f);
         noiseHeight = Mathf.Clamp(normalizedHeight, 0, maxPossibleHeight);

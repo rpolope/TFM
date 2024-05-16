@@ -5,11 +5,19 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
-public static class MapGenerator
+public class MapGenerator : MonoBehaviour
 {
-    private const int MapSize = 241;
+    private const int MapSize = 129;
+    
+    public bool autoUpdate = true;
+    public DrawMode drawMode;
+    public TerrainParameters mapParameters;
+    [Header("Biomes Params")]
+    public BiomesParameters biomeParameters;
 
     private static Climate[] _regions = new[]
     {
@@ -28,7 +36,6 @@ public static class MapGenerator
     {
         [NativeDisableParallelForRestriction] 
         public NativeArray<float> Map;
-        // public int MapSize;
         public float2 Centre;
         public NoiseParameters Parameters;
 
@@ -45,26 +52,34 @@ public static class MapGenerator
         }
     }
     
-    private static MapData GenerateMapData(NoiseParameters parameters, Biome[] regions) {
-        // float[,] noiseMap = NoiseGenerator.GenerateNoiseMap(MapSize, parameters);
-        float[] noiseMap = GenerateMap(MapSize, new float2(),parameters);
+    public MapData GenerateMapData() {
 
-        Color[] colourMap = new Color[MapSize * MapSize];
+        float[] noiseMap = GenerateMap(MapSize, new float2(), mapParameters.noiseParameters);
+        
+        BiomeManager biomeManager = new BiomeManager(biomeParameters);
+        Color[] colorMap = GenerateColorMap(noiseMap, biomeManager.Biomes);
+	
+        return new MapData (noiseMap, colorMap);
+    }
+
+    private static Color[] GenerateColorMap(float[] noiseMap, Biome[] biomes)
+    {
+        Color[] colorMap = new Color[MapSize * MapSize];
         for (int y = 0; y < MapSize; y++) {
             for (int x = 0; x < MapSize; x++)
             {
                 float currentHeight = noiseMap [x + y * MapSize];
-                foreach (var region in regions)
+                
+                foreach (var biome in biomes)
                 {
-                    if (currentHeight > region.Elevation) continue;
-                    colourMap [y * MapSize + x] = region.Color;
+                    if (currentHeight > biome.Elevation) continue;
+                    colorMap [y * MapSize + x] = BiomeManager.GetColorFromBiome(biome);
                     break;
                 }
             }
         }
 
-	
-        return new MapData (noiseMap, colourMap);
+        return colorMap;
     }
 
     public static float[] GenerateMap(int mapSize, float2 centre, NoiseParameters parameters)
@@ -74,7 +89,6 @@ public static class MapGenerator
         var generateMapJob = new GenerateMapJob()
         {
             Map = map,
-            // MapSize = mapSize,
             Centre = centre,
             Parameters = parameters
         };
@@ -86,35 +100,10 @@ public static class MapGenerator
         
         return mapArray;
     }
-    
-    public static void DrawMapInEditor(MapDisplay display, DrawMode drawMode, TerrainParameters terrainParameters)
-    {
-        Climate[] regions = terrainParameters.biomesParameters.climates;
-        Biome[] biomes = new Biome[regions.Length];
-
-        for(int i = 0; i < biomes.Length; i++)
-        {
-            biomes[i] = BiomeManager.GetBiomeFromClimate(regions[i]);
-        }
-        
-        var mapData = GenerateMapData(terrainParameters.noiseParameters, biomes);
-        
-        if (drawMode == DrawMode.NoiseMap) {
-            display.DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap));
-        } else if (drawMode == DrawMode.ColourMap) {
-            display.DrawTexture (TextureGenerator.TextureFromColourMap (mapData.ColourMap, MapSize));
-        } else if (drawMode == DrawMode.Mesh)
-        {
-            var meshData = new MeshData(MapSize, 0);
-            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, MapSize, 1, new float2(), 0,ref meshData).Complete();
-            
-            display.DrawMesh (meshData, TextureGenerator.TextureFromColourMap (mapData.ColourMap, MapSize));
-        }
-    }
 }
 public struct MapData {
-    public readonly float[] HeightMap;
-    public readonly Color[] ColourMap;
+    public float[] HeightMap;
+    public Color[] ColourMap;
 
     public MapData (float[] heightMap, Color[] colourMap)
     {
@@ -122,9 +111,4 @@ public struct MapData {
         ColourMap = colourMap;
     }
 }
-public enum DrawMode
-{
-    NoiseMap,
-    ColourMap,
-    Mesh
-}
+

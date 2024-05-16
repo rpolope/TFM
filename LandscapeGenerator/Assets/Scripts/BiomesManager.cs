@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public enum Climate {
@@ -23,14 +24,18 @@ public enum Climate {
 
 public class BiomeManager
 {
+    public Biome[] Biomes;
     private static Texture2D[] _colorMaps;
-
-    private Biome[] _biomes;
-
-    public BiomeManager(Texture2D[] colorMaps)
+    
+    public BiomeManager(BiomesParameters biomesParameters)
     {
-        _colorMaps = colorMaps;
-        _biomes = new Biome[Enum.GetValues(typeof(Climate)).Length];
+        var parameters = biomesParameters;
+        _colorMaps = parameters.colorMaps;
+        Biomes = new Biome[parameters.climates.Length];
+        for(int i = 0; i < Biomes.Length; i++)
+        {
+            Biomes[i] = GetBiomeFromClimate(parameters.climates[i]);
+        }
     }
 
     public static Climate GetClimateFromBiome(Biome biome)
@@ -68,10 +73,11 @@ public class BiomeManager
             }
         };
     }
-    
-    public static Biome GetBiomeFromClimate(Climate climate)
+
+    private static Biome GetBiomeFromClimate(Climate climate)
     {
         Biome biome = new Biome(0,0);
+        biome.Climate = climate;
         
         switch (climate)
         {
@@ -150,6 +156,8 @@ public class BiomeManager
                 biome.Moisture = UnityEngine.Random.Range(0.66f, 1f);
                 biome.Color = GetColorFromBiome(biome);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(climate), climate, null);
         }
 
         return biome;
@@ -157,7 +165,11 @@ public class BiomeManager
 
     public static Color GetColorFromBiome(Biome biome)
     {
-        return _colorMaps[0].GetPixel((int)biome.Elevation, (int)biome.Moisture);
+        int2 dimension = new int2(_colorMaps[0].width, _colorMaps[0].height);
+        int x = (int)(biome.Moisture * dimension.x);
+        int y = (int)(biome.Elevation * dimension.y);
+        
+        return _colorMaps[0].GetPixel(x, y);
     }
 }
 
@@ -170,7 +182,7 @@ public class Biome
     public float Moisture;
     public Color Color;
     public Climate Climate;
-
+    
     public Biome(float elevation, float moisture)
     {
         Elevation = elevation;

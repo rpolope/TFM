@@ -84,7 +84,6 @@ public static class MeshGenerator
             Scale = scale,
             LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters
-            
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         

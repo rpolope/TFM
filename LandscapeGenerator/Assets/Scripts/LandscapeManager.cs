@@ -24,7 +24,7 @@ public class LandscapeManager : MonoBehaviour{
 
 	private BiomeManager _biomeManager;
 	
-	public const float Scale = 5f;
+	public const float Scale = 1f;
 	public const float ViewerRotateThresholdForChunkUpdate = 20f;
 	public const float AngleThresholdForChunkCulling = 120f; 
 	public const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
@@ -36,10 +36,10 @@ public class LandscapeManager : MonoBehaviour{
 	public int initialLatitude = 0;
 	public int initialLongitude = 0;
 	public TerrainParameters terrainParameters;
+	public BiomesParameters biomesParameters;
 	public Material chunkMaterial;
 	public Viewer viewer;
 	public CullingMode culling;
-	public Texture2D[] biomesColorMaps;
 
 	private void Awake()
 	{
@@ -60,7 +60,7 @@ public class LandscapeManager : MonoBehaviour{
 		_transform = transform;
 		_lastLatitude = initialLatitude + 90;
 		_lastLongitude = initialLongitude + 90;
-		_biomeManager = new BiomeManager(biomesColorMaps);
+		_biomeManager = new BiomeManager(biomesParameters);
 		_worldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
 		
 		MaxViewDst = 0;
