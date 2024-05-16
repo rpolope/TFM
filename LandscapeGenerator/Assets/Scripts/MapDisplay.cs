@@ -1,8 +1,5 @@
-using System;
 using UnityEngine;
-using System.Collections;
 using Unity.Mathematics;
-using UnityEditor;
 
 public enum DrawMode
 {
@@ -12,18 +9,18 @@ public enum DrawMode
 }
 public static class MapDisplay{
     
-    public static Renderer textureRender;
-    public static MeshFilter meshFilter;
-    public static MeshRenderer meshRenderer;
-    
-    public static void DrawTexture(Texture2D texture) {
-        textureRender.sharedMaterial.mainTexture = texture;
-        textureRender.transform.localScale = new Vector3 (texture.width, 1, texture.height);
+    public static Renderer TextureRender;
+    public static MeshFilter MeshFilter;
+    public static MeshRenderer MeshRenderer;
+
+    private static void DrawTexture(Texture2D texture) {
+        TextureRender.sharedMaterial.mainTexture = texture;
+        TextureRender.transform.localScale = new Vector3 (texture.width, 1, texture.height);
     }
 
-    public static void DrawMesh(MeshData meshData, Texture2D texture) {
-        meshFilter.sharedMesh = meshData.CreateMesh ();
-        meshRenderer.sharedMaterial.mainTexture = texture;
+    private static void DrawMesh(MeshData meshData, Texture2D texture) {
+        MeshFilter.sharedMesh = meshData.CreateMesh ();
+        MeshRenderer.sharedMaterial.mainTexture = texture;
     }
     
     public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters)
@@ -33,13 +30,11 @@ public static class MapDisplay{
         if (drawMode == DrawMode.NoiseMap) {
             DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap));
         } else if (drawMode == DrawMode.ColorMap) {
-            DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColourMap, mapSize));
-        } else if (drawMode == DrawMode.Mesh)
-        {
+            DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColorMap, mapSize));
+        } else if (drawMode == DrawMode.Mesh) {
             var meshData = new MeshData(mapSize, 0);
             MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(), 0,ref meshData).Complete();
-            
-            DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColourMap, mapSize));
+            DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap, mapSize));
         }
     }
 }

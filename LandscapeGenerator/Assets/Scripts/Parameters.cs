@@ -46,9 +46,6 @@ public struct NoiseParameters
     [SerializeField, Min(0.001f)] 
     public float lacunarity;
     
-    // [SerializeField, Range(0, 1)]
-    // public float ridgeRoughness;
-    //
     [SerializeField, Range(0.1f, 10f)]
     public float ridgeRoughness;
 }

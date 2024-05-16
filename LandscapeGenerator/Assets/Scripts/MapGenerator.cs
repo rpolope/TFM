@@ -1,18 +1,11 @@
-using System.Buffers.Binary;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class MapGenerator : MonoBehaviour
 {
-    private const int MapSize = 129;
-    
     public bool autoUpdate = true;
     public DrawMode drawMode;
     public TerrainParameters mapParameters;
@@ -36,6 +29,7 @@ public class MapGenerator : MonoBehaviour
     {
         [NativeDisableParallelForRestriction] 
         public NativeArray<float> Map;
+        public int MapSize;
         public float2 Centre;
         public NoiseParameters Parameters;
 
@@ -54,7 +48,7 @@ public class MapGenerator : MonoBehaviour
     
     public MapData GenerateMapData() {
 
-        float[] noiseMap = GenerateMap(MapSize, new float2(), mapParameters.noiseParameters);
+        float[] noiseMap = GenerateMap(mapParameters.meshParameters.resolution, new float2(), mapParameters.noiseParameters);
         
         BiomeManager biomeManager = new BiomeManager(biomeParameters);
         Color[] colorMap = GenerateColorMap(noiseMap, biomeManager.Biomes);
@@ -64,18 +58,17 @@ public class MapGenerator : MonoBehaviour
 
     private static Color[] GenerateColorMap(float[] noiseMap, Biome[] biomes)
     {
-        Color[] colorMap = new Color[MapSize * MapSize];
-        for (int y = 0; y < MapSize; y++) {
-            for (int x = 0; x < MapSize; x++)
+        var mapSize = noiseMap.Length;
+        Color[] colorMap = new Color[mapSize];
+        for (int i = 0; i < mapSize; i++) {
+            
+            float currentHeight = noiseMap [i];
+            
+            foreach (var biome in biomes)
             {
-                float currentHeight = noiseMap [x + y * MapSize];
-                
-                foreach (var biome in biomes)
-                {
-                    if (currentHeight > biome.Elevation) continue;
-                    colorMap [y * MapSize + x] = BiomeManager.GetColorFromBiome(biome);
-                    break;
-                }
+                if (currentHeight > biome.Elevation) continue;
+                colorMap [i] = BiomeManager.GetColorFromBiome(biome);
+                break;
             }
         }
 
@@ -90,6 +83,7 @@ public class MapGenerator : MonoBehaviour
         {
             Map = map,
             Centre = centre,
+            MapSize = mapSize,
             Parameters = parameters
         };
         generateMapJob.Schedule( mapSize* mapSize, 3000).Complete();
@@ -103,12 +97,12 @@ public class MapGenerator : MonoBehaviour
 }
 public struct MapData {
     public float[] HeightMap;
-    public Color[] ColourMap;
+    public Color[] ColorMap;
 
-    public MapData (float[] heightMap, Color[] colourMap)
+    public MapData (float[] heightMap, Color[] colorMap)
     {
         HeightMap = heightMap;
-        ColourMap = colourMap;
+        ColorMap = colorMap;
     }
 }
 
