@@ -106,4 +106,18 @@ public static class NoiseGenerator
 
         return noiseValue;
     }
+
+    public static float[,] GenerateNoiseMap(int mapSize, NoiseParameters parameters)
+    {
+        var noiseMap = new float[mapSize, mapSize];
+
+        for (int i = 0; i < noiseMap.Length; i++)
+        {
+            int y = i / mapSize;
+            int x = i % mapSize;
+            noiseMap[x, y] = GetNoiseValue(new float2(x, y), parameters);
+        }
+
+        return noiseMap;
+    }
 }

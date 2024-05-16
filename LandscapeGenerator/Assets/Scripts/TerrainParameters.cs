@@ -12,6 +12,15 @@ public struct TerrainParameters
 
     [Header("Mesh")]
     public MeshParameters meshParameters;
+    
+    [Header("Biomes")]
+    public BiomesParameters biomesParameters;
+}
+[System.Serializable]
+public struct BiomesParameters
+{
+    // public Texture2D[] lookupMaps;
+    public Climate[] climates;
 }
 
 [System.Serializable]

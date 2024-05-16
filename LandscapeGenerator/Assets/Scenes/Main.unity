@@ -242,13 +242,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 797567965}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 80, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 963194228}
-  m_Father: {fileID: 1916827186}
+  m_Father: {fileID: 1462233068}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &797567967
 MonoBehaviour:
@@ -386,7 +386,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 797567966}
   m_Father: {fileID: 1916827186}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1462233071
@@ -430,6 +431,8 @@ MonoBehaviour:
       heightScale: 1
       waterLevel: 0
       levelsOfDetail: 3
+    biomesParameters:
+      climates: 
   chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
   viewer: {fileID: 797567967}
   culling: 0
@@ -515,13 +518,162 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 797567966}
   - {fileID: 705507995}
   - {fileID: 1462233068}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &8751225986432495322
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1492341647542716721, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
+    - target: {fileID: 6162215488803214256, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_Name
+      value: MapDisplay
+      objectReference: {fileID: 0}
+    - target: {fileID: 6711262025940102053, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.seed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.scale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.octaves
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.meshParameters.resolution
+      value: 129
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.amplitude
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.frequency
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.meshParameters.heightScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.lacunarity
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.persistence
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.meshParameters.levelsOfDetail
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.noiseParameters.ridgeRoughness
+      value: 4.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.lookupMaps.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[1]
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[2]
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[3]
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[4]
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[5]
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.climates.Array.data[6]
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.lookupMaps.Array.data[0]
+      value: 
+      objectReference: {fileID: 2800000, guid: 4a1398514144b9c4eb4a524e16e347da, type: 3}
+    - target: {fileID: 7709532008401454975, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: mapParameters.biomesParameters.lookupMaps.Array.data[1]
+      value: 
+      objectReference: {fileID: 2800000, guid: 93f22736ec754f74f8e22719b604ae1f, type: 3}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 68.40273
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 83.053024
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 406.78754
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8814950926989840772, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 409318e3db7b3da438e28bb99fc902d9, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1916827186}
+  - {fileID: 8751225986432495322}
