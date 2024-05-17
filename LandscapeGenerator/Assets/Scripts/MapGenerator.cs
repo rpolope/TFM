@@ -48,15 +48,15 @@ public class MapGenerator : MonoBehaviour
     
     public MapData GenerateMapData() {
 
+        BiomeManager.Initialize();
         float[] noiseMap = GenerateMap(mapParameters.meshParameters.resolution, new float2(), mapParameters.noiseParameters);
         
-        BiomeManager biomeManager = new BiomeManager(biomeParameters);
-        Color[] colorMap = GenerateColorMap(noiseMap, biomeManager.Biomes);
+        Color[] colorMap = GenerateColorMap(noiseMap);
 	
         return new MapData (noiseMap, colorMap);
     }
 
-    private static Color[] GenerateColorMap(float[] noiseMap, Biome[] biomes)
+    private static Color[] GenerateColorMap(float[] noiseMap)
     {
         var mapSize = noiseMap.Length;
         Color[] colorMap = new Color[mapSize];
@@ -64,7 +64,7 @@ public class MapGenerator : MonoBehaviour
             
             float currentHeight = noiseMap [i];
             
-            foreach (var biome in biomes)
+            foreach (var biome in BiomeManager.Biomes)
             {
                 if (currentHeight > biome.Elevation) continue;
                 colorMap [i] = BiomeManager.GetColorFromBiome(biome);

@@ -24,12 +24,13 @@ public enum Climate {
 
 public class BiomeManager
 {
-    public Biome[] Biomes;
+    public static Biome[] Biomes;
     private static Texture2D[] _colorMaps;
-    
-    public BiomeManager(BiomesParameters biomesParameters)
+    private static readonly string[] LookupMapNames = { "biome-lookup-discrete", "biome-lookup-smooth" };
+
+    public static void Initialize()
     {
-        var parameters = biomesParameters;
+        var parameters = new BiomesParameters(LookupMapNames);
         _colorMaps = parameters.colorMaps;
         Biomes = new Biome[parameters.climates.Length];
         for(int i = 0; i < Biomes.Length; i++)

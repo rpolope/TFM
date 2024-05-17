@@ -21,7 +21,6 @@ public static class MeshGenerator
         public float2 Center;
         public int LODScale;
 
-
         public void Execute(int index)
         {
             int x = index % Resolution;

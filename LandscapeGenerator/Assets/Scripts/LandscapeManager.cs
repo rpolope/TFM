@@ -12,7 +12,7 @@ public class LandscapeManager : MonoBehaviour{
 	private static int _chunksVisibleInViewDst = 3;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
-	private static readonly List<TerrainChunk> SurrounderTerrainChunks = new List<TerrainChunk>();
+	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private static float _worldTerrainChunkSize;
 	private Transform _transform;
 	private MeshRenderer _meshRenderer;
@@ -21,8 +21,6 @@ public class LandscapeManager : MonoBehaviour{
 	private int _lastLatitude;
 	[Range(-90, 90)]
 	private int _lastLongitude;
-
-	private BiomeManager _biomeManager;
 	
 	public const float Scale = 1f;
 	public const float ViewerRotateThresholdForChunkUpdate = 20f;
@@ -55,12 +53,12 @@ public class LandscapeManager : MonoBehaviour{
 
 	private void Start()
 	{
-		// GenerateSimpleTerrainChunk();
+		BiomeManager.Initialize();
 		
 		_transform = transform;
 		_lastLatitude = initialLatitude + 90;
 		_lastLongitude = initialLongitude + 90;
-		_biomeManager = new BiomeManager(biomesParameters);
+		
 		_worldTerrainChunkSize = (TerrainChunkSize - 1) * Scale;
 		
 		MaxViewDst = 0;
@@ -106,7 +104,7 @@ public class LandscapeManager : MonoBehaviour{
 		}
 		
 		TerrainChunksVisibleLastUpdate.Clear();
-		SurrounderTerrainChunks.Clear();
+		SurroundTerrainChunks.Clear();
 			
 		int currentChunkCoordX = Mathf.RoundToInt (viewer.PositionV2.x / (TerrainChunkSize - 1));
 		int currentChunkCoordY = Mathf.RoundToInt (viewer.PositionV2.y / (TerrainChunkSize - 1));
@@ -120,13 +118,13 @@ public class LandscapeManager : MonoBehaviour{
 				if (TerrainChunkDictionary.TryGetValue(viewedChunkCoord, out var value))
 				{
 					chunk = value;
-					SurrounderTerrainChunks.Add(chunk);
+					SurroundTerrainChunks.Add(chunk);
 					chunk.Update ();
 				} else
 				{
 					chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkSize, _transform, chunkMaterial);
 					TerrainChunkDictionary.Add(viewedChunkCoord, chunk);
-					SurrounderTerrainChunks.Add(chunk);
+					SurroundTerrainChunks.Add(chunk);
 				}
 				
 				if (chunk.IsVisible())
@@ -141,7 +139,7 @@ public class LandscapeManager : MonoBehaviour{
 	void UpdateCulledChunks()
 	{
 		Vector2 viewerForward = viewer.ForwardV2.normalized;
-		foreach (TerrainChunk chunk in SurrounderTerrainChunks)
+		foreach (TerrainChunk chunk in SurroundTerrainChunks)
 		{
 			CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
 		}
@@ -156,7 +154,7 @@ public class LandscapeManager : MonoBehaviour{
 				LayerMask.NameToLayer("Culled") : 
 				LayerMask.NameToLayer("Default");
 		}
-		else if(Instance.culling == CullingMode.Visbility)
+		else if(Instance.culling == CullingMode.Visibility)
 		{
 			visible = !isCulled && inDistance;
 		}
@@ -358,7 +356,6 @@ public class LandscapeManager : MonoBehaviour{
 		public bool IsVisible() {
 			return GameObject.activeSelf;
 		}
-
 	}
 
 	private class LODMesh {
@@ -410,6 +407,6 @@ public class LandscapeManager : MonoBehaviour{
 	public enum CullingMode
 	{
 		Layer,
-		Visbility
+		Visibility
 	}
 }
