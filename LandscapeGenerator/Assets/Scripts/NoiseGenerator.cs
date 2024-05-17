@@ -57,7 +57,7 @@ public static class NoiseGenerator
         return 2 * (0.5f - Mathf.Abs(0.5f - Mathf.PerlinNoise(sample.x, sample.y)));
     }
 
-    public static float GetOctavedRidgeNoise(float2 sample, NoiseParameters parameters)
+    public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters)
     {
         float ampl = parameters.amplitude;
         float freq = parameters.frequency;

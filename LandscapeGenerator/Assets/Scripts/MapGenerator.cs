@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -11,6 +13,8 @@ public class MapGenerator : MonoBehaviour
     public TerrainParameters mapParameters;
     [Header("Biomes Params")]
     public BiomesParameters biomeParameters;
+
+    public static MapGenerator Instance;
 
     private static Climate[] _regions = new[]
     {
@@ -40,16 +44,43 @@ public class MapGenerator : MonoBehaviour
             
             float2 pos = new float2(x, y) + Centre;
 
-            float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
-
+            // float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
+            float value = GenerateHeight(pos);
+            
             Map[threadIndex] = value;
         }
-    }
-    
-    public MapData GenerateMapData() {
+        
+        private float GenerateHeight(float2 samplePos)
+        {
+            float ridgedFactor = Parameters.ridgeness;
+            // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            
+            float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, Parameters);
+            noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, Parameters);
+            
+            if (ridgedFactor > 0)
+                noiseValue = Mathf.Pow(noiseValue, Parameters.ridgeRoughness);
 
-        BiomeManager.Initialize();
-        float[] noiseMap = GenerateMap(mapParameters.meshParameters.resolution, new float2(), mapParameters.noiseParameters);
+            return noiseValue;
+        }
+    }
+
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(Instance);
+        }
+    }
+
+    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters) {
+
+        float[] noiseMap = GenerateNoiseMap(resolution, new float2(), parameters);
         
         Color[] colorMap = GenerateColorMap(noiseMap);
 	
@@ -58,6 +89,8 @@ public class MapGenerator : MonoBehaviour
 
     private static Color[] GenerateColorMap(float[] noiseMap)
     {
+        BiomeManager.Initialize();
+        
         var mapSize = noiseMap.Length;
         Color[] colorMap = new Color[mapSize];
         for (int i = 0; i < mapSize; i++) {
@@ -75,7 +108,7 @@ public class MapGenerator : MonoBehaviour
         return colorMap;
     }
 
-    public static float[] GenerateMap(int mapSize, float2 centre, NoiseParameters parameters)
+    public static float[] GenerateNoiseMap(int mapSize, float2 centre, NoiseParameters parameters)
     {
         NativeArray<float> map = new NativeArray<float>(mapSize * mapSize, Allocator.TempJob);
         
@@ -88,7 +121,7 @@ public class MapGenerator : MonoBehaviour
         };
         generateMapJob.Schedule( mapSize* mapSize, 3000).Complete();
 
-        float[] mapArray = new float[mapSize * mapSize];
+        var mapArray = new float[mapSize* mapSize];
         map.CopyTo(mapArray);
         map.Dispose();
         
@@ -96,13 +129,19 @@ public class MapGenerator : MonoBehaviour
     }
 }
 public struct MapData {
-    public float[] HeightMap;
-    public Color[] ColorMap;
+    public NativeArray<float> HeightMap;
+    public NativeArray<Color> ColorMap;
 
     public MapData (float[] heightMap, Color[] colorMap)
     {
-        HeightMap = heightMap;
-        ColorMap = colorMap;
+        HeightMap = new NativeArray<float>(heightMap, Allocator.Persistent);
+        ColorMap = new NativeArray<Color>(colorMap, Allocator.Persistent);;
+    }
+
+    public void Dispose()
+    {
+        HeightMap.Dispose();
+        ColorMap.Dispose();
     }
 }
 

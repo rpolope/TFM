@@ -57,7 +57,7 @@ public static class MeshGenerator
             float ridgedFactor = 0.85f;
             // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
             float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            noiseValue += ridgedFactor * NoiseGenerator.GetOctavedRidgeNoise(samplePos, TerrainParameters.noiseParameters);
+            noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
             
             if (ridgedFactor > 0)
                 noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);

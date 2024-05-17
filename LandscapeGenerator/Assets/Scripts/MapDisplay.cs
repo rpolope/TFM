@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
 
@@ -28,13 +29,13 @@ public static class MapDisplay{
         var mapSize = terrainParameters.meshParameters.resolution;
         
         if (drawMode == DrawMode.NoiseMap) {
-            DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap));
+            DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap.ToArray()));
         } else if (drawMode == DrawMode.ColorMap) {
-            DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColorMap, mapSize));
+            DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         } else if (drawMode == DrawMode.Mesh) {
             var meshData = new MeshData(mapSize, 0);
             MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(), 0,ref meshData).Complete();
-            DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap, mapSize));
+            DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         }
     }
 }
