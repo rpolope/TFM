@@ -172,6 +172,15 @@ public class BiomeManager
         
         return _colorMaps[0].GetPixel(x, y);
     }
+    
+    public static Color GetColorFromBiome(float elevation, float moisture)
+    {
+        int2 dimension = new int2(_colorMaps[0].width, _colorMaps[0].height);
+        int x = (int)(moisture * dimension.x);
+        int y = (int)(elevation * dimension.y);
+        
+        return _colorMaps[0].GetPixel(x, y);
+    }
 }
 
 public class Biome

@@ -161,48 +161,6 @@ public class LandscapeManager : MonoBehaviour{
 		
 		chunk.SetVisible(visible);
 	}
-	
-	//  
-	// public static void GenerateSimpleTerrainChunk()
-	// {
-	// 	Instance._meshFilter ??= Instance.GetComponent<MeshFilter>();
-	// 	Instance._meshRenderer ??= Instance.GetComponent<MeshRenderer>();
-	//
-	// 	MeshData meshData = new MeshData(Instance.terrainParameters.meshParameters.resolution, 0);
-	// 	
-	// 	Mesh mesh = MeshGenerator.RequestMesh(Instance.terrainParameters, Instance.terrainParameters.meshParameters.resolution, Scale, new float2(), 0, meshData);
-	// 	Instance._meshFilter.sharedMesh = mesh;
-	//
-	// 	Texture2D heightTexture = GenerateHeightTexture(mesh);
-	//
-	// 	Material material = new Material(Shader.Find("Standard"));
-	// 	material.mainTexture = heightTexture;
-	// 	Instance._meshRenderer.sharedMaterial = material;
-	// }
-
-	// private static Texture2D GenerateHeightTexture(Mesh mesh)
-	// {
-	// 	Vector3[] vertices = mesh.vertices;
-	// 	Texture2D texture = new Texture2D(Instance.terrainParameters.meshParameters.resolution, Instance.terrainParameters.meshParameters.resolution);
-	//
-	// 	for (int i = 0; i < vertices.Length; i++)
-	// 	{
-	// 		int y = i / Instance.terrainParameters.meshParameters.resolution;
-	// 		int x = i % Instance.terrainParameters.meshParameters.resolution;
-	// 		
-	// 		float height = vertices[i].y;
-	// 		float normalizedHeight = Mathf.Lerp(0, NoiseGenerator.MaxValue * Scale * Instance.terrainParameters.meshParameters.heightScale, height);
-	//
-	// 		texture.SetPixel(x, y, new Color(normalizedHeight, normalizedHeight, normalizedHeight));
-	// 	}
-	//
-	// 	texture.Apply();
-	// 	byte[] pngData = texture.EncodeToPNG();
-	//
-	// 	System.IO.File.WriteAllBytes("./Assets/Textures/savedTexture.png", pngData);
-	//
-	// 	return texture;
-	// }
 
 	private class TerrainChunk
 	{
@@ -219,19 +177,22 @@ public class LandscapeManager : MonoBehaviour{
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
+		private TerrainChunk[,] _neighbors;
 		
 		public float2 Position => _position;
 		public GameObject GameObject { get; }
+		public bool NeighborsFilled => (_neighbors.Length == 4);
 
 		public TerrainChunk(int2 coord, int size, Transform parent, Material material)
 		{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
-			
+			GameObject = new GameObject("TerrainChunk");
+
 			_coord = coord;
 			_position = (size - 1) * coord;
 			_positionV3 = new Vector3(_position.x,0,_position.y) * Scale;
-
-			GameObject = new GameObject("TerrainChunk");
+			_neighbors = new TerrainChunk[2, 2];
+			
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 			meshRenderer.material = material;
@@ -317,6 +278,13 @@ public class LandscapeManager : MonoBehaviour{
 			
 		}
 
+		public void SetNeighbor(TerrainChunk neighbor)
+		{
+			int x = (neighbor._coord - _coord).x % 180;
+			int y = (neighbor._coord - _coord).y % 180;
+
+			_neighbors[x, y] = neighbor;
+		}
 		public bool IsCulled(Vector2 viewerForward)
 		{
 			if (_coord.Equals(Viewer.ChunkCoord)) return false;
@@ -329,7 +297,10 @@ public class LandscapeManager : MonoBehaviour{
 
 			return dot < 0 && chunkAngle > Instance.viewer.FOV;
 		}
-
+		
+		public bool IsVisible() {
+			return GameObject.activeSelf;
+		}
 		public void SetVisible(bool visible) {
 			GameObject.SetActive (visible);
 		}
@@ -353,9 +324,7 @@ public class LandscapeManager : MonoBehaviour{
 			}	
 		}
 
-		public bool IsVisible() {
-			return GameObject.activeSelf;
-		}
+		
 	}
 
 	private class LODMesh {

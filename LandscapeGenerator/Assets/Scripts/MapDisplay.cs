@@ -26,12 +26,13 @@ public static class MapDisplay{
     
     public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters, GameObject canvas)
     {
-        var mapSize = terrainParameters.meshParameters.resolution;
+        // var mapSize = terrainParameters.meshParameters.resolution;
         TextureRender = MeshRenderer = canvas.GetComponent<MeshRenderer>();
         MeshFilter = canvas.GetComponent<MeshFilter>();
+        var mapSize = MapGenerator.MapSize;
         
         if (drawMode == DrawMode.NoiseMap) {
-            DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap.ToArray()));
+            DrawTexture (TextureGenerator.TextureFromHeightMap (mapData.HeightMap.ToArray(), mapSize));
         } else if (drawMode == DrawMode.ColorMap) {
             DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         } else if (drawMode == DrawMode.Mesh) {
@@ -40,5 +41,7 @@ public static class MapDisplay{
             MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(center.x, center.z), 0,ref meshData).Complete();
             DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         }
+
+        
     }
 }

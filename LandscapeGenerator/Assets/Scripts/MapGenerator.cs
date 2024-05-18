@@ -23,6 +23,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] canvasObjects;
     
     public static MapGenerator Instance;
+    public static int MapSize = 1024;
 
     private static Climate[] _regions = new[]
     {
@@ -89,10 +90,12 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams) {
-
-        float[] noiseMap = GenerateNoiseMap(resolution, centre, heightMapParams);
-        float[] moistureMap = GenerateNoiseMap(resolution, centre, moistureMapParams);
+    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams)
+    {
+        BiomeManager.Initialize();
+        // resolution = 1024;
+        float[] noiseMap = GenerateNoiseMap(MapSize, centre, heightMapParams);
+        float[] moistureMap = GenerateNoiseMap(MapSize, centre, moistureMapParams);
         
         Color[] colorMap = GenerateColorMap(noiseMap, moistureMap);
 	
@@ -108,8 +111,15 @@ public class MapGenerator : MonoBehaviour
             float height = heightMap [i];
             float moisture = moistureMap [i];
 
-            Biome biome = new Biome(height, moisture);
-            colorMap[i] = biome.Color;
+            Color color = Color.Lerp(Color.red, Color.blue, moisture);
+            color *= height;
+
+            color = Color.Lerp(Color.black, Color.white, height);
+            colorMap[i] = color;
+            // Biome biome = new Biome(height, moisture);
+            // colorMap[i] = biome.Color;
+
+            // colorMap[i] = BiomeManager.GetColorFromBiome(height, moisture);
         }
 
         return colorMap;
@@ -155,7 +165,7 @@ public class MapGenerator : MonoBehaviour
                     canvasObjects[i * batchesNumber + j].transform.position.z);
                 mapData.HeightMap =
                     new NativeArray<float>(GenerateNoiseMap(resolution, centre, heightMapParameters),Allocator.Temp);
-                MapDisplay.DrawMapInEditor(DrawMode.NoiseMap, mapData, new TerrainParameters(heightMapParameters, new MeshParameters(0f)), canvasObjects[i * batchesNumber + j]);
+                MapDisplay.DrawMapInEditor(DrawMode.NoiseMap, mapData, new TerrainParameters(heightMapParameters, new MeshParameters(0.1f)), canvasObjects[i * batchesNumber + j]);
             }
         }
     }
