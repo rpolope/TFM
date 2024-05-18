@@ -10,20 +10,18 @@ namespace Editor
 		public override void OnInspectorGUI() {
 
 			MapGenerator mapGenerator = (MapGenerator)target;
-			MapDisplay.MeshFilter = mapGenerator.gameObject.GetComponent<MeshFilter>();
-			MapDisplay.MeshRenderer = mapGenerator.gameObject.GetComponent<MeshRenderer>();
-			MapDisplay.TextureRender = mapGenerator.gameObject.GetComponent<Renderer>();
 		
 			if (DrawDefaultInspector ()) {
 				if (mapGenerator.autoUpdate) {
-					var mapData = MapGenerator.GenerateMapData(mapGenerator.mapParameters.meshParameters.resolution, new float2(), mapGenerator.mapParameters.noiseParameters);
-					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.mapParameters);
+					var mapData = MapGenerator.GenerateMapData(mapGenerator.meshParameters.resolution, new float2(), mapGenerator.heightMapParameters, mapGenerator.moistureMapParameters);
+					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, new MeshParameters(0f)), mapGenerator.gameObject);
 				}
 			}
 
 			if (GUILayout.Button ("Generate")) {
-				var mapData = MapGenerator.GenerateMapData(mapGenerator.mapParameters.meshParameters.resolution, new float2(), mapGenerator.mapParameters.noiseParameters);
-				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.mapParameters);		
+				var mapData = MapGenerator.GenerateMapData(mapGenerator.meshParameters.resolution, new float2(), mapGenerator.heightMapParameters, mapGenerator.moistureMapParameters);
+				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, new MeshParameters(0f)), mapGenerator.gameObject);
+				// mapGenerator.GenerateWorldNoiseMap();
 			}
 		}
 	}

@@ -9,6 +9,12 @@ public struct TerrainParameters
 
     [Header("Mesh")]
     public MeshParameters meshParameters;
+
+    public TerrainParameters(NoiseParameters noiseParameters, MeshParameters meshParameters)
+    {
+        this.noiseParameters = noiseParameters;
+        this.meshParameters = meshParameters;
+    }
     
 }
 [System.Serializable]
@@ -89,4 +95,12 @@ public struct MeshParameters
     public float waterLevel;
     [Range(0,6)]
     public int levelsOfDetail;
+
+    public MeshParameters(float waterLevel)
+    {
+        resolution = 11;
+        heightScale = 1;
+        levelsOfDetail = 1;
+        this.waterLevel = waterLevel;
+    }
 }

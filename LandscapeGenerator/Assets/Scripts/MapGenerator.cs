@@ -1,19 +1,27 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {
     public bool autoUpdate = true;
     public DrawMode drawMode;
-    public TerrainParameters mapParameters;
+    [Header("HeightMap Parameters")]
+    public NoiseParameters heightMapParameters;
+    [Header("MoistureMap Parameters")]
+    public NoiseParameters moistureMapParameters;
+    [Header("Mesh Variables")]
+    public MeshParameters meshParameters;
     [Header("Biomes Params")]
     public BiomesParameters biomeParameters;
-
+    public GameObject[] canvasObjects;
+    
     public static MapGenerator Instance;
 
     private static Climate[] _regions = new[]
@@ -27,6 +35,9 @@ public class MapGenerator : MonoBehaviour
         Climate.SCORCHED,
         Climate.SNOW
     };
+
+    private Transform _transform;
+    private float[] _moistureMap;
     
     [BurstCompile]
     private struct GenerateMapJob : IJobParallelFor
@@ -78,37 +89,33 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters) {
+    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams) {
 
-        float[] noiseMap = GenerateNoiseMap(resolution, new float2(), parameters);
+        float[] noiseMap = GenerateNoiseMap(resolution, centre, heightMapParams);
+        float[] moistureMap = GenerateNoiseMap(resolution, centre, moistureMapParams);
         
-        Color[] colorMap = GenerateColorMap(noiseMap);
+        Color[] colorMap = GenerateColorMap(noiseMap, moistureMap);
 	
         return new MapData (noiseMap, colorMap);
     }
 
-    private static Color[] GenerateColorMap(float[] noiseMap)
+    private static Color[] GenerateColorMap(float[] heightMap, float[] moistureMap)
     {
-        BiomeManager.Initialize();
-        
-        var mapSize = noiseMap.Length;
+        var mapSize = heightMap.Length;
         Color[] colorMap = new Color[mapSize];
         for (int i = 0; i < mapSize; i++) {
             
-            float currentHeight = noiseMap [i];
-            
-            foreach (var biome in BiomeManager.Biomes)
-            {
-                if (currentHeight > biome.Elevation) continue;
-                colorMap [i] = BiomeManager.GetColorFromBiome(biome);
-                break;
-            }
+            float height = heightMap [i];
+            float moisture = moistureMap [i];
+
+            Biome biome = new Biome(height, moisture);
+            colorMap[i] = biome.Color;
         }
 
         return colorMap;
     }
 
-    public static float[] GenerateNoiseMap(int mapSize, float2 centre, NoiseParameters parameters)
+    private static float[] GenerateNoiseMap(int mapSize, float2 centre, NoiseParameters parameters)
     {
         NativeArray<float> map = new NativeArray<float>(mapSize * mapSize, Allocator.TempJob);
         
@@ -127,6 +134,57 @@ public class MapGenerator : MonoBehaviour
         
         return mapArray;
     }
+
+    public void GenerateWorldNoiseMap()
+    {
+        const int batchesNumber = 18;
+        const int terrainChunksBatches = 10;
+        float worldTerrainChunkSize = (meshParameters.resolution - 1) * LandscapeManager.Scale;
+        float distanceBetweenBatches = terrainChunksBatches * worldTerrainChunkSize;
+
+        var mapData = new MapData();
+        int resolution = meshParameters.resolution * terrainChunksBatches;
+        _transform = transform;
+        canvasObjects = InstantiateCanvasObjects(worldTerrainChunkSize, batchesNumber);
+        
+        for (int i = 0; i < batchesNumber; i++)
+        {
+            for (int j = 0; j < batchesNumber; j++)
+            {
+                var centre = new float2(canvasObjects[i * batchesNumber + j].transform.position.x,
+                    canvasObjects[i * batchesNumber + j].transform.position.z);
+                mapData.HeightMap =
+                    new NativeArray<float>(GenerateNoiseMap(resolution, centre, heightMapParameters),Allocator.Temp);
+                MapDisplay.DrawMapInEditor(DrawMode.NoiseMap, mapData, new TerrainParameters(heightMapParameters, new MeshParameters(0f)), canvasObjects[i * batchesNumber + j]);
+            }
+        }
+    }
+
+    private GameObject[] InstantiateCanvasObjects(float distanceBetween, int instancesPerLine)
+    {
+        var canvas = new GameObject[instancesPerLine * instancesPerLine];
+        float2 pos = new float2();
+    
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+
+        for (int y = 0; y < instancesPerLine; y++)
+        {
+            for (int x = 0; x < instancesPerLine; x++)
+            {
+                pos.x = x * distanceBetween;
+                pos.y = y * distanceBetween;
+            
+                var canvasObj = Instantiate(go, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+                canvasObj.name = $"Plane{x},{y}";
+                canvasObj.transform.localScale = _transform.localScale;
+                canvas[y * instancesPerLine + x] = canvasObj;
+            }
+        }
+
+        DestroyImmediate(go);
+        return canvas;
+    }
+
 }
 public struct MapData {
     public NativeArray<float> HeightMap;
