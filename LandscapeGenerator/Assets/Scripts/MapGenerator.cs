@@ -23,7 +23,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] canvasObjects;
     
     public static MapGenerator Instance;
-    public static int MapSize = 1024;
+    public static int MapSize = 257;
 
     private static Climate[] _regions = new[]
     {
@@ -56,8 +56,8 @@ public class MapGenerator : MonoBehaviour
             
             float2 pos = new float2(x, y) + Centre;
 
-            // float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
-            float value = GenerateHeight(pos);
+            float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
+            // float value = GenerateHeight(pos);
             
             Map[threadIndex] = value;
         }
@@ -92,8 +92,6 @@ public class MapGenerator : MonoBehaviour
 
     public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams)
     {
-        BiomeManager.Initialize();
-        // resolution = 1024;
         float[] noiseMap = GenerateNoiseMap(MapSize, centre, heightMapParams);
         float[] moistureMap = GenerateNoiseMap(MapSize, centre, moistureMapParams);
         
@@ -111,15 +109,13 @@ public class MapGenerator : MonoBehaviour
             float height = heightMap [i];
             float moisture = moistureMap [i];
 
-            Color color = Color.Lerp(Color.red, Color.blue, moisture);
-            color *= height;
-
-            color = Color.Lerp(Color.black, Color.white, height);
-            colorMap[i] = color;
+            // Color color = Color.Lerp(Color.red, Color.blue, moisture);
+            // colorMap[i] = color;
+            
             // Biome biome = new Biome(height, moisture);
             // colorMap[i] = biome.Color;
 
-            // colorMap[i] = BiomeManager.GetColorFromBiome(height, moisture);
+            colorMap[i] = BiomeManager.GetColorFromBiome(height, moisture);
         }
 
         return colorMap;

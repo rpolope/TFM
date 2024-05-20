@@ -10,18 +10,21 @@ namespace Editor
 		public override void OnInspectorGUI() {
 
 			MapGenerator mapGenerator = (MapGenerator)target;
-		
+			BiomeManager.Initialize();
+
 			if (DrawDefaultInspector ()) {
 				if (mapGenerator.autoUpdate) {
 					var mapData = MapGenerator.GenerateMapData(mapGenerator.meshParameters.resolution, new float2(), mapGenerator.heightMapParameters, mapGenerator.moistureMapParameters);
-					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, new MeshParameters(0f)), mapGenerator.gameObject);
+					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, mapGenerator.meshParameters), mapGenerator.gameObject);
+					// mapData.Dispose();
 				}
 			}
 
 			if (GUILayout.Button ("Generate")) {
 				var mapData = MapGenerator.GenerateMapData(mapGenerator.meshParameters.resolution, new float2(), mapGenerator.heightMapParameters, mapGenerator.moistureMapParameters);
-				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, new MeshParameters(0f)), mapGenerator.gameObject);
-				// mapGenerator.GenerateWorldNoiseMap();
+				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, new TerrainParameters(mapGenerator.heightMapParameters, mapGenerator.meshParameters), mapGenerator.gameObject);
+				// mapData.Dispose();
+				// mapGenerator.GenerateWorldNoiseMap();1
 			}
 		}
 	}

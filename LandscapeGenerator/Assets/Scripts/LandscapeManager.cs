@@ -348,7 +348,7 @@ public class LandscapeManager : MonoBehaviour{
 		{
 			_meshData = new MeshData(TerrainChunkSize, _lod);
 			var resolution = (TerrainChunkSize - 1) / _meshData.LODScale + 1;
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(Instance.terrainParameters, resolution , Scale, _chunk.Position, _lod, ref _meshData);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(Instance.terrainParameters, resolution , Scale, _chunk.Position, ref _meshData);
 			RequestedMesh = true;
 		}
 

@@ -12,6 +12,7 @@ public static class MeshGenerator
     {
         public NativeArray<Vector3> Vertices;
         public NativeArray<float2> UVs;
+        public NativeArray<Color> Colors;
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
         public TerrainParameters TerrainParameters;
@@ -34,7 +35,8 @@ public static class MeshGenerator
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
-
+            Colors[index] = BiomeManager.GetColorFromBiome(height, 0.5f);
+            
             if (index < FacesCount)
             {
                 int row = index / (Resolution - 1);
@@ -54,12 +56,12 @@ public static class MeshGenerator
 
         private float GenerateHeight(float2 samplePos)
         {
-            float ridgedFactor = 0.85f;
+            float ridgedFactor = TerrainParameters.noiseParameters.ridgeness;
             // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
             float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
             noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
             
-            if (ridgedFactor > 0)
+            if (ridgedFactor > 0.01f)
                 noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
             
             noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
@@ -70,13 +72,14 @@ public static class MeshGenerator
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
             Vertices = meshData.Vertices,
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
+            Colors = meshData.Colors,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
             Center = center,
@@ -96,6 +99,7 @@ public class MeshData {
     public NativeArray<Vector3> Vertices;
     public NativeArray<int> Triangles;
     public NativeArray<float2> UVs;
+    public NativeArray<Color> Colors;
 
     public readonly int LODScale;
 
@@ -106,6 +110,7 @@ public class MeshData {
         Vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.Persistent);
         Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
         UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
+        Colors = new NativeArray<Color>(resolution * resolution, Allocator.Persistent);
     }
 
     public Mesh CreateMesh() {
@@ -116,6 +121,7 @@ public class MeshData {
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
+        mesh.SetColors(Colors);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         

@@ -23,5 +23,4 @@ public static class TextureGenerator {
 
         return TextureFromColorMap (colorMap, size);
     }
-
 }

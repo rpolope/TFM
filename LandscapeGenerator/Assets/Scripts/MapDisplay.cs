@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
 
@@ -38,10 +37,8 @@ public static class MapDisplay{
         } else if (drawMode == DrawMode.Mesh) {
             var meshData = new MeshData(mapSize, 0);
             var center = canvas.transform.position;
-            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(center.x, center.z), 0,ref meshData).Complete();
+            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(center.x, center.z), ref meshData).Complete();
             DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         }
-
-        
     }
 }
