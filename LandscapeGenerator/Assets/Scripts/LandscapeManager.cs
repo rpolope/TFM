@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.TextCore.Text;
 
 public class LandscapeManager : MonoBehaviour{
 	
@@ -30,6 +31,7 @@ public class LandscapeManager : MonoBehaviour{
 	public static event Action CompleteMeshGenerationEvent;
 	
 	public static LandscapeManager Instance;
+	public MapGenerator mapGenerator;
 	public LODInfo[] detailLevels;
 	public int initialLatitude = 0;
 	public int initialLongitude = 0;
@@ -348,7 +350,7 @@ public class LandscapeManager : MonoBehaviour{
 		{
 			_meshData = new MeshData(TerrainChunkSize, _lod);
 			var resolution = (TerrainChunkSize - 1) / _meshData.LODScale + 1;
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(Instance.terrainParameters, resolution , Scale, _chunk.Position, ref _meshData);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(Instance.terrainParameters, resolution , Scale, _chunk.Position, Instance.mapGenerator.GetColorGradient(), ref _meshData);
 			RequestedMesh = true;
 		}
 

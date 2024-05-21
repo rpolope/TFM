@@ -23,7 +23,7 @@ public static class MapDisplay{
         MeshRenderer.sharedMaterial.mainTexture = texture;
     }
     
-    public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters, GameObject canvas)
+    public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters, GameObject canvas, MapGenerator mapGenerator)
     {
         // var mapSize = terrainParameters.meshParameters.resolution;
         TextureRender = MeshRenderer = canvas.GetComponent<MeshRenderer>();
@@ -37,7 +37,7 @@ public static class MapDisplay{
         } else if (drawMode == DrawMode.Mesh) {
             var meshData = new MeshData(mapSize, 0);
             var center = canvas.transform.position;
-            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(center.x, center.z), ref meshData).Complete();
+            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(center.x, center.z), mapGenerator.GetColorGradient(), ref meshData).Complete();
             DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         }
     }

@@ -20,10 +20,12 @@ public class MapGenerator : MonoBehaviour
     public MeshParameters meshParameters;
     [Header("Biomes Params")]
     public BiomesParameters biomeParameters;
-    public GameObject[] canvasObjects;
+
+    public Gradient colorGradient;
     
+    public GameObject[] canvasObjects;
     public static MapGenerator Instance;
-    public static int MapSize = 257;
+    public static int MapSize = 180;
 
     private static Climate[] _regions = new[]
     {
@@ -141,6 +143,18 @@ public class MapGenerator : MonoBehaviour
         return mapArray;
     }
 
+    public NativeArray<Color> GetColorGradient()
+    {
+        var gradientColorArray = new NativeArray<Color>(100, Allocator.Persistent);
+
+        for (int i = 0; i < 100; i++)
+        {
+            gradientColorArray[i] = colorGradient.Evaluate(i / 100f);
+        }
+
+        return gradientColorArray;   
+    }
+    
     public void GenerateWorldNoiseMap()
     {
         const int batchesNumber = 18;
@@ -161,7 +175,7 @@ public class MapGenerator : MonoBehaviour
                     canvasObjects[i * batchesNumber + j].transform.position.z);
                 mapData.HeightMap =
                     new NativeArray<float>(GenerateNoiseMap(resolution, centre, heightMapParameters),Allocator.Temp);
-                MapDisplay.DrawMapInEditor(DrawMode.NoiseMap, mapData, new TerrainParameters(heightMapParameters, new MeshParameters(0.1f)), canvasObjects[i * batchesNumber + j]);
+                MapDisplay.DrawMapInEditor(DrawMode.NoiseMap, mapData, new TerrainParameters(heightMapParameters, new MeshParameters(0.1f)), canvasObjects[i * batchesNumber + j], this);
             }
         }
     }

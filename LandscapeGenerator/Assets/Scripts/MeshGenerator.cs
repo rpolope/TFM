@@ -21,6 +21,8 @@ public static class MeshGenerator
         public float Scale;
         public float2 Center;
         public int LODScale;
+        [NativeDisableParallelForRestriction]
+        public NativeArray<Color> ColorGradient;
 
         public void Execute(int index)
         {
@@ -31,11 +33,14 @@ public static class MeshGenerator
             float xPos = LODScale * (x - offset) * Scale;
             float zPos = LODScale * (z - offset) * Scale;
 
-            float height = GenerateHeight(Center + LODScale * new float2(x, z));
+            float noiseValue = GenerateNoiseValue(Center + LODScale * new float2(x, z));
+            // Colors[index] = Color.Lerp(Color.black, Color.white, noiseValue);
+            Colors[index] = ColorGradient[Mathf.Clamp(Mathf.Abs(Mathf.RoundToInt(noiseValue * 100)), 0, 99)];
+            float height = Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
-            Colors[index] = BiomeManager.GetColorFromBiome(height, 0.5f);
+            
             
             if (index < FacesCount)
             {
@@ -54,25 +59,24 @@ public static class MeshGenerator
             }
         }
 
-        private float GenerateHeight(float2 samplePos)
+        private float GenerateNoiseValue(float2 samplePos)
         {
             float ridgedFactor = TerrainParameters.noiseParameters.ridgeness;
-            // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
-            
-            if (ridgedFactor > 0.01f)
-                noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
-            
+            float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            // float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
+            //
+            // if (ridgedFactor > 0.01f)
+            //     noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
+            //
             noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
                 TerrainParameters.meshParameters.waterLevel :  noiseValue;
 
-            
-            return Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
+            return noiseValue;
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, NativeArray<Color> gradient, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -80,6 +84,7 @@ public static class MeshGenerator
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
             Colors = meshData.Colors,
+            ColorGradient = gradient,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
             Center = center,
@@ -88,7 +93,6 @@ public static class MeshGenerator
             TerrainParameters = terrainParameters
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
-        
         
         return jobHandle;
     }
@@ -124,6 +128,7 @@ public class MeshData {
         mesh.SetColors(Colors);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
+        mesh.RecalculateTangents();
         
         Dispose();
         
