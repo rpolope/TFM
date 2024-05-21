@@ -1,4 +1,4 @@
-Shader "Custom/VertexColorWithLighting"
+Shader "Custom/VertexColorWithLightingShader"
 {
     Properties
     {
@@ -21,16 +21,12 @@ Shader "Custom/VertexColorWithLighting"
             float4 color : COLOR;
         };
 
-        struct v2f
+        struct Input
         {
-            float4 pos : SV_POSITION;
             float4 color : COLOR;
-            float3 normal : TEXCOORD0;
         };
 
-        half4 _MainTex;
-
-        void vert (inout appdata_full v, out Input o)
+        void vert (inout appdata_t v, out Input o)
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
             o.color = v.color;

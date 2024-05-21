@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UnlitColorChunkMat
-  m_Shader: {fileID: 4800000, guid: 949551d64f54ee44da54493963a1db6a, type: 3}
+  m_Shader: {fileID: 4800000, guid: 737d0c0737b3d494d849001613afb0fb, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
