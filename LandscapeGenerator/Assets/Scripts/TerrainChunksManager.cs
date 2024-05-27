@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,13 +10,40 @@ public static class TerrainChunksManager
 {
     public const int TerrainChunkResolution = 11;
     public static TerrainChunk[,] TerrainChunks;
+    public static float WorldTerrainChunkResolution = (TerrainChunkResolution - 1) * LandscapeManager.Scale;
+    private static int _chunksVisibleInViewDst;
+
+    internal static LODInfo[] DetailLevels;
+    private static readonly Dictionary<Coordinates, TerrainChunk> TerrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
+    private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
+    private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
+
     public static Material ChunksMaterial { get; private set; }
 
     public static void Initialize()
     {
         ChunksMaterial = new Material(Shader.Find("Custom/VertexColorWithLighting"));
         TerrainChunks = new TerrainChunk[LandscapeManager.MapWidth, LandscapeManager.MapHeight];
+        
+        MaxViewDst = 0;
+        _chunksVisibleInViewDst = 0;
+        DetailLevels = new LODInfo[3] {
+            new LODInfo(0, 3), 
+            new LODInfo(1, 4), 
+            new LODInfo(3, 5)
+        };
+        foreach (var detailLevel in DetailLevels)
+        {
+            _chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
+            MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunkResolution - 1);
+        }
+
+        MaxViewDst *= LandscapeManager.Scale;
+		
+        UpdateVisibleChunks ();
     }
+
+    public static float MaxViewDst { get; set; }
 
     public static void InitializeTerrainChunks(int size, int2 coords, out TerrainChunk[,] chunks, Transform batch)
     {
@@ -35,9 +63,76 @@ public static class TerrainChunksManager
 
     public static void UpdateVisibleChunks()
     {
-        
+        foreach (var visibleChunk in TerrainChunksVisibleLastUpdate)
+        {
+            visibleChunk.SetVisible(false);
+        }
+		
+        TerrainChunksVisibleLastUpdate.Clear();
+        SurroundTerrainChunks.Clear();
+			
+        int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunkResolution - 1));
+        int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunkResolution - 1));
+        Viewer.ChunkCoord = new Coordinates(currentChunkCoordX, currentChunkCoordY);
+		
+        for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
+            for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
+				
+                var viewedChunkCoord = new Coordinates(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+
+                if (!IsWithinMapBounds(viewedChunkCoord)) continue;
+                
+                TerrainChunk chunk;
+                if (TerrainChunkDictionary.TryGetValue(viewedChunkCoord, out var value))
+                {
+                    chunk = value;
+                    SurroundTerrainChunks.Add(chunk);
+                    chunk.Update();
+                } else
+                {
+                    chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkResolution);
+                    TerrainChunkDictionary.Add(viewedChunkCoord, chunk);
+                    SurroundTerrainChunks.Add(chunk);
+                }
+				
+                if (chunk.IsVisible())
+                    TerrainChunksVisibleLastUpdate.Add(chunk);
+            }
+        }
     }
 
+    private static bool IsWithinMapBounds(Coordinates coord)
+    {
+        return coord.Latitude is >= 0 and < LandscapeManager.MapHeight 
+                                                    &&
+               coord.Longitude is >= 0 and < LandscapeManager.MapWidth;
+    }
+
+    public static void UpdateCulledChunks()
+    {
+        var viewerForward = Viewer.ForwardV2.normalized;
+        foreach (TerrainChunk chunk in SurroundTerrainChunks)
+        {
+            CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
+        }
+    }
+	
+    private static void CullChunkAndSetVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
+    {
+        var visible = inDistance;
+        if (LandscapeManager.Instance.cullingMode == CullingMode.Layer)
+        {
+            chunk.GameObject.layer = isCulled? 
+                LayerMask.NameToLayer("Culled") : 
+                LayerMask.NameToLayer("Default");
+        }
+        else if(LandscapeManager.Instance.cullingMode == CullingMode.Visibility)
+        {
+            visible = !isCulled && inDistance;
+        }
+		
+        chunk.SetVisible(visible);
+    }
 }
 
 public class TerrainChunk
@@ -74,6 +169,7 @@ public class TerrainChunk
         GameObject.transform.position = new Vector3(Position.x, 0, Position.y) * LandscapeManager.Scale;
         
         MeshFilter = GameObject.AddComponent<MeshFilter>();
+        MeshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
         // ModifyVertices(MeshFilter);
         
         Renderer = GameObject.AddComponent<MeshRenderer>();
@@ -134,6 +230,30 @@ public class TerrainChunk
             }
         }
     }
+
+    public bool IsCulled(Vector2 viewerForward)
+    {
+        if (Coordinates.Equals(Viewer.ChunkCoord)) return false;
+
+        var chunkCenter = new Vector2(Position.x, Position.y);
+        chunkCenter += chunkCenter.normalized * (TerrainChunksManager.WorldTerrainChunkResolution * 0.5f);
+        Vector2 chunkDirection = (chunkCenter - Viewer.PositionV2).normalized;
+        float dot = Vector2.Dot(viewerForward, chunkDirection);
+        float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+        return dot < 0 && chunkAngle > Viewer.FOV;
+    }
+		
+    public bool IsVisible() {
+        return GameObject.activeSelf;
+    }
+    public void SetVisible(bool visible) {
+        GameObject.SetActive (visible);
+    }
+
+    public void Update()
+    {
+    }
 }
 
 public class Border
@@ -186,6 +306,27 @@ public class Border
         neighborBorder.Adjusted = true;
     }
 
+}
+
+
+[Serializable]
+public struct LODInfo {
+    public int lod;
+    public int visibleChunksThreshold;
+    public bool useForCollider;
+
+    public LODInfo(int lod, int visibleChunksThreshold)
+    {
+        this.lod = lod;
+        this.visibleChunksThreshold = visibleChunksThreshold;
+        useForCollider = false;
+    }
+}
+
+public enum CullingMode
+{
+    Layer,
+    Visibility
 }
 
 public enum Cardinal

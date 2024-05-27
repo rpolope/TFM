@@ -31,7 +31,6 @@ public static class MapDisplay
                 if (meshFilter != null)
                     meshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, chunk.Biome.Heat,
                         chunk.Biome.Moisture, chunk.HeightMap, chunk.Biome.ColorGradient);
-                // Implement logic for ColorMap display mode
                 break;
             case DisplayMode.Mesh:
                 // Implement logic for Mesh display mode

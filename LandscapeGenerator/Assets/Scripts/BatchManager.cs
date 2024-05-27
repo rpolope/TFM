@@ -19,8 +19,8 @@ public static class BatchesManager
 
     private static void UpdateCurrentBatch()
     {
-        _currentBatchX = Viewer.ChunkCoord.x / ChunksPerBatchSide;
-        _currentBatchY = Viewer.ChunkCoord.y / ChunksPerBatchSide;
+        _currentBatchX = Viewer.ChunkCoord.Longitude / ChunksPerBatchSide;
+        _currentBatchY = Viewer.ChunkCoord.Latitude / ChunksPerBatchSide;
 
         _currentBatch = _batches[_currentBatchX, _currentBatchY];
         _currentBatch.SetActive(true);

@@ -63,11 +63,11 @@ public class MapGenerator : MonoBehaviour
         
         public void Execute(int threadIndex)
         {
-            // var height = HeightMap[threadIndex];
-            // var heightTempDecr = height * 0.6f;
-            // var heat = Mathf.Clamp01(LatitudeHeat - heightTempDecr);
-            // ColorMap[threadIndex] = BiomeMoistureColorRange[Mathf.RoundToInt(LatitudeHeat * 127)] * height;
-            ColorMap[threadIndex] = Color.Lerp(Color.black, Color.white, HeightMap[threadIndex]);
+            var height = HeightMap[threadIndex];
+            var heightTempDecr = height * 0.6f;
+            var heat = Mathf.Clamp01(LatitudeHeat - heightTempDecr);
+            ColorMap[threadIndex] = BiomeMoistureColorRange[Mathf.RoundToInt(LatitudeHeat * 127)] * height;
+            // ColorMap[threadIndex] = Color.Lerp(Color.black, Color.white, HeightMap[threadIndex]);
         }
         
         private void GenerateMoistureBasedColor(int threadIndex)

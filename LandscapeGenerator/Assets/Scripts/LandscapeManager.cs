@@ -1,33 +1,35 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Serialization;
 
 public class LandscapeManager : MonoBehaviour
 {
-    public static LandscapeManager Instance;
+    
     private static float[] MoistureMap { get; set; }
     private static float[] LatitudeHeats { get; set; }
+    
+    public static LandscapeManager Instance;
     
     public const float Scale = 1f;
     public const int MapWidth = 7;
     public const int MapHeight = 7;
+    public const float FixedMoisture = 0.5f;
+    public Transform Transform { get; private set; }
 
     public DisplayMode displayMode;
     public int initialLatitude, initialLongitude;
     [Header("World Moisture Map")]
     public NoiseParameters moistureParameters;
     public MeshFilter meshFilter;
-    public Transform Transform { get; private set; }
-    public static float FixedMoisture => _fixedMoisture;
-
+    public CullingMode cullingMode;
     [Range(-90, 90)]
     private int _lastLatitude;
     [Range(-90, 90)]
     private int _lastLongitude;
 
-    private static readonly float _fixedMoisture = 0.5f;
 
     private void Awake()
     {
@@ -57,9 +59,24 @@ public class LandscapeManager : MonoBehaviour
         DisplayMap();
     }
 
+    private void Update()
+    {
+        if (Viewer.PositionChanged()) {
+            Viewer.UpdateOldPosition();
+            TerrainChunksManager.UpdateVisibleChunks();
+        }
+        /* */
+		
+        if (Viewer.RotationChanged())
+        {
+            Viewer.UpdateOldRotation();
+            TerrainChunksManager.UpdateCulledChunks();
+        }
+    }
+
     public void GenerateFixedMoistureMap()
     {
-        MoistureMap = Enumerable.Repeat(_fixedMoisture, MapHeight * MapWidth).ToArray();
+        MoistureMap = Enumerable.Repeat(FixedMoisture, MapHeight * MapWidth).ToArray();
     }
     
     public static void GenerateStaticMoistureMap(NoiseParameters moistureParameters)
