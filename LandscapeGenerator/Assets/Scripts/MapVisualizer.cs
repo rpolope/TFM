@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -25,44 +26,6 @@ public class MapVisualizer : MonoBehaviour
     private Transform _transform;
     private float[] _moistureMap;
     
-    [BurstCompile]
-    private struct GenerateMapJob : IJobParallelFor
-    {
-        [NativeDisableParallelForRestriction] 
-        public NativeArray<float> HeightMap;
-        public int Resolution;
-        public float2 Centre;
-        public NoiseParameters Parameters;
-
-        public void Execute(int threadIndex)
-        {
-            int x = threadIndex % Resolution;
-            int y = threadIndex / Resolution;
-            
-            float2 pos = new float2(x, y) + Centre;
-
-            float value = Noise.GetNoiseValue(pos, Parameters);
-            // float value = GenerateHeight(pos);
-            
-            HeightMap[threadIndex] = value;
-        }
-        
-        private float GenerateHeight(float2 samplePos)
-        {
-            float ridgedFactor = Parameters.ridgeness;
-            // float noiseValue = Noise.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            
-            float noiseValue = (1 - ridgedFactor) * Noise.GetNoiseValue(samplePos, Parameters);
-            noiseValue += ridgedFactor * Noise.GetFractalRidgeNoise(samplePos, Parameters);
-            
-            if (ridgedFactor > 0)
-                noiseValue = Mathf.Pow(noiseValue, Parameters.ridgeRoughness);
-
-            return noiseValue;
-        }
-    }
-
-
     private void Awake()
     {
         if (Instance == null)
@@ -75,14 +38,63 @@ public class MapVisualizer : MonoBehaviour
         }
     }
 
-    public MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams)
+    public static void DrawMapInEditor(DisplayMode drawMode, MapData maps, TerrainParameters terrainParameters, MapVisualizer visualizer)
     {
-        float[] noiseMap = GenerateNoiseMap(resolution, centre, heightMapParams); 
-        float[] moistureMap = GenerateNoiseMap(MapSize, centre, moistureMapParams);
-        // var colorMap = GenerateColorMap(noiseMap, 0.5f);
-        var colorMap = GetColorRangeFromMoisture(0.5f);
+        GameObject canvas = visualizer.gameObject;
+        MeshRenderer renderer = canvas.GetComponent<MeshRenderer>();
+        MeshFilter meshFilter = canvas.GetComponent<MeshFilter>();
+
+        int resolution = visualizer.meshParameters.resolution;
+        var mockedMoistureValue = LandscapeManager.FixedMoisture;
+        var mockedHeatValue = 0.66f;
+        var colorGradient = BiomesManager.ColorMap[(int)(mockedMoistureValue*127)];
         
-        return displayMode == DisplayMode.Mesh ? new MapData (noiseMap, GetColorGradient()) : new MapData (noiseMap, colorMap);
+        switch (drawMode)
+        {
+            case DisplayMode.NoiseMap:
+                MapDisplay.DrawTexture(TextureGenerator.TextureFromHeightMap(maps.HeightMap.ToArray(), resolution), renderer);
+                break;
+            
+            case DisplayMode.ColorMap:
+                /* Para pintar el mapa */
+                // Color[] colorMap = GetColorMapFromGradient(visualizer.colorGradient, maps.HeightMap.ToArray());
+
+                Color[] colorMap = GetColorMapFromColorRange(resolution, colorGradient, maps.HeightMap.ToArray(), mockedHeatValue);
+                MapDisplay.DrawTexture (TextureGenerator.TextureFromColorMap (colorMap, resolution), renderer);
+                
+                /* Para mostrar la textura de test del BiomesManager */
+                // DrawTexture (BiomesManager.TextureTest, renderer);
+                break;
+            
+            case DisplayMode.Mesh:
+                MeshData meshData = new MeshData(resolution, 0);
+                Color[] colors = GetColorMapFromColorRange(resolution, colorGradient, maps.HeightMap.ToArray(), mockedHeatValue);
+                meshData.Colors = new NativeArray<Color>(colors, Allocator.Persistent);
+                
+                float2 center = new float2(canvas.transform.position.x, canvas.transform.position.z);
+                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, 1, center, maps, ref meshData).Complete();
+                MapDisplay.DrawMesh(meshData, meshFilter);
+                break;
+            
+            default:
+                throw new ArgumentOutOfRangeException(nameof(drawMode), drawMode, null);
+        }
+    }
+    
+    
+    private static Color[] GetColorMapFromColorRange(int mapSize, Color[] colorRange, float[] heightMap, float heat)
+    {
+        var colorMap = new Color[mapSize * mapSize];
+        for (int i = 0; i < colorMap.Length; i++)
+        {
+            var row = i / mapSize;
+            var latitudeRelative = row / (mapSize - 1f);
+
+            var rangeIndex = Mathf.FloorToInt(latitudeRelative * 127);
+            colorMap[i] = colorRange[rangeIndex];
+        }
+
+        return colorMap;
     }
 
     public static Color[] GetColorRangeFromMoisture(float moisture)
@@ -90,39 +102,36 @@ public class MapVisualizer : MonoBehaviour
         return BiomesManager.ColorMap[(int)(moisture * 128)];
     }
 
-    private static Color[] GenerateColorMap(float[] heightMap, float moisture)
+    public static Texture2D GetTextureFromMoistureColorGradient(int resolution)
     {
-        var mapSize = heightMap.Length;
-        var colorMap = new Color[mapSize];
-        for (var i = 0; i < mapSize; i++) {
-            
-            var height = heightMap[i];
-
-            Color color = Color.Lerp(Color.red, Color.blue, moisture);
-            colorMap[i] = color * height;
+        var colorMap = new Color[resolution * resolution];
+        return TextureGenerator.TextureFromColorMap(colorMap, resolution);
+    }
+    private static Color[] GetColorMapFromGradient(Gradient gradient, float[] heightMap)
+    {
+        Color[] colorMap = new Color[heightMap.Length];
+        for (int i = 0; i < colorMap.Length; i++)
+        {
+            colorMap[i] = gradient.Evaluate(heightMap[i]);
         }
-
         return colorMap;
     }
 
-    private static float[] GenerateNoiseMap(int resolution, float2 centre, NoiseParameters parameters)
+    private static Color[] GetColorRangeFromMoisture(int mapSize, TerrainChunk chunk)
     {
-        var map = new NativeArray<float>(resolution * resolution, Allocator.TempJob);
+        Color[] colorMap = new Color[mapSize * mapSize];
+        Biome biome = chunk.Biome;
+        Color[] colorGradient = biome.ColorGradient;
         
-        var generateMapJob = new GenerateMapJob()
-        {
-            HeightMap = map,
-            Centre = centre,
-            Resolution = resolution,
-            Parameters = parameters
-        };
-        generateMapJob.Schedule( resolution* resolution, 3000).Complete();
 
-        var mapArray = new float[resolution* resolution];
-        map.CopyTo(mapArray);
-        map.Dispose();
-        
-        return mapArray;
+        for (int i = 0; i < colorMap.Length; i++)
+        {
+            float heat = biome.Heat - chunk.HeightMap[i] * 0.6f;
+            Color color = colorGradient[(int)(heat * 127 + 1 / 128f)];
+            colorMap[i] = color;
+        }
+
+        return colorMap;
     }
 
     private Color[] GetColorGradient()

@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -7,6 +8,8 @@ using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {
+    public static int MapSize = 7;
+
     [BurstCompile]
     private struct GenerateMapJob : IJobParallelFor
     {
@@ -15,7 +18,6 @@ public class MapGenerator : MonoBehaviour
         public int MapSize;
         public float2 Centre;
         public NoiseParameters Parameters;
-
         public void Execute(int threadIndex)
         {
             int x = threadIndex % MapSize;
@@ -62,9 +64,9 @@ public class MapGenerator : MonoBehaviour
         public void Execute(int threadIndex)
         {
             var height = HeightMap[threadIndex];
-            var heightTempDecr = 1.0f - (height);
-            var heat = Mathf.Clamp01(LatitudeHeat - heightTempDecr);
-            ColorMap[threadIndex] = BiomeMoistureColorRange[(int)heat * 127];
+            var heightTempDecr = height * 0.6f;
+            var heat = Mathf.Clamp01(LatitudeHeat);
+            ColorMap[threadIndex] = BiomeMoistureColorRange[Mathf.RoundToInt(heat * 127)];
         }
         
         private void GenerateMoistureBasedColor(int threadIndex)
@@ -122,6 +124,39 @@ public class MapGenerator : MonoBehaviour
         map.Dispose();
         
         return mapArray;
+    }
+    
+    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters heightMapParams, NoiseParameters moistureMapParams, DisplayMode displayMode)
+    {
+        float[] noiseMap = GenerateNoiseMap(resolution * resolution, centre, heightMapParams); 
+        float[] moistureMap = GenerateNoiseMap(resolution * resolution, centre, moistureMapParams);
+        // var colorMap = GenerateColorMap(noiseMap, 0.5f);
+        var colorMap = GetColorRangeFromMoisture(LandscapeManager.FixedMoisture);
+        var colorGradient = BiomesManager.ColorMap[(int)(LandscapeManager.FixedMoisture * 128)];
+       
+        return displayMode == DisplayMode.Mesh ? 
+                new MapData (noiseMap, colorGradient) : 
+                new MapData (noiseMap, colorMap);
+    }
+
+    private static Color[] GetColorRangeFromMoisture(float moisture)
+    {
+        return BiomesManager.ColorMap[(int)(LandscapeManager.FixedMoisture * 128)];
+    }
+    
+    private static Color[] GenerateTestingColorMap(float[] heightMap, float moisture)
+    {
+        var mapSize = heightMap.Length;
+        var colorMap = new Color[mapSize];
+        for (var i = 0; i < mapSize; i++) {
+            
+            var height = heightMap[i];
+
+            Color color = Color.Lerp(Color.red, Color.blue, moisture);
+            colorMap[i] = color * height;
+        }
+
+        return colorMap;
     }
 }
 

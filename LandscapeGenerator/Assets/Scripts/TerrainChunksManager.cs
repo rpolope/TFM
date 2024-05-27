@@ -54,7 +54,6 @@ public class TerrainChunk
         Coordinates = coordinates;
         IsIsland = Random.value > 0.9f;
         Biome = BiomesManager.GetBiome(coordinates);
-        var heat = Biome.Heat;
         var coords = new float2(Coordinates.Longitude, Coordinates.Longitude);
         HeightMap = MapGenerator.GenerateNoiseMap(resolution * resolution, coords, Biome.TerrainParameters.noiseParameters);
 

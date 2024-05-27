@@ -19,12 +19,15 @@ public class LandscapeManager : MonoBehaviour
     [Header("World Moisture Map")]
     public NoiseParameters moistureParameters;
     public MeshFilter meshFilter;
+    public Transform Transform { get; private set; }
+    public static float FixedMoisture => _fixedMoisture;
 
     [Range(-90, 90)]
     private int _lastLatitude;
     [Range(-90, 90)]
     private int _lastLongitude;
-    public Transform Transform { get; private set; }
+
+    private static readonly float _fixedMoisture = 0.5f;
 
     private void Awake()
     {
@@ -41,7 +44,7 @@ public class LandscapeManager : MonoBehaviour
         GenerateFixedMoistureMap();
         InitializeLatitudeHeats();
         Transform = transform;
-        BiomesManager.Initialize();
+        BiomesManager.Initialize(false);
         TerrainChunksManager.Initialize();
         BatchesManager.Initialize();
         _lastLatitude = initialLatitude + 3;
@@ -57,7 +60,7 @@ public class LandscapeManager : MonoBehaviour
 
     public void GenerateFixedMoistureMap()
     {
-        MoistureMap = Enumerable.Repeat(0.4f, MapHeight * MapWidth).ToArray();
+        MoistureMap = Enumerable.Repeat(_fixedMoisture, MapHeight * MapWidth).ToArray();
     }
     
     public static void GenerateStaticMoistureMap(NoiseParameters moistureParameters)
@@ -78,11 +81,12 @@ public class LandscapeManager : MonoBehaviour
     private static void InitializeLatitudeHeats()
     {
         LatitudeHeats = new float[MapHeight];
+        const float ecuador = (MapHeight - 1) * 0.5f;
+        
         for (int latitude = 0; latitude < MapHeight; latitude++)
         {
-            float distanceFromEcuador = Math.Abs(latitude - MapHeight/2);
-            float normalizedDistance = distanceFromEcuador / 3.5f;
-            float heat = 1.0f - normalizedDistance;
+            float distanceFromEcuador = Math.Abs(latitude - ecuador);
+            float heat = distanceFromEcuador / ecuador;
             
             LatitudeHeats[latitude] = heat;
         }

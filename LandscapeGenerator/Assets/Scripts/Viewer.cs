@@ -23,7 +23,6 @@ public class Viewer : MonoBehaviour
     {
         _velocity = new Vector3(0, 0, speed);
         _mainCamera = Camera.main;
-        
     }
 
     private void Start()
