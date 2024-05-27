@@ -18,13 +18,19 @@ public static class MapDisplay
     {
         Renderer renderer = chunk.Renderer;
         MeshFilter meshFilter = chunk.MeshFilter;
-
+        const int resolution = TerrainChunksManager.TerrainChunkResolution;
+        
         switch (displayMode)
         {
             case DisplayMode.NoiseMap:
-                DrawTexture(TextureGenerator.TextureFromHeightMap(chunk.HeightMap, TerrainChunksManager.TerrainChunkResolution), renderer);
+                renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+                DrawTexture(TextureGenerator.TextureFromHeightMap(chunk.HeightMap, resolution), renderer);
                 break;
             case DisplayMode.ColorMap:
+                renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
+                if (meshFilter != null)
+                    meshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, chunk.Biome.Heat,
+                        chunk.Biome.Moisture, chunk.HeightMap, chunk.Biome.ColorGradient);
                 // Implement logic for ColorMap display mode
                 break;
             case DisplayMode.Mesh:

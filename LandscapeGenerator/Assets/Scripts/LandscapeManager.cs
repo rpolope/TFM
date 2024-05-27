@@ -98,11 +98,11 @@ public class LandscapeManager : MonoBehaviour
 
     private static void DisplayMap()
     {
-        // foreach (var chunk in TerrainChunksManager.TerrainChunks)
-        // {
-        //     if (chunk == null) continue;
-        //     MapDisplay.DisplayChunk(Instance.displayMode, chunk);
-        // }
+        foreach (var chunk in TerrainChunksManager.TerrainChunks)
+        {
+            if (chunk == null) continue;
+            MapDisplay.DisplayChunk(Instance.displayMode, chunk);
+        }
     }
 }
 

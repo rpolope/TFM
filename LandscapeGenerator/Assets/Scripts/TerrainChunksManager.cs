@@ -70,21 +70,9 @@ public class TerrainChunk
         GameObject.transform.position = new Vector3(Position.x, 0, Position.y) * LandscapeManager.Scale;
         
         MeshFilter = GameObject.AddComponent<MeshFilter>();
-        ModifyVertices(MeshFilter);
+        // ModifyVertices(MeshFilter);
         
         Renderer = GameObject.AddComponent<MeshRenderer>();
-        if (LandscapeManager.Instance.displayMode == DisplayMode.NoiseMap)
-        {
-            Renderer.sharedMaterial = new Material(Shader.Find("Standard"));
-            MapDisplay.DisplayChunk(LandscapeManager.Instance.displayMode, this);
-        }
-        else
-        {
-            Renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
-            if (MeshFilter != null)
-                MeshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, Biome.Heat,
-                    Biome.Moisture, HeightMap, Biome.ColorGradient);
-        }
         
         GameObject.transform.localScale = Vector3.one * LandscapeManager.Scale;
         GameObject.SetActive(true);
