@@ -31,9 +31,13 @@ public static class TerrainChunksManager
                 TerrainChunks[coords.x + x, coords.y + y] = chunk;
             }
         }
-        
+    }
+
+    public static void UpdateVisibleChunks()
+    {
         
     }
+
 }
 
 public class TerrainChunk
