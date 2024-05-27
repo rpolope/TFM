@@ -141,7 +141,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &326653665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  displayMode: 1
+  displayMode: 0
   heightMapParameters:
     noiseType: 0
     seed: 1
@@ -182,7 +182,7 @@ MonoBehaviour:
     ridgeRoughness: 0
   meshParameters:
     resolution: 11
-    heightScale: 1
+    heightScale: 10
     waterLevel: 0.1
     levelsOfDetail: 3
   biomeParameters:
@@ -241,7 +241,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 326653664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -717,7 +717,7 @@ MonoBehaviour:
   moistureParameters:
     noiseType: 0
     seed: 1
-    scale: 10
+    scale: 50
     offset: {x: 0, y: 0}
     amplitude: 1
     octaves: 3

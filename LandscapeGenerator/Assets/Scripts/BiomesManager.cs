@@ -24,7 +24,7 @@ public enum ClimateType
 public static class BiomesManager
 {
     private static Biome[,] _biomes;
-    private static bool _initialized = false;
+    internal static bool Initialized;
     
     private static Texture2D _colorMapTexture;
     public static Color[][] ColorMap { get; private set; }
@@ -37,7 +37,7 @@ public static class BiomesManager
         LoadColorMapTexture();
         if (!fromMapVisualizer)
             InitializeBiomes();
-        _initialized = true;
+        Initialized = true;
     }
 
     private static void TestColorRangeColorSampling(Color[] colorGradient)
@@ -138,7 +138,8 @@ public class Biome
         Heat = heat;
         ClimateType = GetClimateType(moisture, heat);
         ColorGradient = BiomesManager.ColorMap[Mathf.RoundToInt(Moisture * 128)];
-        TerrainParameters = new TerrainParameters(new NoiseParameters(GetNoiseType()), new MeshParameters(0.1f));
+        // TerrainParameters = new TerrainParameters(new NoiseParameters(GetNoiseType()), new MeshParameters(0.1f));
+        TerrainParameters = new TerrainParameters(new NoiseParameters(NoiseType.Perlin), new MeshParameters(0.1f));
     }
 
     public void Update() { }

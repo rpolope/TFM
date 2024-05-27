@@ -17,7 +17,7 @@ public static class Noise
     {
         float maxPossibleHeight = 0f;
         float noiseHeight = 0f;
-        float amplitude = parameters.amplitude;
+        float amplitude = 1f;
         float frequency = parameters.frequency;
 
         var random = new Random(parameters.seed);
@@ -60,7 +60,7 @@ public static class Noise
 
     public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters)
     {
-        float ampl = parameters.amplitude;
+        float ampl = 1f;
         float freq = parameters.frequency;
         float accum = 1f, maxAmpl = 0.0f;
         

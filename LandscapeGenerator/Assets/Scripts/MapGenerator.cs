@@ -20,8 +20,8 @@ public class MapGenerator : MonoBehaviour
         public NoiseParameters Parameters;
         public void Execute(int threadIndex)
         {
-            int x = threadIndex % MapSize;
-            int y = threadIndex / MapSize;
+            int x = threadIndex / MapSize;
+            int y = threadIndex % MapSize;
             
             float2 pos = new float2(x, y) + Centre;
 
@@ -63,10 +63,11 @@ public class MapGenerator : MonoBehaviour
         
         public void Execute(int threadIndex)
         {
-            var height = HeightMap[threadIndex];
-            var heightTempDecr = height * 0.6f;
-            var heat = Mathf.Clamp01(LatitudeHeat);
-            ColorMap[threadIndex] = BiomeMoistureColorRange[Mathf.RoundToInt(heat * 127)];
+            // var height = HeightMap[threadIndex];
+            // var heightTempDecr = height * 0.6f;
+            // var heat = Mathf.Clamp01(LatitudeHeat - heightTempDecr);
+            // ColorMap[threadIndex] = BiomeMoistureColorRange[Mathf.RoundToInt(LatitudeHeat * 127)] * height;
+            ColorMap[threadIndex] = Color.Lerp(Color.black, Color.white, HeightMap[threadIndex]);
         }
         
         private void GenerateMoistureBasedColor(int threadIndex)

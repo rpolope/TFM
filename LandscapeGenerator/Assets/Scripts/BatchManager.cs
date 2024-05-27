@@ -49,7 +49,7 @@ public static class BatchesManager
 
         public Batch(int2 coords)
         {
-            _gameObject = new GameObject($"Batch_{coords.x}_{coords.y}") 
+            _gameObject = new GameObject($"Batch({coords.x},{coords.y})") 
             {
                 transform =
                 {

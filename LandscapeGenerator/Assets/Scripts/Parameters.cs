@@ -65,9 +65,6 @@ public struct NoiseParameters
     [SerializeField]
     public Vector2 offset;
     
-    [SerializeField, Min(0.001f)]
-    public float amplitude;
-    
     [SerializeField, Range(0, 8)]
     public int octaves;
     
@@ -92,7 +89,6 @@ public struct NoiseParameters
         seed = 1; 
         scale = 1f; 
         offset = Vector2.zero; 
-        amplitude = 1f; 
         octaves = 4;
         frequency = 1f; 
         persistence = 0.5f; 

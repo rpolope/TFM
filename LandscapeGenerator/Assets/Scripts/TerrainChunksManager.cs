@@ -31,6 +31,8 @@ public static class TerrainChunksManager
                 TerrainChunks[coords.x + x, coords.y + y] = chunk;
             }
         }
+        
+        
     }
 }
 
@@ -55,6 +57,8 @@ public class TerrainChunk
         IsIsland = Random.value > 0.9f;
         Biome = BiomesManager.GetBiome(coordinates);
         var coords = new float2(Coordinates.Longitude, Coordinates.Longitude);
+        Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (resolution - 1);
+
         HeightMap = MapGenerator.GenerateNoiseMap(resolution * resolution, coords, Biome.TerrainParameters.noiseParameters);
 
         foreach (Cardinal cardinal in Enum.GetValues(typeof(Cardinal)))
@@ -62,16 +66,60 @@ public class TerrainChunk
             Borders[cardinal] = new Border(cardinal, this);
         }
 
-        GameObject = new GameObject($"Chunk_{coordinates.Longitude}_{coordinates.Latitude}");
-        Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (resolution - 1);
+        GameObject = new GameObject($"Chunk({coordinates.Longitude},{coordinates.Latitude})");
         GameObject.transform.position = new Vector3(Position.x, 0, Position.y) * LandscapeManager.Scale;
-        Renderer = GameObject.AddComponent<MeshRenderer>();
-        Renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
+        
         MeshFilter = GameObject.AddComponent<MeshFilter>();
-        MeshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
-        MeshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, Biome.Heat, Biome.Moisture, HeightMap, Biome.ColorGradient);
+        ModifyVertices(MeshFilter);
+        
+        Renderer = GameObject.AddComponent<MeshRenderer>();
+        if (LandscapeManager.Instance.displayMode == DisplayMode.NoiseMap)
+        {
+            Renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+            MapDisplay.DisplayChunk(LandscapeManager.Instance.displayMode, this);
+        }
+        else
+        {
+            Renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
+            if (MeshFilter != null)
+                MeshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, Biome.Heat,
+                    Biome.Moisture, HeightMap, Biome.ColorGradient);
+        }
+        
         GameObject.transform.localScale = Vector3.one * LandscapeManager.Scale;
         GameObject.SetActive(true);
+    }
+
+    private void ModifyVertices(MeshFilter meshFilter, float heightMultiplier = 1f)
+    {
+        float[] heightMap = HeightMap;
+        var originalMesh = LandscapeManager.Instance.meshFilter.mesh;
+
+        Vector3[] originalVertices = originalMesh.vertices;
+
+        if (originalVertices.Length != heightMap.Length)
+        {
+            Debug.LogError("El tamaño del mapa de alturas no coincide con el número de vértices.");
+            return;
+        }
+
+        Vector3[] modifiedVertices = new Vector3[originalVertices.Length];
+        for (int i = 0; i < originalVertices.Length; i++)
+        {
+            Vector3 vertex = originalVertices[i];
+            float height = heightMap[i] * heightMultiplier; 
+            modifiedVertices[i] = vertex + Vector3.up * height;
+        }
+        
+        Mesh clonedMesh = new Mesh();
+        clonedMesh.vertices = modifiedVertices;
+        clonedMesh.triangles = originalMesh.triangles;
+        clonedMesh.uv = originalMesh.uv;
+        clonedMesh.normals = originalMesh.normals;
+        clonedMesh.RecalculateBounds();
+        clonedMesh.RecalculateNormals();
+        
+        meshFilter.mesh = clonedMesh;
     }
 
     public void AssignNeighbor(Cardinal direction, TerrainChunk neighbor)
@@ -136,13 +184,16 @@ public class Border
     {
         for (int i = 0; i < Values.Length; i++)
         {
-            var adjustedValue = 0.5f * (neighborBorder.Values[i] + Values[i]);
+            var thisValue = Values[i];
+            var neighborValue = neighborBorder.Values[i];
+            var adjustedValue = Mathf.Lerp(thisValue, neighborValue, 0.5f); // Interpolación lineal
             neighborBorder.Values[i] = adjustedValue;
             Values[i] = adjustedValue;
         }
         Adjusted = true;
         neighborBorder.Adjusted = true;
     }
+
 }
 
 public enum Cardinal

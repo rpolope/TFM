@@ -41,7 +41,7 @@ public class LandscapeManager : MonoBehaviour
         }
         
         MapDisplay.DisplayMode = displayMode;
-        GenerateFixedMoistureMap();
+        GenerateMoistureMap();
         InitializeLatitudeHeats();
         Transform = transform;
         BiomesManager.Initialize(false);
@@ -54,7 +54,6 @@ public class LandscapeManager : MonoBehaviour
 
     private void Start()
     {
-        
         DisplayMap();
     }
 
@@ -99,11 +98,11 @@ public class LandscapeManager : MonoBehaviour
 
     private static void DisplayMap()
     {
-        foreach (var chunk in TerrainChunksManager.TerrainChunks)
-        {
-            if (chunk == null) continue;
-            MapDisplay.DisplayChunk(Instance.displayMode, chunk);
-        }
+        // foreach (var chunk in TerrainChunksManager.TerrainChunks)
+        // {
+        //     if (chunk == null) continue;
+        //     MapDisplay.DisplayChunk(Instance.displayMode, chunk);
+        // }
     }
 }
 
