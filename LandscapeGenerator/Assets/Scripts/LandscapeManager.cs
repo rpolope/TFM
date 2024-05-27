@@ -42,21 +42,23 @@ public class LandscapeManager : MonoBehaviour
             Destroy(Instance);
         }
         
+    }
+
+    private void Start()
+    {
         MapDisplay.DisplayMode = displayMode;
         GenerateMoistureMap();
         InitializeLatitudeHeats();
         Transform = transform;
         BiomesManager.Initialize(false);
-        TerrainChunksManager.Initialize();
         BatchesManager.Initialize();
+        TerrainChunksManager.Initialize();
         _lastLatitude = initialLatitude + 3;
         _lastLongitude = initialLongitude + 3;
         Viewer.InitialCoords = new Vector2Int(_lastLongitude, _lastLatitude);
-    }
-
-    private void Start()
-    {
-        DisplayMap();
+        Viewer.Initialize();
+        
+        TerrainChunksManager.DisplayChunks();
     }
 
     private void Update()
@@ -113,14 +115,14 @@ public class LandscapeManager : MonoBehaviour
         return LatitudeHeats[coordinates.Latitude];
     }
 
-    private static void DisplayMap()
-    {
-        foreach (var chunk in TerrainChunksManager.TerrainChunks)
-        {
-            if (chunk == null) continue;
-            MapDisplay.DisplayChunk(Instance.displayMode, chunk);
-        }
-    }
+    // private static void DisplayMap()
+    // {
+    //     foreach (var chunk in TerrainChunksManager.TerrainChunks)
+    //     {
+    //         if (chunk == null) continue;
+    //         MapDisplay.DisplayChunk(Instance.displayMode, chunk);
+    //     }
+    // }
 }
 
 public struct Coordinates

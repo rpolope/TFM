@@ -24,15 +24,14 @@ public class Viewer : MonoBehaviour
     {
         _mainCamera = Camera.main;
         _velocity = new Vector3(0, 0, speed);
+        _viewerTransform = transform;
     }
 
-    private void Start()
+    public static void Initialize()
     {
-        _viewerTransform = transform;
-
         var position = _viewerTransform.position;
         var rotation = _viewerTransform.rotation;
-        var initialPos = TerrainChunksManager.TerrainChunks[InitialCoords.x, InitialCoords.y].Position;
+        var initialPos = TerrainChunksManager.GetChunkFromCoordinates(new Coordinates(InitialCoords.x, InitialCoords.y)).Position;
         _viewerTransform.position = new Vector3(initialPos.x, 0, initialPos.y);
         _viewerOldPosition = new Vector2(position.x, position.z);
         _viewerOldRotationY = rotation.eulerAngles.y;

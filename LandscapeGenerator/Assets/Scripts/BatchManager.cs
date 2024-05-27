@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -45,6 +46,7 @@ public static class BatchesManager
     public class Batch
     {
         private TerrainChunk[,] _chunks;
+        // private static Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
         private GameObject _gameObject;
 
         public Batch(int2 coords)
@@ -64,7 +66,7 @@ public static class BatchesManager
 
         private void LoadBatch(int2 batchCoords)
         {
-            TerrainChunksManager.InitializeTerrainChunks(ChunksPerBatchSide, batchCoords, out _chunks, _gameObject.transform);
+            TerrainChunksManager.InitializeTerrainChunks(ChunksPerBatchSide, batchCoords, _gameObject.transform);
         }
 
         public void SetActive(bool active)
