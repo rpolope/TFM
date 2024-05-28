@@ -10,12 +10,12 @@ public class LandscapeManager : MonoBehaviour
     
     private static float[] MoistureMap { get; set; }
     private static float[] LatitudeHeats { get; set; }
-    
+    private const int InitialCoordOffset = MapWidth / 2;
     public static LandscapeManager Instance;
     
     public const float Scale = 1f;
-    public const int MapWidth = 7;
-    public const int MapHeight = 7;
+    public const int MapWidth = 32;
+    public const int MapHeight = 32;
     public const float FixedMoisture = 0.5f;
     public Transform Transform { get; private set; }
 
@@ -30,7 +30,6 @@ public class LandscapeManager : MonoBehaviour
     [Range(-90, 90)]
     private int _lastLongitude;
 
-
     private void Awake()
     {
         if (Instance == null)
@@ -41,7 +40,6 @@ public class LandscapeManager : MonoBehaviour
         {
             Destroy(Instance);
         }
-        
     }
 
     private void Start()
@@ -53,8 +51,8 @@ public class LandscapeManager : MonoBehaviour
         BiomesManager.Initialize(false);
         BatchesManager.Initialize();
         TerrainChunksManager.Initialize();
-        _lastLatitude = initialLatitude + 3;
-        _lastLongitude = initialLongitude + 3;
+        _lastLatitude = initialLatitude + InitialCoordOffset;
+        _lastLongitude = initialLongitude + InitialCoordOffset;
         Viewer.InitialCoords = new Vector2Int(_lastLongitude, _lastLatitude);
         Viewer.Initialize();
         
@@ -124,15 +122,26 @@ public class LandscapeManager : MonoBehaviour
     //     }
     // }
 }
-
+[Serializable]
 public struct Coordinates
 {
-    public readonly int Latitude;
-    public readonly int Longitude;
+    public int Longitude { get; set; }
+    public int Latitude { get; set; }
 
-    public Coordinates(int longitude, int latitude)
+    public Coordinates(int x, int y)
     {
-        Longitude = longitude;
-        Latitude = latitude;
+        Longitude = x;
+        Latitude = y;
     }
+
+    public int2 AsInt2() => new (Longitude, Latitude);
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not Coordinates coord) return false;
+        return coord.Longitude == Longitude && coord.Latitude == Latitude;
+    }
+
+    public override int GetHashCode() => (Longitude, Latitude).GetHashCode();
 }
+

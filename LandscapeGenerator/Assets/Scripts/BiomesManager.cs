@@ -129,8 +129,8 @@ public class Biome
     public TerrainParameters TerrainParameters { get; private set; }
     public float Moisture { get; private set; }
     public float Heat { get; private set; }
-    public ClimateType ClimateType { get; private set; }
     public Color[] ColorGradient { get; private set; }
+    private ClimateType ClimateType { get; set; }
 
     public Biome(float heat, float moisture)
     {

@@ -8,7 +8,7 @@ public static class BatchesManager
     private static int _currentBatchY;
     private static Batch[,] _batches;
     private const int BatchesNum = 1;
-    private const int ChunksPerBatchSide = 7;
+    private const int ChunksPerBatchSide = 32;
     private static Batch _currentBatch;
 
     public static void Initialize()
@@ -33,7 +33,8 @@ public static class BatchesManager
         {
             for (int x = 0; x < BatchesNum; x++)
             {
-                _batches[x, y] = new Batch(new int2(x * ChunksPerBatchSide, y * ChunksPerBatchSide));
+                _batches[x, y] = new Batch(new int2(x * ChunksPerBatchSide,
+                                                          y * ChunksPerBatchSide));
             }
         }
     }
@@ -43,7 +44,7 @@ public static class BatchesManager
         // Add logic to change batches based on player position or other criteria
     }
 
-    public class Batch
+    private class Batch
     {
         private TerrainChunk[,] _chunks;
         // private static Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
@@ -55,11 +56,11 @@ public static class BatchesManager
             {
                 transform =
                 {
-                    position = new Vector3(coords.x, coords.y), 
+                    position = new Vector3(coords.x, coords.y) * TerrainChunksManager.WorldTerrainChunkResolution, 
                     parent = LandscapeManager.Instance.transform
                 }
             };
-            _gameObject.SetActive(true);
+            _gameObject.SetActive(false);
             
             LoadBatch(coords);
         }

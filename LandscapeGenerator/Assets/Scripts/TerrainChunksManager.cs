@@ -11,9 +11,9 @@ public static class TerrainChunksManager
 {
     public const int TerrainChunkResolution = 11;
     public static TerrainChunk[,] TerrainChunks;
-    public static float WorldTerrainChunkResolution = (TerrainChunkResolution - 1) * LandscapeManager.Scale;
+    public const float WorldTerrainChunkResolution = (TerrainChunkResolution - 1) * LandscapeManager.Scale;
 
-    internal static LODInfo[] DetailLevels;
+    private static LODInfo[] _detailLevels;
     private static readonly Dictionary<Coordinates, TerrainChunk> TerrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
     private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
     private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
@@ -29,12 +29,12 @@ public static class TerrainChunksManager
         
         MaxViewDst = 0;
         ChunksVisibleInViewDist = 0;
-        DetailLevels = new LODInfo[3] {
+        _detailLevels = new LODInfo[3] {
             new LODInfo(0, 3), 
             new LODInfo(1, 4), 
             new LODInfo(3, 5)
         };
-        foreach (var detailLevel in DetailLevels)
+        foreach (var detailLevel in _detailLevels)
         {
             ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
             MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunkResolution - 1);
@@ -42,7 +42,7 @@ public static class TerrainChunksManager
 
         MaxViewDst *= LandscapeManager.Scale;
 		
-        UpdateVisibleChunks ();
+        // UpdateVisibleChunks ();
     }
 
     public static float MaxViewDst { get; set; }
@@ -120,15 +120,20 @@ public static class TerrainChunksManager
     internal static void CullChunkAndSetVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
     {
         var visible = inDistance;
-        if (LandscapeManager.Instance.cullingMode == CullingMode.Layer)
+        if (chunk.Coordinates.Equals(new Coordinates(29,14))) 
+            Debug.Log("Invisible en coords: "+chunk.Coordinates);
+        switch (LandscapeManager.Instance.cullingMode)
         {
-            chunk.GameObject.layer = isCulled? 
-                LayerMask.NameToLayer("Culled") : 
-                LayerMask.NameToLayer("Default");
-        }
-        else if(LandscapeManager.Instance.cullingMode == CullingMode.Visibility)
-        {
-            visible = !isCulled && inDistance;
+            case CullingMode.Layer:
+                chunk.GameObject.layer = isCulled? 
+                    LayerMask.NameToLayer("Culled") : 
+                    LayerMask.NameToLayer("Default");
+                break;
+            case CullingMode.Visibility:
+                visible = !isCulled && inDistance;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 		
         chunk.SetVisible(visible);
@@ -182,7 +187,7 @@ public class TerrainChunk
         Renderer = GameObject.AddComponent<MeshRenderer>();
         
         GameObject.transform.localScale = Vector3.one * LandscapeManager.Scale;
-        GameObject.SetActive(true);
+        GameObject.SetActive(false);
     }
 
     private void ModifyVertices(MeshFilter meshFilter, float heightMultiplier = 1f)
@@ -260,12 +265,10 @@ public class TerrainChunk
 
     public void Update()
     {
-        var viewerCoords = new int2(Viewer.ChunkCoord.Longitude, Viewer.ChunkCoord.Latitude);
-        var coords = new int2(Coordinates.Longitude, Coordinates.Latitude);
-        var chunksFromViewer = viewerCoords - coords;
+        var chunksFromViewer = Viewer.ChunkCoord.AsInt2() - Coordinates.AsInt2();
         chunksFromViewer = new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
-        bool inDistance = chunksFromViewer.x < TerrainChunksManager.ChunksVisibleInViewDist && 
-                          chunksFromViewer.y < TerrainChunksManager.ChunksVisibleInViewDist;
+        var inDistance = chunksFromViewer.x < TerrainChunksManager.ChunksVisibleInViewDist && 
+                         chunksFromViewer.y < TerrainChunksManager.ChunksVisibleInViewDist;
 			
         // if (inDistance)
         // {
