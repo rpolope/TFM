@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-public static class MeshGenerator
+public class MeshGenerator
 {
     [BurstCompile]
     private struct GenerateMeshJob : IJobParallelFor
@@ -16,7 +16,7 @@ public static class MeshGenerator
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
         public TerrainParameters TerrainParameters;
-        [NativeDisableParallelForRestriction]
+        [ReadOnly]
         public MapData MapData;
         public float2 Center;
         public int Resolution;
@@ -76,7 +76,7 @@ public static class MeshGenerator
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, MapData mapData, ref MeshData meshData)
+    public JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float2 center, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -88,7 +88,7 @@ public static class MeshGenerator
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
             Center = center,
-            Scale = scale,
+            Scale = LandscapeManager.Scale,
             LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters
         };
@@ -96,7 +96,6 @@ public static class MeshGenerator
         
         return jobHandle;
     }
-
 }
 
 public class MeshData {

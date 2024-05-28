@@ -8,8 +8,6 @@ using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {
-    public static int MapSize = 7;
-
     [BurstCompile]
     private struct GenerateMapJob : IJobParallelFor
     {
@@ -82,19 +80,19 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public static Color[] GenerateColorMap(int mapSize, float heat, float moisture, float[] heightMap, Color[] moistureColorRange)
+    public static Color[] GenerateColorMap(int mapSize, Biome biome, float[] heightMap)
     {
         var colorMap = new NativeArray<Color>(mapSize, Allocator.TempJob);
         var heights = new NativeArray<float>(heightMap, Allocator.TempJob);
-        var moistureColors = new NativeArray<Color>(moistureColorRange, Allocator.TempJob);
+        var moistureColors = new NativeArray<Color>(biome.ColorGradient, Allocator.TempJob);
         
         var generateMapJob = new GenerateColorMapJob()
         {
             HeightMap = heights,
             ColorMap = colorMap,
             BiomeMoistureColorRange = moistureColors,
-            ChunkMoisture = moisture,
-            LatitudeHeat = heat,
+            ChunkMoisture = biome.Moisture,
+            LatitudeHeat = biome.Heat,
         };
         generateMapJob.Schedule( mapSize, 3000).Complete();
 
@@ -161,11 +159,11 @@ public class MapGenerator : MonoBehaviour
     }
 }
 
-public struct MapData {
+public readonly struct MapData {
     [NativeDisableParallelForRestriction]
-    public NativeArray<float> HeightMap;
+    public readonly NativeArray<float> HeightMap;
     [NativeDisableParallelForRestriction]
-    public NativeArray<Color> ColorMap;
+    public readonly NativeArray<Color> ColorMap;
 
     public MapData (float[] heightMap, Color[] colorMap)
     {

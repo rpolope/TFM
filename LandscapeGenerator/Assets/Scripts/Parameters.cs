@@ -112,7 +112,7 @@ public struct MeshParameters
     public MeshParameters(float waterLevel)
     {
         resolution = 11;
-        heightScale = 100000;
+        heightScale = 1;
         levelsOfDetail = 1;
         this.waterLevel = waterLevel;
     }

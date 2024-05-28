@@ -14,8 +14,8 @@ public class LandscapeManager : MonoBehaviour
     public static LandscapeManager Instance;
     
     public const float Scale = 1f;
-    public const int MapWidth = 32;
-    public const int MapHeight = 32;
+    public const int MapWidth = 16;
+    public const int MapHeight = 16;
     public const float FixedMoisture = 0.5f;
     public Transform Transform { get; private set; }
 
@@ -69,6 +69,11 @@ public class LandscapeManager : MonoBehaviour
             BatchesManager.UpdateBatches();
             // BatchesManager.DisplayBatches();
         }
+    }
+
+    private void LateUpdate()
+    {
+        TerrainChunksManager.CompleteChunksMeshGeneration();
     }
 
     public void GenerateFixedMoistureMap()

@@ -70,9 +70,9 @@ public class MapVisualizer : MonoBehaviour
                 MeshData meshData = new MeshData(resolution, 0);
                 Color[] colors = GetColorMapFromColorRange(resolution, colorGradient, maps.HeightMap.ToArray(), mockedHeatValue);
                 meshData.Colors = new NativeArray<Color>(colors, Allocator.Persistent);
-                
+                MeshGenerator generator = new MeshGenerator();
                 float2 center = new float2(canvas.transform.position.x, canvas.transform.position.z);
-                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, 1, center, maps, ref meshData).Complete();
+                generator.ScheduleMeshGenerationJob(terrainParameters, resolution, center, maps, ref meshData).Complete();
                 MapDisplay.DrawMesh(meshData, meshFilter);
                 break;
             

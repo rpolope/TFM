@@ -27,10 +27,12 @@ public static class MapDisplay
                 DrawTexture(TextureGenerator.TextureFromHeightMap(chunk.HeightMap, resolution), renderer);
                 break;
             case DisplayMode.ColorMap:
-                renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
-                if (meshFilter != null)
-                    meshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, chunk.Biome.Heat,
-                        chunk.Biome.Moisture, chunk.HeightMap, chunk.Biome.ColorGradient);
+                
+                /* Dado que la mesh se completa en el LateUpdate, cuando se llama a DisplayChunk la mesh no está vacía y no tiene vértices a los que aplicar colores */
+                
+                // renderer.sharedMaterial = new Material(TerrainChunksManager.ChunksMaterial);
+                // if (meshFilter != null)
+                //     meshFilter.mesh.colors = MapGenerator.GenerateColorMap(resolution * resolution, chunk.Biome, chunk.HeightMap);
                 break;
             case DisplayMode.Mesh:
                 // Implement logic for Mesh display mode

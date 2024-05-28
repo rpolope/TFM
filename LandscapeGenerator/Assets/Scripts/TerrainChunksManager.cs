@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using UnityEngine;
 using Unity.Mathematics;
 using Unity.VisualScripting.FullSerializer.Internal.Converters;
@@ -10,13 +11,17 @@ using Random = UnityEngine.Random;
 
 public class TerrainChunksManager
 {
-    public const int TerrainChunkResolution = 11;
+    public static event Action CompleteMeshGenerationEvent;
+    
+    public const int TerrainChunkResolution = 129;
     public const float WorldTerrainChunkResolution = (TerrainChunkResolution - 1) * LandscapeManager.Scale;
 
-    private static LODInfo[] _detailLevels;
     private readonly Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
     private readonly HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
     private readonly List<TerrainChunk> _surroundTerrainChunks = new List<TerrainChunk>();
+    private static float MaxViewDst { get; set; }
+
+    internal static LODInfo[] DetailLevels;
 
     public static Material ChunksMaterial { get; private set; }
     public static int ChunksVisibleInViewDist { get; private set; }
@@ -29,12 +34,12 @@ public class TerrainChunksManager
         
         MaxViewDst = 0;
         ChunksVisibleInViewDist = 0;
-        _detailLevels = new LODInfo[3] {
-            new LODInfo(0, 3), 
-            new LODInfo(1, 4), 
-            new LODInfo(3, 5)
+        DetailLevels = new LODInfo[3] {
+            new LODInfo(0, 3, false), 
+            new LODInfo(1, 4, true), 
+            new LODInfo(3, 5, false)
         };
-        foreach (var detailLevel in _detailLevels)
+        foreach (var detailLevel in DetailLevels)
         {
             ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
             MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunkResolution - 1);
@@ -43,8 +48,11 @@ public class TerrainChunksManager
         MaxViewDst *= LandscapeManager.Scale;
     }
 
-    private static float MaxViewDst { get; set; }
-
+    public static void CompleteChunksMeshGeneration()
+    {
+        CompleteMeshGenerationEvent?.Invoke();
+    }
+    
     public void InitializeTerrainChunks(int size, int2 coords , Transform batch)
     {
         for (int y = 0; y < size; y++)
@@ -79,22 +87,25 @@ public class TerrainChunksManager
                 var viewedChunkCoord = new Coordinates(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
                 if (!IsWithinMapBounds(viewedChunkCoord)) continue;
+
+                if (!_terrainChunkDictionary.TryGetValue(viewedChunkCoord, out var terrainChunk)) continue;
                 
-                TerrainChunk chunk;
-                if (_terrainChunkDictionary.TryGetValue(viewedChunkCoord, out var value))
-                {
-                    chunk = value;
-                    _surroundTerrainChunks.Add(chunk);
-                    chunk.Update();
-                } else
-                {
-                    chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkResolution);
-                    _terrainChunkDictionary.Add(viewedChunkCoord, chunk);
-                    _surroundTerrainChunks.Add(chunk);
-                }
-				
-                if (chunk.IsVisible)
-                    _terrainChunksVisibleLastUpdate.Add(chunk);
+                _surroundTerrainChunks.Add(terrainChunk);
+                terrainChunk.Update();
+                if (terrainChunk.IsVisible)
+                    _terrainChunksVisibleLastUpdate.Add(terrainChunk);
+                
+                // FIXME: Descomentar cuando se implemente la funcionalidad de ir añdiendo los chunks del principio 
+                // al final cuando se salga de los límites del mapa para crear la sensación de mapa infinito.
+                // else
+                // {
+                //     chunk = new TerrainChunk(viewedChunkCoord, TerrainChunkResolution);
+                //     _terrainChunkDictionary.Add(viewedChunkCoord, chunk);
+                //     _surroundTerrainChunks.Add(chunk);
+                // }
+                //
+                // if (chunk.IsVisible)
+                //     _terrainChunksVisibleLastUpdate.Add(chunk);
             }
         }
     }
@@ -163,11 +174,19 @@ public class TerrainChunk
     public Coordinates Coordinates { get; private set; }
     public Biome Biome { get; private set; }
     public float[] HeightMap { get; private set; }
+    public Color[] ColorMap { get; set; }
+    public MapData MapData { get; private set;}
     public bool IsIsland { get; private set; }
     public GameObject GameObject { get; private set; }
     public MeshRenderer Renderer { get; private set; }
     public MeshFilter MeshFilter { get; private set; }
     
+    private readonly MeshCollider _meshCollider;
+    private readonly LODInfo[] _detailLevels;
+    private readonly LODMesh _colliderMesh;
+    private readonly LODMesh[] _lodMeshes;
+    private int _lodIndex;
+
     public float2 Position { get; private set; }
     private Dictionary<Cardinal, TerrainChunk> Neighbors { get; } = new(4);
     private Dictionary<Cardinal, Border> Borders { get; } = new(4);
@@ -176,6 +195,8 @@ public class TerrainChunk
 
     public TerrainChunk(Coordinates coordinates, int resolution)
     {
+        TerrainChunksManager.CompleteMeshGenerationEvent += CompleteMeshGeneration;
+        
         Coordinates = coordinates;
         IsIsland = Random.value > 0.9f;
         Biome = BiomesManager.GetBiome(coordinates);
@@ -183,7 +204,9 @@ public class TerrainChunk
         Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (resolution - 1);
 
         HeightMap = MapGenerator.GenerateNoiseMap(resolution * resolution, coords, Biome.TerrainParameters.noiseParameters);
-
+        ColorMap = MapGenerator.GenerateColorMap(resolution * resolution, Biome, HeightMap);
+        MapData = new MapData(HeightMap, ColorMap);
+        
         foreach (Cardinal cardinal in Enum.GetValues(typeof(Cardinal)))
         {
             Borders[cardinal] = new Border(cardinal, this);
@@ -193,45 +216,41 @@ public class TerrainChunk
         GameObject.transform.position = new Vector3(Position.x, 0, Position.y) * LandscapeManager.Scale;
         
         MeshFilter = GameObject.AddComponent<MeshFilter>();
-        MeshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
-        // ModifyVertices(MeshFilter);
-        
+        // MeshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
         Renderer = GameObject.AddComponent<MeshRenderer>();
+        Renderer.sharedMaterial = TerrainChunksManager.ChunksMaterial;
+        
+        _meshCollider = GameObject.AddComponent<MeshCollider>();
+        
+        _detailLevels = TerrainChunksManager.DetailLevels;
+        _lodMeshes = new LODMesh[_detailLevels.Length];
+        for (int i = 0; i < _detailLevels.Length; i++) {
+            _lodMeshes[i] = new LODMesh(_detailLevels[i].lod, this);
+            if (_detailLevels[i].useForCollider) {
+                _colliderMesh = _lodMeshes[i];
+            }
+        }
         
         GameObject.transform.localScale = Vector3.one * LandscapeManager.Scale;
         GameObject.SetActive(false);
     }
 
-    private void ModifyVertices(MeshFilter meshFilter, float heightMultiplier = 1f)
+    private void CompleteMeshGeneration()
     {
-        float[] heightMap = HeightMap;
-        var originalMesh = LandscapeManager.Instance.meshFilter.mesh;
-
-        Vector3[] originalVertices = originalMesh.vertices;
-
-        if (originalVertices.Length != heightMap.Length)
-        {
-            Debug.LogError("El tamaño del mapa de alturas no coincide con el número de vértices.");
-            return;
-        }
-
-        Vector3[] modifiedVertices = new Vector3[originalVertices.Length];
-        for (int i = 0; i < originalVertices.Length; i++)
-        {
-            Vector3 vertex = originalVertices[i];
-            float height = heightMap[i] * heightMultiplier; 
-            modifiedVertices[i] = vertex + Vector3.up * height;
-        }
+        if (!IsVisible) return;
         
-        Mesh clonedMesh = new Mesh();
-        clonedMesh.vertices = modifiedVertices;
-        clonedMesh.triangles = originalMesh.triangles;
-        clonedMesh.uv = originalMesh.uv;
-        clonedMesh.normals = originalMesh.normals;
-        clonedMesh.RecalculateBounds();
-        clonedMesh.RecalculateNormals();
-        
-        meshFilter.mesh = clonedMesh;
+        var lodMesh = _lodMeshes[_lodIndex];
+        if (lodMesh.RequestedMesh)
+        {
+            lodMesh.CompleteMeshGeneration();
+            MeshFilter.mesh = lodMesh.Mesh;
+
+            if (_lodIndex == 0 && _colliderMesh.RequestedMesh)
+            {
+                _colliderMesh.CompleteMeshGeneration();
+                _meshCollider.sharedMesh = _colliderMesh.Mesh;
+            }
+        }
     }
 
     public void AssignNeighbor(Cardinal direction, TerrainChunk neighbor)
@@ -278,58 +297,58 @@ public class TerrainChunk
         var inDistance = chunksFromViewer.x < TerrainChunksManager.ChunksVisibleInViewDist && 
                          chunksFromViewer.y < TerrainChunksManager.ChunksVisibleInViewDist;
 			
-        // if (inDistance)
-        // {
-        //     int lodIndex = 0;
-        //
-        //     for (int i = 0; i < TerrainChunksManager.DetailLevels.Length - 1; i++)
-        //     {
-        //         if (chunksFromViewer.x < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold && 
-        //             chunksFromViewer.y < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold )
-        //         {
-        //             break;
-        //         }
-					   //
-        //         lodIndex = i + 1;
-					   //
-        //     }
-        //     if (lodIndex != _lodIndex)
-        //     {
-        //         var lodMesh = _lodMeshes[lodIndex];
-        //         _lodIndex = lodIndex;
-        //
-        //         if (lodMesh.HasMesh)
-        //         {
-        //             _meshFilter.mesh = lodMesh.Mesh;
-        //             if (lodIndex == 0)
-        //             {
-        //                 _meshCollider.enabled = true;
-        //                 _meshCollider.sharedMesh = _colliderMesh.Mesh;
-        //             }
-        //         }
-        //         else
-        //         {
-        //             lodMesh.RequestMesh();
-        //         }
-        //     }
-				    //
-        //     if (_lodIndex == 0 && _coord.Equals(Viewer.ChunkCoord))
-        //     {
-        //         _meshCollider.enabled = true;
-        //         if (_colliderMesh.HasMesh)
-        //         {
-        //             _meshCollider.sharedMesh = _colliderMesh.Mesh;
-        //         }
-        //         else
-        //         {
-        //             _colliderMesh.RequestMesh();
-        //         }
-        //     }
-        //     else
-        //     {
-        //         _meshCollider.enabled = false;
-        //     }
-        // }
+        if (inDistance)
+        {
+            int lodIndex = 0;
+        
+            for (int i = 0; i < _detailLevels.Length - 1; i++)
+            {
+                if (chunksFromViewer.x < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold && 
+                    chunksFromViewer.y < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold )
+                {
+                    break;
+                }
+					   
+                lodIndex = i + 1;
+					   
+            }
+            if (lodIndex != _lodIndex)
+            {
+                var lodMesh = _lodMeshes[lodIndex];
+                _lodIndex = lodIndex;
+        
+                if (lodMesh.HasMesh)
+                {
+                    MeshFilter.mesh = lodMesh.Mesh;
+                    if (lodIndex == 0)
+                    {
+                        _meshCollider.enabled = true;
+                        _meshCollider.sharedMesh = _colliderMesh.Mesh;
+                    }
+                }
+                else
+                {
+                    lodMesh.RequestMesh();
+                }
+            }
+				    
+            if (_lodIndex == 0 && Coordinates.Equals(Viewer.ChunkCoord))
+            {
+                _meshCollider.enabled = true;
+                if (_colliderMesh.HasMesh)
+                {
+                    _meshCollider.sharedMesh = _colliderMesh.Mesh;
+                }
+                else
+                {
+                    _colliderMesh.RequestMesh();
+                }
+            }
+            else
+            {
+                _meshCollider.enabled = false;
+            }
+        }
 
         TerrainChunksManager.CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
 
@@ -378,7 +397,7 @@ public class Border
         {
             var thisValue = Values[i];
             var neighborValue = neighborBorder.Values[i];
-            var adjustedValue = Mathf.Lerp(thisValue, neighborValue, 0.5f); // Interpolación lineal
+            var adjustedValue = Mathf.Lerp(thisValue, neighborValue, 0.5f);
             neighborBorder.Values[i] = adjustedValue;
             Values[i] = adjustedValue;
         }
@@ -395,11 +414,52 @@ public struct LODInfo {
     public int visibleChunksThreshold;
     public bool useForCollider;
 
-    public LODInfo(int lod, int visibleChunksThreshold)
+    public LODInfo(int lod, int visibleChunksThreshold, bool useForCollider)
     {
         this.lod = lod;
         this.visibleChunksThreshold = visibleChunksThreshold;
-        useForCollider = false;
+        this.useForCollider = useForCollider;
+    }
+}
+
+internal class LODMesh {
+
+    public Mesh Mesh;
+    public bool HasMesh;
+    public bool RequestedMesh;
+		
+    private readonly int _lod;
+    private readonly TerrainChunk _chunk;
+    internal JobHandle MeshJobHandle;
+    private MeshData _meshData;
+    private readonly MeshGenerator _generator;
+
+    public LODMesh(int lod, TerrainChunk chunk) {
+        _lod = lod;
+        _chunk = chunk;
+        HasMesh = false;
+        _generator = new MeshGenerator();
+    }
+
+    public void RequestMesh()
+    {
+        _meshData = new MeshData(TerrainChunksManager.TerrainChunkResolution, _lod);
+        var resolution = (TerrainChunksManager.TerrainChunkResolution - 1) / _meshData.LODScale + 1;
+        MeshJobHandle = _generator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters, resolution, _chunk.Position, _chunk.MapData, ref _meshData);
+        RequestedMesh = true;
+    }
+
+    public void CompleteMeshGeneration()
+    {
+        MeshJobHandle.Complete();
+        SetMesh();
+    }
+
+    private void SetMesh()
+    {
+        Mesh = _meshData.CreateMesh();
+        RequestedMesh = false;
+        HasMesh = true;
     }
 }
 
