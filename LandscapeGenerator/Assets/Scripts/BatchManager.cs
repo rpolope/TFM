@@ -7,7 +7,7 @@ using Debug = System.Diagnostics.Debug;
 public static class BatchesManager
 {
     private static Batch[,] _batches;
-    private const int BatchesNum = 1;
+    private const int BatchesNum = 2;
     private const int ChunksPerBatchSide = 16;
     private static readonly Dictionary<int2, Batch> ActiveBatches = new Dictionary<int2, Batch>();
     private static Batch _currentBatch;

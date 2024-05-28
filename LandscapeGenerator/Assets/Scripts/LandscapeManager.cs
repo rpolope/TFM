@@ -14,8 +14,8 @@ public class LandscapeManager : MonoBehaviour
     public static LandscapeManager Instance;
     
     public const float Scale = 1f;
-    public const int MapWidth = 16;
-    public const int MapHeight = 16;
+    public const int MapWidth = 32;
+    public const int MapHeight = 32;
     public const float FixedMoisture = 0.5f;
     public Transform Transform { get; private set; }
 
@@ -46,20 +46,22 @@ public class LandscapeManager : MonoBehaviour
     {
         Transform = transform;
         MapDisplay.DisplayMode = displayMode;
-        _lastLatitude = initialLatitude + InitialCoordOffset;
-        _lastLongitude = initialLongitude + InitialCoordOffset;
-        
+
+        _lastLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
+        _lastLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
+    
         GenerateMoistureMap();
         InitializeLatitudeHeats();
-        
+    
         Viewer.InitialCoords = new Vector2Int(_lastLongitude, _lastLatitude);
         Viewer.Initialize();
         BiomesManager.Initialize(false);
         TerrainChunksManager.Initialize();
         BatchesManager.Initialize();
-        
+    
         BatchesManager.DisplayBatches();
     }
+
 
     private void Update()
     {
