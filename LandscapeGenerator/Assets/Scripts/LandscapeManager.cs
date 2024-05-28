@@ -44,33 +44,30 @@ public class LandscapeManager : MonoBehaviour
 
     private void Start()
     {
-        MapDisplay.DisplayMode = displayMode;
-        GenerateMoistureMap();
-        InitializeLatitudeHeats();
         Transform = transform;
-        BiomesManager.Initialize(false);
-        BatchesManager.Initialize();
-        TerrainChunksManager.Initialize();
+        MapDisplay.DisplayMode = displayMode;
         _lastLatitude = initialLatitude + InitialCoordOffset;
         _lastLongitude = initialLongitude + InitialCoordOffset;
+        
+        GenerateMoistureMap();
+        InitializeLatitudeHeats();
+        
         Viewer.InitialCoords = new Vector2Int(_lastLongitude, _lastLatitude);
         Viewer.Initialize();
+        BiomesManager.Initialize(false);
+        TerrainChunksManager.Initialize();
+        BatchesManager.Initialize();
         
-        TerrainChunksManager.DisplayChunks();
+        BatchesManager.DisplayBatches();
     }
 
     private void Update()
     {
-        if (Viewer.PositionChanged()) {
-            Viewer.UpdateOldPosition();
-            TerrainChunksManager.UpdateVisibleChunks();
-        }
-        /* */
-		
-        if (Viewer.RotationChanged())
+        if (Viewer.PositionChanged())
         {
-            Viewer.UpdateOldRotation();
-            TerrainChunksManager.UpdateCulledChunks();
+            Viewer.UpdateOldPosition();
+            BatchesManager.UpdateBatches();
+            // BatchesManager.DisplayBatches();
         }
     }
 

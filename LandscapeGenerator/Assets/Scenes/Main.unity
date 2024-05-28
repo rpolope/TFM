@@ -709,7 +709,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3be974aeb4e504e488faedcbb0928ac2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  displayMode: 0
+  displayMode: 1
   initialLatitude: 0
   initialLongitude: 0
   moistureParameters:

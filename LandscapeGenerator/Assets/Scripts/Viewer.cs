@@ -31,7 +31,7 @@ public class Viewer : MonoBehaviour
     {
         var position = _viewerTransform.position;
         var rotation = _viewerTransform.rotation;
-        var initialPos = TerrainChunksManager.GetChunkFromCoordinates(new Coordinates(InitialCoords.x, InitialCoords.y)).Position;
+        var initialPos = new float2(InitialCoords.x, InitialCoords.y) * TerrainChunksManager.WorldTerrainChunkResolution;
         _viewerTransform.position = new Vector3(initialPos.x, 0, initialPos.y);
         _viewerOldPosition = new Vector2(position.x, position.z);
         _viewerOldRotationY = rotation.eulerAngles.y;

@@ -1,31 +1,68 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 public static class BatchesManager
 {
-    private static int _currentBatchX;
-    private static int _currentBatchY;
     private static Batch[,] _batches;
     private const int BatchesNum = 1;
     private const int ChunksPerBatchSide = 32;
+    private static readonly Dictionary<int2, Batch> ActiveBatches = new Dictionary<int2, Batch>();
     private static Batch _currentBatch;
 
     public static void Initialize()
     {
         _batches = new Batch[BatchesNum, BatchesNum];
         InitializeBatches();
-        UpdateCurrentBatch();
+        SetCurrentBatch();
+        UpdateBatches();
     }
 
-    private static void UpdateCurrentBatch()
+    private static void SetCurrentBatch()
     {
-        _currentBatchX = Viewer.ChunkCoord.Longitude / ChunksPerBatchSide;
-        _currentBatchY = Viewer.ChunkCoord.Latitude / ChunksPerBatchSide;
+        int currentBatchXCoord = Mathf.Clamp((Viewer.ChunkCoord.Latitude / LandscapeManager.MapHeight) / ChunksPerBatchSide, 0, LandscapeManager.MapHeight);
+        int currentBatchYCoord = Mathf.Clamp((Viewer.ChunkCoord.Longitude / LandscapeManager.MapWidth) / ChunksPerBatchSide, 0, LandscapeManager.MapWidth);
 
-        _currentBatch = _batches[_currentBatchX, _currentBatchY];
+        if (_currentBatch is not null && _currentBatch.Equals(_batches[currentBatchXCoord, currentBatchYCoord])) 
+           return;
+        
+        var newBatchCoord = new int2(currentBatchXCoord, currentBatchYCoord);
+        _currentBatch = _batches[currentBatchXCoord, currentBatchYCoord];
         _currentBatch.SetActive(true);
+        _currentBatch.LoadBatch();
+        ActiveBatches[newBatchCoord] = _currentBatch;
     }
+    
+    public static void DisplayBatches()
+    {
+        foreach (var activeBatch in ActiveBatches.Values)
+        {
+            activeBatch.DisplayChunks();
+        } 
+    }
+
+    private static void DeactivateOldBatches(int2 newBatchCoord)
+    {
+        List<int2> batchesToRemove = new List<int2>();
+
+        foreach (var (batchCoord, batch) in ActiveBatches)
+        {
+            if (math.abs(batchCoord.x - newBatchCoord.x) > 1 || math.abs(batchCoord.y - newBatchCoord.y) > 1)
+            {
+                batch.SetActive(false);
+                batchesToRemove.Add(batchCoord);
+            }
+        }
+
+        // Remove the deactivated batches from the active batches dictionary
+        foreach (var batchCoord in batchesToRemove)
+        {
+            ActiveBatches.Remove(batchCoord);
+        }
+    }
+
 
     private static void InitializeBatches()
     {
@@ -39,19 +76,24 @@ public static class BatchesManager
         }
     }
 
-    static void Update()
+    public static void UpdateBatches()
     {
-        // Add logic to change batches based on player position or other criteria
+        foreach (var batch in ActiveBatches.Values)
+        {
+            batch.UpdateChunks();
+        }
     }
 
     private class Batch
     {
-        private TerrainChunk[,] _chunks;
-        // private static Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
-        private GameObject _gameObject;
+        private readonly TerrainChunksManager _chunksManager;
+        private readonly int2 _coords;
+        private readonly GameObject _gameObject;
+        public bool IsActive => _gameObject.activeSelf;
 
         public Batch(int2 coords)
         {
+            _coords = coords;
             _gameObject = new GameObject($"Batch({coords.x},{coords.y})") 
             {
                 transform =
@@ -60,19 +102,41 @@ public static class BatchesManager
                     parent = LandscapeManager.Instance.transform
                 }
             };
+            _chunksManager = new TerrainChunksManager();
             _gameObject.SetActive(false);
-            
-            LoadBatch(coords);
         }
 
-        private void LoadBatch(int2 batchCoords)
+        internal void LoadBatch()
         {
-            TerrainChunksManager.InitializeTerrainChunks(ChunksPerBatchSide, batchCoords, _gameObject.transform);
+            _chunksManager.InitializeTerrainChunks(ChunksPerBatchSide, _coords, _gameObject.transform);
         }
 
         public void SetActive(bool active)
         {
             _gameObject.SetActive(active);
+        }
+
+        public void UpdateChunks()
+        {
+            SetCurrentBatch();
+            foreach (var batch in ActiveBatches.Values)
+            {
+                batch._chunksManager.Update();
+                batch._gameObject.SetActive(batch._chunksManager.HasActiveChunks);
+            }
+        }
+        
+        public override bool Equals(object obj)
+        {
+            if (obj is not Batch batch) return false;
+            return batch._coords.x == _coords.x && batch._coords.y == _coords.y;
+        }
+        
+        public override int GetHashCode() => (_coords.x, _coords.y).GetHashCode();
+
+        public void DisplayChunks()
+        {
+            _chunksManager.DisplayChunks();
         }
     }
 }
