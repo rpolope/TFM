@@ -10,9 +10,9 @@ public class TerrainChunksManager
 {
     public static event Action CompleteMeshGenerationEvent;
 
-    private readonly Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
-    private readonly HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
-    private readonly List<TerrainChunk> _surroundTerrainChunks = new List<TerrainChunk>();
+    private static readonly Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
+    private static readonly HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
+    private static readonly List<TerrainChunk> _surroundTerrainChunks = new List<TerrainChunk>();
     private static float MaxViewDst { get; set; }
 
     internal static LODInfo[] DetailLevels;
@@ -40,6 +40,8 @@ public class TerrainChunksManager
         }
 
         MaxViewDst *= LandscapeManager.Scale;
+
+        InitializeTerrainChunks();
     }
 
     public static void CompleteChunksMeshGeneration()
@@ -47,21 +49,21 @@ public class TerrainChunksManager
         CompleteMeshGenerationEvent?.Invoke();
     }
     
-    public void InitializeTerrainChunks(int size, int2 coords , Transform batch)
+    public static void InitializeTerrainChunks()
     {
-        for (int y = 0; y < size; y++)
+        for (int y = 0; y < LandscapeManager.MapHeight; y++)
         {
-            for (int x = 0; x < size; x++)
+            for (int x = 0; x < LandscapeManager.MapWidth; x++)
             {
-                var chunkCoords = new Coordinates(coords.x + x, coords.y + y);
+                var chunkCoords = new Coordinates(x, y);
                 var chunk = new TerrainChunk(chunkCoords);
-                chunk.GameObject.transform.parent = batch;
+                chunk.GameObject.transform.parent = LandscapeManager.Instance.Transform;
                 _terrainChunkDictionary.Add(chunkCoords, chunk);
             }
         }
     }
 
-    private void UpdateVisibleChunks()
+    private static void UpdateVisibleChunks()
     {
         foreach (var visibleChunk in _terrainChunksVisibleLastUpdate)
         {
@@ -104,7 +106,7 @@ public class TerrainChunksManager
         }
     }
     
-    public void UpdateCulledChunks()
+    public static void UpdateCulledChunks()
     {
         var viewerForward = Viewer.ForwardV2.normalized;
         foreach (var chunk in _surroundTerrainChunks)
@@ -121,7 +123,7 @@ public class TerrainChunksManager
         }
     }
 
-    public void Update()
+    public static void Update()
     {
         UpdateVisibleChunks();
         /* */

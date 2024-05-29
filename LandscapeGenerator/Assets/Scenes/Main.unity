@@ -311,7 +311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24352cf4a6081e44a80b130f162cdc40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
+  speed: 150
 --- !u!4 &646257729
 Transform:
   m_ObjectHideFlags: 0
@@ -724,7 +724,7 @@ MonoBehaviour:
     ridgeness: 0
     ridgeRoughness: 0
   meshFilter: {fileID: 1411172155}
-  cullingMode: 0
+  cullingMode: 1
 --- !u!4 &1411172154
 Transform:
   m_ObjectHideFlags: 0

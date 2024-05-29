@@ -54,9 +54,9 @@ public class LandscapeManager : MonoBehaviour
         Viewer.Initialize();
         BiomesManager.Initialize(false);
         TerrainChunksManager.Initialize();
-        BatchesManager.Initialize();
-    
-        BatchesManager.DisplayBatches();
+        
+        // BatchesManager.Initialize();
+        // BatchesManager.DisplayBatches();
     }
 
 
@@ -65,7 +65,8 @@ public class LandscapeManager : MonoBehaviour
         if (Viewer.PositionChanged())
         {
             Viewer.UpdateOldPosition();
-            BatchesManager.UpdateBatches();
+            TerrainChunksManager.Update();
+            // BatchesManager.UpdateBatches();
             // BatchesManager.DisplayBatches();
         }
     }

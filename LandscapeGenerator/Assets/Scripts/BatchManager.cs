@@ -123,7 +123,7 @@ public static class BatchesManager
 
         internal void LoadBatch()
         {
-            _chunksManager.InitializeTerrainChunks(ChunksPerBatchSide, _coords, _gameObject.transform);
+            // _chunksManager.InitializeTerrainChunks(ChunksPerBatchSide, _coords, _gameObject.transform);
         }
 
         public void SetActive(bool active)
@@ -133,12 +133,12 @@ public static class BatchesManager
 
         public void UpdateChunks()
         {
-            SetCurrentBatch();
-            foreach (var batch in ActiveBatches.Values)
-            {
-                batch._chunksManager.Update();
-                batch._gameObject.SetActive(batch._chunksManager.HasActiveChunks);
-            }
+            // SetCurrentBatch();
+            // foreach (var batch in ActiveBatches.Values)
+            // {
+            //     batch._chunksManager.Update();
+            //     batch._gameObject.SetActive(batch._chunksManager.HasActiveChunks);
+            // }
         }
         
         public override bool Equals(object obj)
