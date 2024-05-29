@@ -1,16 +1,13 @@
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Mathematics;
-using UnityEngine.Serialization;
 
 public class LandscapeManager : MonoBehaviour
 {
     
     private static float[] MoistureMap { get; set; }
     private static float[] LatitudeHeats { get; set; }
-    private const int InitialCoordOffset = MapWidth / 2;
     public static LandscapeManager Instance;
     
     public const float Scale = 1f;

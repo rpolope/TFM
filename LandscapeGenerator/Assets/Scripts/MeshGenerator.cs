@@ -1,4 +1,3 @@
-using System.Linq;
 using Unity.Burst;
 using UnityEngine;
 using Unity.Collections;
@@ -15,10 +14,9 @@ public static class MeshGenerator
         public NativeArray<Color> Colors;
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
-        public TerrainParameters TerrainParameters;
+        public MeshParameters MeshParameters;
         [ReadOnly]
         public MapData MapData;
-        public float2 Center;
         public int Resolution;
         public int FacesCount;
         public float Scale;
@@ -33,10 +31,9 @@ public static class MeshGenerator
             float xPos = LODScale * (x - offset) * Scale;
             float zPos = LODScale * (z - offset) * Scale;
 
-            // float noiseValue = GenerateNoiseValue(Center + LODScale * new float2(x, z));
             float noiseValue = MapData.HeightMap[index];
             Colors[index] = MapData.ColorMap[Mathf.Clamp(Mathf.Abs(Mathf.RoundToInt(noiseValue * 100)), 0, 99)];
-            float height = Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
+            float height = Scale * noiseValue * MeshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
@@ -58,25 +55,9 @@ public static class MeshGenerator
                 Triangles[baseIndex + 5] = vertexIndex + 1;
             }
         }
-
-        private float GenerateNoiseValue(float2 samplePos)
-        {
-            float ridgedFactor = TerrainParameters.noiseParameters.ridgeness;
-            float noiseValue = Noise.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            // float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
-            //
-            // if (ridgedFactor > 0.01f)
-            //     noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
-            //
-            noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
-                TerrainParameters.meshParameters.waterLevel :  noiseValue;
-
-            return noiseValue;
-        }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float2 center, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(MeshParameters meshParameters, int resolution, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -87,10 +68,9 @@ public static class MeshGenerator
             MapData = mapData,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
-            Center = center,
             Scale = LandscapeManager.Scale,
             LODScale = meshData.LODScale,
-            TerrainParameters = terrainParameters
+            MeshParameters = meshParameters
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         

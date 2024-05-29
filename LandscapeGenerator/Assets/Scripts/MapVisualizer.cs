@@ -1,7 +1,5 @@
 using System;
-using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -71,10 +69,7 @@ public class MapVisualizer : MonoBehaviour
                 Color[] colors = GetColorMapFromColorRange(resolution, colorGradient, maps.HeightMap.ToArray(), mockedHeatValue);
                 meshData.Colors = new NativeArray<Color>(colors, Allocator.Persistent);
                 
-                var position = canvas.transform.position;
-                float2 center = new float2(position.x, position.z);
-                
-                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, center, maps, ref meshData).Complete();
+                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters.meshParameters, resolution, maps, ref meshData).Complete();
                 MapDisplay.DrawMesh(meshData, meshFilter);
                 break;
             

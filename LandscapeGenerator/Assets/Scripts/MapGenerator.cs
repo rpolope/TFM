@@ -1,10 +1,8 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {

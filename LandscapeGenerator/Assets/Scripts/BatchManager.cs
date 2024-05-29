@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
@@ -77,6 +78,10 @@ public static class BatchesManager
 
     public static void UpdateBatches()
     {
+        foreach (var _batch in _batches)
+        {
+            
+        }
         foreach (var batch in ActiveBatches.Values)
         {
             batch.UpdateChunks();
@@ -97,12 +102,23 @@ public static class BatchesManager
             {
                 transform =
                 {
-                    position = new Vector3(coords.x, coords.y) * TerrainChunksManager.WorldTerrainChunkResolution, 
-                    parent = LandscapeManager.Instance.transform
+                    position = new Vector3(coords.x, 0, coords.y) * TerrainChunk.WorldSize, 
+                    parent = LandscapeManager.Instance.transform,
+                    localScale = Vector3.one * 410
                 }
             };
             _chunksManager = new TerrainChunksManager();
-            _gameObject.SetActive(false);
+            _gameObject.SetActive(true);
+            
+            var meshFilter = _gameObject.AddComponent<MeshFilter>();
+            var meshRenderer = _gameObject.AddComponent<MeshRenderer>();
+            
+            // var meshData = new MeshData(2, 0);
+            // const int mapSize = 2 * 2;
+            // MeshGenerator.ScheduleMeshGenerationJob(new MeshParameters(0), 2, new MapData(new float[mapSize], new Color[mapSize]), ref meshData).Complete();
+
+            meshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
+            meshRenderer.material = new Material(Shader.Find("Standard"));
         }
 
         internal void LoadBatch()

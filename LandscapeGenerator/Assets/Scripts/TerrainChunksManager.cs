@@ -1,20 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Jobs;
 using UnityEngine;
 using Unity.Mathematics;
-using Unity.VisualScripting.FullSerializer.Internal.Converters;
-using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
 
 public class TerrainChunksManager
 {
     public static event Action CompleteMeshGenerationEvent;
-    
-    public const int TerrainChunkResolution = 129;
-    public const float WorldTerrainChunkResolution = (TerrainChunkResolution - 1) * LandscapeManager.Scale;
 
     private readonly Dictionary<Coordinates, TerrainChunk> _terrainChunkDictionary = new Dictionary<Coordinates, TerrainChunk>();
     private readonly HashSet<TerrainChunk> _terrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
@@ -42,7 +36,7 @@ public class TerrainChunksManager
         foreach (var detailLevel in DetailLevels)
         {
             ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
-            MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunkResolution - 1);
+            MaxViewDst += detailLevel.visibleChunksThreshold * (TerrainChunk.Resolution - 1);
         }
 
         MaxViewDst *= LandscapeManager.Scale;
@@ -60,7 +54,7 @@ public class TerrainChunksManager
             for (int x = 0; x < size; x++)
             {
                 var chunkCoords = new Coordinates(coords.x + x, coords.y + y);
-                var chunk = new TerrainChunk(chunkCoords, TerrainChunkResolution);
+                var chunk = new TerrainChunk(chunkCoords);
                 chunk.GameObject.transform.parent = batch;
                 _terrainChunkDictionary.Add(chunkCoords, chunk);
             }
@@ -77,8 +71,8 @@ public class TerrainChunksManager
         _terrainChunksVisibleLastUpdate.Clear();
         _surroundTerrainChunks.Clear();
 			
-        int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunkResolution - 1));
-        int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunkResolution - 1));
+        int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunk.Resolution - 1));
+        int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunk.Resolution - 1));
         Viewer.ChunkCoord = new Coordinates(currentChunkCoordX, currentChunkCoordY);
 		
         for (int yOffset = -ChunksVisibleInViewDist; yOffset <= ChunksVisibleInViewDist; yOffset++) {
@@ -171,6 +165,9 @@ public class TerrainChunksManager
 
 public class TerrainChunk
 {
+    public const int Resolution = 129;
+    public const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
+    
     public Coordinates Coordinates { get; private set; }
     public Biome Biome { get; private set; }
     public float[] HeightMap { get; private set; }
@@ -193,18 +190,19 @@ public class TerrainChunk
     public Material Material { get; set; }
     public bool IsVisible => GameObject.activeSelf;
 
-    public TerrainChunk(Coordinates coordinates, int resolution)
+    public TerrainChunk(Coordinates coordinates)
     {
+        
         TerrainChunksManager.CompleteMeshGenerationEvent += CompleteMeshGeneration;
         
         Coordinates = coordinates;
         IsIsland = Random.value > 0.9f;
         Biome = BiomesManager.GetBiome(coordinates);
         var coords = new float2(Coordinates.Longitude, Coordinates.Longitude);
-        Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (resolution - 1);
+        Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (Resolution - 1);
 
-        HeightMap = MapGenerator.GenerateNoiseMap(resolution * resolution, coords, Biome.TerrainParameters.noiseParameters);
-        ColorMap = MapGenerator.GenerateColorMap(resolution * resolution, Biome, HeightMap);
+        HeightMap = MapGenerator.GenerateNoiseMap(Resolution * Resolution, coords, Biome.TerrainParameters.noiseParameters);
+        ColorMap = MapGenerator.GenerateColorMap(Resolution * Resolution, Biome, HeightMap);
         MapData = new MapData(HeightMap, ColorMap);
         
         foreach (Cardinal cardinal in Enum.GetValues(typeof(Cardinal)))
@@ -279,7 +277,7 @@ public class TerrainChunk
         if (Coordinates.Equals(Viewer.ChunkCoord)) return false;
 
         var chunkCenter = new Vector2(Position.x, Position.y);
-        chunkCenter += chunkCenter.normalized * (TerrainChunksManager.WorldTerrainChunkResolution * 0.5f);
+        chunkCenter += chunkCenter.normalized * (TerrainChunk.WorldSize * 0.5f);
         Vector2 chunkDirection = (chunkCenter - Viewer.PositionV2).normalized;
         float dot = Vector2.Dot(viewerForward, chunkDirection);
         float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
@@ -366,7 +364,7 @@ public class Border
     {
         Cardinal = cardinal;
         _chunk = chunk;
-        Values = new float[TerrainChunksManager.TerrainChunkResolution];
+        Values = new float[TerrainChunk.Resolution];
         InitializeValues();
     }
 
@@ -380,7 +378,7 @@ public class Border
 
     private float GetHeightValueForCardinal(int index)
     {
-        const int length = TerrainChunksManager.TerrainChunkResolution;
+        const int length = TerrainChunk.Resolution;
         return Cardinal switch
         {
             Cardinal.West => _chunk.HeightMap[0 + index * length],
@@ -441,9 +439,9 @@ internal class LODMesh {
 
     public void RequestMesh()
     {
-        _meshData = new MeshData(TerrainChunksManager.TerrainChunkResolution, _lod);
-        var resolution = (TerrainChunksManager.TerrainChunkResolution - 1) / _meshData.LODScale + 1;
-        MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters, resolution, _chunk.Position, _chunk.MapData, ref _meshData);
+        _meshData = new MeshData(TerrainChunk.Resolution, _lod);
+        var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
+        MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters.meshParameters, resolution, _chunk.MapData, ref _meshData);
         RequestedMesh = true;
     }
 

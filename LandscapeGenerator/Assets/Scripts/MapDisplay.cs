@@ -1,6 +1,4 @@
 using System;
-using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 public enum DisplayMode
@@ -18,7 +16,7 @@ public static class MapDisplay
     {
         Renderer renderer = chunk.Renderer;
         MeshFilter meshFilter = chunk.MeshFilter;
-        const int resolution = TerrainChunksManager.TerrainChunkResolution;
+        const int resolution = TerrainChunk.Resolution;
         
         switch (displayMode)
         {
