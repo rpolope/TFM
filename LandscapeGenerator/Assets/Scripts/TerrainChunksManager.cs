@@ -29,9 +29,9 @@ public class TerrainChunksManager
         MaxViewDst = 0;
         ChunksVisibleInViewDist = 0;
         DetailLevels = new LODInfo[3] {
-            new LODInfo(0, 3, false), 
-            new LODInfo(1, 4, true), 
-            new LODInfo(3, 5, false)
+            new(0, 3, false), 
+            new(1, 4, true), 
+            new(3, 5, false)
         };
         foreach (var detailLevel in DetailLevels)
         {
@@ -184,28 +184,32 @@ public class TerrainChunk
     private readonly LODInfo[] _detailLevels;
     private readonly LODMesh _colliderMesh;
     private readonly LODMesh[] _lodMeshes;
-    private int _lodIndex;
+    private int _lodIndex = -1;
 
     public float2 Position { get; private set; }
     private Dictionary<Cardinal, TerrainChunk> Neighbors { get; } = new(4);
     private Dictionary<Cardinal, Border> Borders { get; } = new(4);
     public Material Material { get; set; }
     public bool IsVisible => GameObject.activeSelf;
+    public bool HasMesh => _lodMeshes[0].HasMesh;
 
-    public TerrainChunk(Coordinates coordinates)
+    public TerrainChunk(Coordinates coordinates, LODInfo[] detailLevels = default, Transform parent = default)
     {
         
-        TerrainChunksManager.CompleteMeshGenerationEvent += CompleteMeshGeneration;
+        TerrainManagerWithCorrutine.CompleteMeshGenerationEvent += CompleteMeshGeneration;
         
         Coordinates = coordinates;
         IsIsland = Random.value > 0.9f;
-        Biome = BiomesManager.GetBiome(coordinates);
+        
+        // FIXME
+        // Biome = BiomesManager.GetBiome(coordinates);
         var coords = new float2(Coordinates.Longitude, Coordinates.Longitude);
         Position = new float2(Coordinates.Longitude, Coordinates.Latitude) * (Resolution - 1);
-
-        HeightMap = MapGenerator.GenerateNoiseMap(Resolution * Resolution, coords, Biome.TerrainParameters.noiseParameters);
-        ColorMap = MapGenerator.GenerateColorMap(Resolution * Resolution, Biome, HeightMap);
-        MapData = new MapData(HeightMap, ColorMap);
+        // FIXME
+        // HeightMap = MapGenerator.GenerateNoiseMap(Resolution * Resolution, coords, Biome.TerrainParameters.noiseParameters);
+        HeightMap = MapGenerator.GenerateNoiseMap(Resolution * Resolution, coords, new NoiseParameters(NoiseType.Perlin));
+        // ColorMap = MapGenerator.GenerateColorMap(Resolution * Resolution, Biome, HeightMap);
+        MapData = new MapData(HeightMap, new Color[HeightMap.Length]);
         
         foreach (Cardinal cardinal in Enum.GetValues(typeof(Cardinal)))
         {
@@ -215,14 +219,17 @@ public class TerrainChunk
         GameObject = new GameObject($"Chunk({coordinates.Longitude},{coordinates.Latitude})");
         GameObject.transform.position = new Vector3(Position.x, 0, Position.y) * LandscapeManager.Scale;
         
+        // FIXME
         MeshFilter = GameObject.AddComponent<MeshFilter>();
         // MeshFilter.mesh = LandscapeManager.Instance.meshFilter.mesh;
         Renderer = GameObject.AddComponent<MeshRenderer>();
-        Renderer.sharedMaterial = TerrainChunksManager.ChunksMaterial;
+        // Renderer.sharedMaterial = TerrainChunksManager.ChunksMaterial;
+        Renderer.sharedMaterial = new Material(Shader.Find("Standard"));
         
         _meshCollider = GameObject.AddComponent<MeshCollider>();
         
-        _detailLevels = TerrainChunksManager.DetailLevels;
+        _detailLevels = detailLevels ?? TerrainChunksManager.DetailLevels;
+                
         _lodMeshes = new LODMesh[_detailLevels.Length];
         for (int i = 0; i < _detailLevels.Length; i++) {
             _lodMeshes[i] = new LODMesh(_detailLevels[i].lod, this);
@@ -232,7 +239,11 @@ public class TerrainChunk
         }
         
         GameObject.transform.localScale = Vector3.one * LandscapeManager.Scale;
-        GameObject.SetActive(false);
+        GameObject.transform.parent = parent;
+
+        Update();
+        // FIXME
+        // GameObject.SetActive(false);
     }
 
     private void CompleteMeshGeneration()
@@ -294,8 +305,8 @@ public class TerrainChunk
     {
         var chunksFromViewer = Viewer.ChunkCoord.AsInt2() - Coordinates.AsInt2();
         chunksFromViewer = new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
-        var inDistance = chunksFromViewer.x < TerrainChunksManager.ChunksVisibleInViewDist && 
-                         chunksFromViewer.y < TerrainChunksManager.ChunksVisibleInViewDist;
+        var inDistance = chunksFromViewer.x < TerrainManagerWithCorrutine.ChunksVisibleInViewDist && 
+                         chunksFromViewer.y < TerrainManagerWithCorrutine.ChunksVisibleInViewDist;
 			
         if (inDistance)
         {
@@ -303,8 +314,8 @@ public class TerrainChunk
         
             for (int i = 0; i < _detailLevels.Length - 1; i++)
             {
-                if (chunksFromViewer.x < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold && 
-                    chunksFromViewer.y < TerrainChunksManager.DetailLevels[i].visibleChunksThreshold )
+                if (chunksFromViewer.x < TerrainManagerWithCorrutine.DetailLevels[i].visibleChunksThreshold && 
+                    chunksFromViewer.y < TerrainManagerWithCorrutine.DetailLevels[i].visibleChunksThreshold )
                 {
                     break;
                 }
@@ -350,8 +361,15 @@ public class TerrainChunk
             }
         }
 
-        TerrainChunksManager.CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
+        SetVisible(inDistance);
+        // FIXME
+        // TerrainChunksManager.CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
 
+    }
+
+    public void RequestMesh()
+    {
+        _lodMeshes[0].RequestMesh();
     }
 }
 
@@ -431,7 +449,7 @@ internal class LODMesh {
     private readonly int _lod;
     private readonly TerrainChunk _chunk;
     internal JobHandle MeshJobHandle;
-    private MeshData _meshData;
+    public MeshData MeshData { get; private set; }
 
     public LODMesh(int lod, TerrainChunk chunk) {
         _lod = lod;
@@ -441,9 +459,13 @@ internal class LODMesh {
 
     public void RequestMesh()
     {
-        _meshData = new MeshData(TerrainChunk.Resolution, _lod);
-        var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
-        MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters.meshParameters, resolution, _chunk.MapData, ref _meshData);
+        MeshData = new MeshData(TerrainChunk.Resolution, _lod);
+        var meshData = MeshData;
+        var resolution = (TerrainChunk.Resolution - 1) / meshData.LODScale + 1;
+        //FIXME
+        // MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters.meshParameters, resolution, _chunk.MapData, ref _meshData);
+        MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(new MeshParameters(0), resolution, _chunk.MapData, ref meshData);
+        MeshData = meshData;
         RequestedMesh = true;
     }
 
@@ -455,7 +477,7 @@ internal class LODMesh {
 
     private void SetMesh()
     {
-        Mesh = _meshData.CreateMesh();
+        Mesh = MeshData.CreateMesh();
         RequestedMesh = false;
         HasMesh = true;
     }

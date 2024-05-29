@@ -34,6 +34,39 @@ public class LODManager
 
         return new MapData(noiseMap, colorMap);
     }
+    
+    public Mesh ChangeMeshLOD(int lod, Mesh mesh)
+    {
+        var lodChangedMesh = new Mesh
+        {
+            vertices = mesh.vertices,
+            triangles = mesh.triangles,
+            normals = mesh.normals,
+            uv = mesh.uv
+        };
+
+        NativeArray<Vector3> vertices = new NativeArray<Vector3>(mesh.vertices, Allocator.TempJob);
+        int lodResolution = (Resolution - 1) / (1 << lod) + 1;
+        NativeArray<int> triangles = new NativeArray<int>((lodResolution - 1) * (lodResolution - 1) * 6, Allocator.TempJob);
+
+        LODTrianglesGenerationJob lodJob = new LODTrianglesGenerationJob
+        {
+            Vertices = vertices,
+            Triangles = triangles,
+            Resolution = Resolution,
+            LOD = lod
+        };
+
+        var jobHandle = lodJob.Schedule((lodResolution - 1) * (lodResolution - 1), 64);
+        jobHandle.Complete();
+
+        LODMeshes[lod].triangles = triangles.ToArray();
+
+        vertices.Dispose();
+        triangles.Dispose();
+
+        return lodChangedMesh;
+    }
 
     public Mesh ChangeMeshLOD(int lod)
     {
