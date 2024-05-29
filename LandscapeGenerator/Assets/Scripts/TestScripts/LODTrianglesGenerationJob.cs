@@ -17,7 +17,7 @@ public struct LODTrianglesGenerationJob : IJobParallelFor
     public void Execute(int index)
     {
         int lodStep = 1 << LOD; // equivalente a 2^lod
-        int lodResolution = Resolution / lodStep;
+        int lodResolution = (Resolution - 1) / lodStep + 1; // Resolución para el LOD actual
 
         int x = index % (lodResolution - 1);
         int z = index / (lodResolution - 1);
