@@ -14,8 +14,8 @@ public class LandscapeManager : MonoBehaviour
     public static LandscapeManager Instance;
     
     public const float Scale = 1f;
-    public const int MapWidth = 32;
-    public const int MapHeight = 32;
+    public const int MapWidth = 64;
+    public const int MapHeight = 64;
     public const float FixedMoisture = 0.5f;
     public Transform Transform { get; private set; }
 

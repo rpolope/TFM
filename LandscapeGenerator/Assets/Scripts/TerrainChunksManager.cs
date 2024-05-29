@@ -432,20 +432,18 @@ internal class LODMesh {
     private readonly TerrainChunk _chunk;
     internal JobHandle MeshJobHandle;
     private MeshData _meshData;
-    private readonly MeshGenerator _generator;
 
     public LODMesh(int lod, TerrainChunk chunk) {
         _lod = lod;
         _chunk = chunk;
         HasMesh = false;
-        _generator = new MeshGenerator();
     }
 
     public void RequestMesh()
     {
         _meshData = new MeshData(TerrainChunksManager.TerrainChunkResolution, _lod);
         var resolution = (TerrainChunksManager.TerrainChunkResolution - 1) / _meshData.LODScale + 1;
-        MeshJobHandle = _generator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters, resolution, _chunk.Position, _chunk.MapData, ref _meshData);
+        MeshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(_chunk.Biome.TerrainParameters, resolution, _chunk.Position, _chunk.MapData, ref _meshData);
         RequestedMesh = true;
     }
 

@@ -8,7 +8,7 @@ public static class BatchesManager
 {
     private static Batch[,] _batches;
     private const int BatchesNum = 2;
-    private const int ChunksPerBatchSide = 16;
+    private const int ChunksPerBatchSide = 32;
     private static readonly Dictionary<int2, Batch> ActiveBatches = new Dictionary<int2, Batch>();
     private static Batch _currentBatch;
 
@@ -45,7 +45,7 @@ public static class BatchesManager
 
     private static void DeactivateOldBatches(int2 newBatchCoord)
     {
-        List<int2> batchesToRemove = new List<int2>();
+        var batchesToRemove = new List<int2>();
 
         foreach (var (batchCoord, batch) in ActiveBatches)
         {
@@ -56,7 +56,6 @@ public static class BatchesManager
             }
         }
 
-        // Remove the deactivated batches from the active batches dictionary
         foreach (var batchCoord in batchesToRemove)
         {
             ActiveBatches.Remove(batchCoord);

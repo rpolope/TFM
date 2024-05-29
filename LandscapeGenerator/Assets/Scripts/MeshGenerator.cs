@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-public class MeshGenerator
+public static class MeshGenerator
 {
     [BurstCompile]
     private struct GenerateMeshJob : IJobParallelFor
@@ -76,7 +76,7 @@ public class MeshGenerator
         }
     }
 
-    public JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float2 center, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float2 center, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
