@@ -31,7 +31,7 @@ public class TerrainChunksManager{
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
 			new LODInfo(1, 3, true),
-			new LODInfo(3, 4, false)
+			new LODInfo(2, 4, false)
 		};
 		foreach (var detailLevel in _detailLevels)
 		{
@@ -133,43 +133,44 @@ public class TerrainChunksManager{
 	public class TerrainChunk
 	{
 		public const int Resolution = 17;
-		public const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
-		private static readonly Material Material = new (Shader.Find("Custom/VertexColorWithLighting"));
+		public float2 Position => _position;
+		public GameObject GameObject { get; }
+		public MapData MapData { get; private set; }
+		
+		private static Material _material = new (Shader.Find("Custom/VertexColorWithLighting"));
 		private readonly float2 _position;
 		private readonly Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
 		private int2 _coord;
 		private Bounds _bounds;
 		private LOD[] _lods;
-
+		private const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
 		private int _lodIndex = -1;
-		
+		private Biome _biome;
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
 		
-		public float2 Position => _position;
-		public GameObject GameObject { get; }
-		public MapData MapData { get; private set; }
 
 		public TerrainChunk(int2 coord)
 		{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
 			
 			_coord = coord;
+			_biome = BiomesManager.GetBiome(_coord);
 			_position = (Resolution - 1) * coord;
 			_positionV3 = new Vector3(_position.x,0,_position.y) * LandscapeManager.Scale;
 
 			GameObject = new GameObject("TerrainChunk");
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
-			meshRenderer.material = Material;
+			meshRenderer.material = _material;
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
 			GameObject.transform.position = _positionV3;
 			GameObject.transform.parent = LandscapeManager.Instance.Transform;
 			_bounds = new Bounds(_positionV3,Vector2.one * (Resolution * LandscapeManager.Scale));
-
+			
 			_lodMeshes = new LODMesh[_detailLevels.Length];
 			for (int i = 0; i < _detailLevels.Length; i++) {
 				_lodMeshes[i] = new LODMesh(_detailLevels[i].lod, this);

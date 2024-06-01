@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -13,6 +14,8 @@ public static class MeshGenerator
         public NativeArray<float2> UVs;
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
+        [NativeDisableParallelForRestriction]
+        public NativeArray<Color> Colors;
         public TerrainParameters TerrainParameters;
         public int Resolution;
         public int FacesCount;
@@ -36,7 +39,8 @@ public static class MeshGenerator
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
-
+            Colors[index] = MapData.ColorMap[mapIndex];
+            
             if (index < FacesCount)
             {
                 int row = index / (Resolution - 1);
@@ -79,6 +83,7 @@ public static class MeshGenerator
             Vertices = meshData.Vertices,
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
+            Colors = meshData.Colors,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
             Center = center,
@@ -89,7 +94,6 @@ public static class MeshGenerator
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         
-        
         return jobHandle;
     }
 
@@ -99,6 +103,7 @@ public class MeshData {
     public NativeArray<Vector3> Vertices;
     public NativeArray<int> Triangles;
     public NativeArray<float2> UVs;
+    public NativeArray<Color> Colors;
 
     public readonly int LODScale;
 
@@ -109,6 +114,7 @@ public class MeshData {
         Vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.Persistent);
         Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
         UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
+        Colors = new NativeArray<Color>(resolution * resolution, Allocator.Persistent);
     }
 
     public Mesh CreateMesh() {
@@ -119,6 +125,7 @@ public class MeshData {
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
+        mesh.SetColors(Colors);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         

@@ -6,8 +6,8 @@ using UnityEngine;
 public class LandscapeManager : MonoBehaviour{
 	
 	public const float Scale = 1f;
-	public const int MapHeight = 30;
-	public const int MapWidth = 30;
+	public const int MapHeight = 128;
+	public const int MapWidth = 128;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	public static float[] LatitudeHeats { get; private set; }
@@ -49,18 +49,18 @@ public class LandscapeManager : MonoBehaviour{
 		Viewer.SetInitialPos(relativeInitialLongitude, relativeInitialLatitude);
 		GenerateMoistureMap();
 		InitializeLatitudeHeats();
+		BiomesManager.Initialize();
+		
 		Maps = new MapData[MapHeight,MapWidth];
-
 		for (int y = 0; y < MapHeight; y++)
 		{
 			for (int x = 0; x < MapWidth; x++)
 			{
 				Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution,
-					new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), terrainParameters.noiseParameters);
+					new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), terrainParameters.noiseParameters, BiomesManager.GetBiome(new int2(x, y)));
 			}
 		}
 		
-		BiomesManager.Initialize();
 		_chunksManager = new TerrainChunksManager();
 		_chunksManager.Initialize();
 	}
@@ -85,8 +85,8 @@ public class LandscapeManager : MonoBehaviour{
 	{
 		MoistureMap = MapGenerator.GenerateNoiseMap(MapWidth * MapHeight, new int2(), moistureParameters);
 	}
-    
-	public void GenerateMoistureMap()
+
+	private void GenerateMoistureMap()
 	{
 		MoistureMap = MapGenerator.GenerateNoiseMap(MapWidth * MapHeight, new int2(), moistureParameters);
 	}

@@ -48,7 +48,6 @@ public class Viewer : MonoBehaviour
     public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 50f;
                                      // TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
 
-
     public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 5f;
                                      // TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
 

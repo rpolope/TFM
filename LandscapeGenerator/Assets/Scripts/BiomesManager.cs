@@ -64,8 +64,8 @@ public static class BiomesManager
 
     private static void LoadColorMapTexture()
     {
-        // _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-discrete");
-        _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-smooth");
+        _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-discrete");
+        // _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-smooth");
         if (_colorMapTexture == null)
         {
             Debug.LogError("No se pudo cargar la textura biome-lookup-discrete.");

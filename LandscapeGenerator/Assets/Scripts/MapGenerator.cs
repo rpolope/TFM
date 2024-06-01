@@ -1,3 +1,4 @@
+using System.Reflection;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -102,28 +103,40 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters) {
+    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters, Biome biome) {
 
         float[] noiseMap = GenerateNoiseMap(resolution, centre, parameters);
         
-        Color[] colorMap = GenerateColorMap(noiseMap);
+        Color[] colorMap = GenerateColorMap(noiseMap, biome);
 	
         return new MapData (noiseMap, colorMap);
     }
 
-    private static Color[] GenerateColorMap(float[] noiseMap)
+    private static Color[] GenerateColorMap(float[] noiseMap, Biome biome)
     {
-        BiomesManager.Initialize();
+        NativeArray<float> heightMap = new NativeArray<float>(noiseMap, Allocator.Persistent);
+        NativeArray<Color> colorMap = new NativeArray<Color>(noiseMap.Length, Allocator.Persistent);
+        NativeArray<Color> colorRange = new NativeArray<Color>(biome.ColorGradient, Allocator.Persistent);
         
-        var mapSize = noiseMap.Length;
-        Color[] colorMap = new Color[mapSize];
-        for (int i = 0; i < mapSize; i++) {
-            
-            float currentHeight = noiseMap [i];
-        }
 
-        return colorMap;
+        GenerateColorMapJob colorMapJob = new GenerateColorMapJob()
+        {
+            HeightMap = heightMap,
+            ColorMap = colorMap,
+            BiomeMoistureColorRange = colorRange,
+            LatitudeHeat = biome.Heat,
+            ChunkMoisture = biome.Moisture,
+        };
+        colorMapJob.Schedule(colorMap.Length, 64).Complete();
+
+        var colorMapArray = colorMap.ToArray();
+        heightMap.Dispose();
+        colorMap.Dispose();
+        colorRange.Dispose();
+        
+        return colorMapArray;
     }
+
 
     public static float[] GenerateNoiseMap(int mapSize, float2 centre, NoiseParameters parameters)
     {
