@@ -5,7 +5,7 @@ using UnityEngine;
 public class Viewer : MonoBehaviour
 {
     private Transform _viewerTransform;
-    private Vector2 _viewerOldPosition;
+    private static Vector2 _viewerOldPosition;
     private float _viewerOldRotationY;
     private float _rotationY;
     private int2 _chunkCoord;
@@ -13,8 +13,8 @@ public class Viewer : MonoBehaviour
     private Camera _mainCamera;
 
     public float speed;
-    public Vector2 PositionV2 { get; private set; }
-    public Vector3 Position;
+    public static Vector2 PositionV2 => new Vector2(Position.x, Position.z);
+    public static Vector3 Position;
     public Vector2 ForwardV2 => new (_viewerTransform.forward.x, _viewerTransform.forward.z);
     public static int2 ChunkCoord { get; set; }
     public float FOV => _mainCamera.fieldOfView;
@@ -30,7 +30,6 @@ public class Viewer : MonoBehaviour
         
         _viewerOldPosition = new Vector2(position.x, position.z);
         _viewerOldRotationY = rotation.eulerAngles.y;
-        PositionV2 = new Vector2(position.x, position.z);
         _rotationY = rotation.eulerAngles.y;
         Position = _viewerTransform.position;
     }
@@ -39,14 +38,13 @@ public class Viewer : MonoBehaviour
     private void Update()
     {
         _viewerTransform.position += _velocity * Time.deltaTime;
-        PositionV2 = new Vector2(_viewerTransform.position.x, _viewerTransform.position.z) / LandscapeManager.Scale;
         _rotationY = _viewerTransform.rotation.eulerAngles.y;
     }
 
     public void UpdateOldPosition() => _viewerOldPosition = PositionV2;
     public void UpdateOldRotation() => _viewerOldRotationY = _rotationY;
 
-    public bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 50f;
+    public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 50f;
                                      // TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
 
 

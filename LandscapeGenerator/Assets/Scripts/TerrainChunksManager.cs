@@ -5,8 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 public class TerrainChunksManager{
-	
-	private const int TerrainChunkSize = 17;
+	public const int TerrainChunkSize = 17;
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunkSize - 1) * 0.5f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	private static int _chunksVisibleInViewDst = 3;
@@ -59,7 +58,7 @@ public class TerrainChunksManager{
 	public void Update() {
 		
 		
-		if (_viewer.PositionChanged()) {
+		if (Viewer.PositionChanged()) {
 			_viewer.UpdateOldPosition();
 			UpdateVisibleChunks();
 		}
@@ -88,8 +87,8 @@ public class TerrainChunksManager{
 		TerrainChunksVisibleLastUpdate.Clear();
 		SurroundTerrainChunks.Clear();
 			
-		int currentChunkCoordX = Mathf.RoundToInt (_viewer.PositionV2.x / (TerrainChunkSize - 1));
-		int currentChunkCoordY = Mathf.RoundToInt (_viewer.PositionV2.y / (TerrainChunkSize - 1));
+		int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunkSize - 1));
+		int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunkSize - 1));
 		Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 		
 		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
@@ -161,6 +160,7 @@ public class TerrainChunksManager{
 		
 		public float2 Position => _position;
 		public GameObject GameObject { get; }
+		public MapData MapData { get; private set; }
 
 		public TerrainChunk(int2 coord, int size, Material material)
 		{
@@ -187,6 +187,8 @@ public class TerrainChunksManager{
 					_colliderMesh = _lodMeshes[i];
 				}
 			}
+
+			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
 			
 			Update();
 		}
@@ -261,7 +263,7 @@ public class TerrainChunksManager{
 
 			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
 			chunkCenter += chunkCenter.normalized * (_worldTerrainChunkSize / 2);
-			Vector2 chunkDirection = (chunkCenter - _viewer.PositionV2).normalized;
+			Vector2 chunkDirection = (chunkCenter - Viewer.PositionV2).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
 			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
 
@@ -317,7 +319,7 @@ public class TerrainChunksManager{
 		{
 			_meshData = new MeshData(TerrainChunkSize, _lod);
 			var resolution = (TerrainChunkSize - 1) / _meshData.LODScale + 1;
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(LandscapeManager.Instance.terrainParameters, resolution , LandscapeManager.Scale, _chunk.Position, _lod, ref _meshData);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(LandscapeManager.Instance.terrainParameters, resolution , LandscapeManager.Scale, _chunk.Position, _chunk.MapData, ref _meshData);
 			RequestedMesh = true;
 		}
 

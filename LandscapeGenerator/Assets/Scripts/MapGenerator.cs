@@ -118,7 +118,7 @@ public class MapGenerator : MonoBehaviour
 
     public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters) {
 
-        float[] noiseMap = GenerateNoiseMap(resolution, new float2(), parameters);
+        float[] noiseMap = GenerateNoiseMap(resolution, centre, parameters);
         
         Color[] colorMap = GenerateColorMap(noiseMap);
 	

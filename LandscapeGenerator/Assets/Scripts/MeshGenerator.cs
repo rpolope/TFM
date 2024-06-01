@@ -19,6 +19,8 @@ public static class MeshGenerator
         public int FacesCount;
         public float Scale;
         public float2 Center;
+        [ReadOnly]
+        public MapData MapData;
         public int LODScale;
 
         public void Execute(int index)
@@ -29,8 +31,9 @@ public static class MeshGenerator
             float offset = (Resolution - 1) * 0.5f;
             float xPos = LODScale * (x - offset) * Scale;
             float zPos = LODScale * (z - offset) * Scale;
-
-            float height = GenerateHeight(Center + LODScale * new float2(x, z));
+            
+            var mapIndex = LODScale * (x + z * TerrainChunksManager.TerrainChunkSize);
+            float height = MapData.HeightMap[mapIndex] * Scale * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
@@ -70,7 +73,7 @@ public static class MeshGenerator
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, int lod, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -81,6 +84,7 @@ public static class MeshGenerator
             FacesCount = meshData.Triangles.Length / 6,
             Center = center,
             Scale = scale,
+            MapData = mapData,
             LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters
         };

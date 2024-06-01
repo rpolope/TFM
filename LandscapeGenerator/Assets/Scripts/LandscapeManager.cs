@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,7 +20,7 @@ public class LandscapeManager : MonoBehaviour{
 	public CullingMode culling;
 
 
-	private static MapData[] _maps;
+	public static MapData[,] Maps { get; private set; }
 	
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
@@ -45,9 +46,18 @@ public class LandscapeManager : MonoBehaviour{
 
 		_initialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
 		_initialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
-		viewer.Position = new Vector3(_initialLongitude, viewer.Position.y, _initialLatitude);
+		Viewer.Position = new Vector3(_initialLongitude * TerrainChunksManager.TerrainChunkSize, Viewer.Position.y, _initialLatitude * TerrainChunksManager.TerrainChunkSize);
 		
-		_maps = new MapData[MapHeight * MapWidth];
+		Maps = new MapData[MapHeight,MapWidth];
+
+		for (int y = 0; y < MapHeight; y++)
+		{
+			for (int x = 0; x < MapWidth; x++)
+			{
+				Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunkSize,
+					new float2(x, y) * (TerrainChunksManager.TerrainChunkSize - 1), terrainParameters.noiseParameters);
+			}
+		}
 		
 		BiomeManager.Initialize();
 		_chunksManager = new TerrainChunksManager(viewer, chunkMaterial);
