@@ -14,7 +14,7 @@ public class Viewer : MonoBehaviour
 
     public float speed;
     public Vector2 PositionV2 { get; private set; }
-    public Vector3 PositionV3 => new (PositionV2.x, 0, PositionV2.y);
+    public Vector3 Position;
     public Vector2 ForwardV2 => new (_viewerTransform.forward.x, _viewerTransform.forward.z);
     public static int2 ChunkCoord { get; set; }
     public float FOV => _mainCamera.fieldOfView;
@@ -32,6 +32,7 @@ public class Viewer : MonoBehaviour
         _viewerOldRotationY = rotation.eulerAngles.y;
         PositionV2 = new Vector2(position.x, position.z);
         _rotationY = rotation.eulerAngles.y;
+        Position = _viewerTransform.position;
     }
 
 
