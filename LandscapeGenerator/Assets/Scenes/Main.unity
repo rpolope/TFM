@@ -421,7 +421,6 @@ MonoBehaviour:
       seed: 1
       scale: 10
       offset: {x: 0, y: 0}
-      amplitude: 1
       octaves: 4
       frequency: 1
       persistence: 0.474
@@ -746,7 +745,6 @@ MonoBehaviour:
       seed: 1
       scale: 5
       offset: {x: 0, y: 0}
-      amplitude: 1
       octaves: 4
       frequency: 1
       persistence: 0.472
@@ -758,12 +756,22 @@ MonoBehaviour:
       heightScale: 20
       waterLevel: 0.102
       levelsOfDetail: 3
+  moistureParameters:
+    noiseType: 0
+    seed: 10
+    scale: 50
+    offset: {x: 0, y: 0}
+    octaves: 3
+    frequency: 0.5
+    persistence: 0.66
+    lacunarity: 0.99
+    ridgeness: 0
+    ridgeRoughness: 0.1
   biomesParameters:
     climates: 
     colorMaps:
     - {fileID: 2800000, guid: 2ce02ef67e3ad0940bc4ab458cc7b43f, type: 3}
     - {fileID: 2800000, guid: 5fac8514391fc8f459b7ed9242bf78c3, type: 3}
-  chunkMaterial: {fileID: 2100000, guid: 4940e0e35f1dbed428c86a7a421ac910, type: 2}
   viewer: {fileID: 797567967}
   culling: 0
 --- !u!1 &1916827185

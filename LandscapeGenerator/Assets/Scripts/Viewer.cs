@@ -1,54 +1,65 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Viewer : MonoBehaviour
 {
-    private Transform _viewerTransform;
+    private static Transform _transform;
     private static Vector2 _viewerOldPosition;
-    private float _viewerOldRotationY;
-    private float _rotationY;
+    private static Camera _mainCamera;
+
+    private static float _viewerOldRotationY;
+    private static float _rotationY;
     private int2 _chunkCoord;
     private Vector3 _velocity;
-    private Camera _mainCamera;
 
-    public float speed;
-    public static Vector2 PositionV2 => new Vector2(Position.x, Position.z);
+    public static Vector2 PositionV2 => new (Position.x, Position.z);
     public static Vector3 Position;
-    public Vector2 ForwardV2 => new (_viewerTransform.forward.x, _viewerTransform.forward.z);
+    public static Vector2 ForwardV2 => new (_transform.forward.x, _transform.forward.z);
     public static int2 ChunkCoord { get; set; }
-    public float FOV => _mainCamera.fieldOfView;
+    public static float FOV => _mainCamera.fieldOfView;
+    
+    public float speed;
+
 
     private void Awake()
     {
         _velocity = new(0, 0, speed);
         _mainCamera = Camera.main;
-        _viewerTransform = transform;
-        
-        var position = _viewerTransform.position;
-        var rotation = _viewerTransform.rotation;
-        
-        _viewerOldPosition = new Vector2(position.x, position.z);
+        _transform = transform;
+
+        var rotation = _transform.rotation;
         _viewerOldRotationY = rotation.eulerAngles.y;
         _rotationY = rotation.eulerAngles.y;
-        Position = _viewerTransform.position;
     }
 
 
     private void Update()
     {
-        _viewerTransform.position += _velocity * Time.deltaTime;
-        _rotationY = _viewerTransform.rotation.eulerAngles.y;
+        _transform.position += _velocity * Time.deltaTime;
+        Position = _transform.position;
+        _rotationY = _transform.rotation.eulerAngles.y;
     }
 
-    public void UpdateOldPosition() => _viewerOldPosition = PositionV2;
-    public void UpdateOldRotation() => _viewerOldRotationY = _rotationY;
+    public static void UpdateOldPosition() => _viewerOldPosition = PositionV2;
+    public static void UpdateOldRotation() => _viewerOldRotationY = _rotationY;
 
     public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 50f;
                                      // TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
 
 
-    public bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 5f;
+    public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 5f;
                                      // TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
 
+    public static void SetInitialPos(int longitude, int latitude)
+    {
+        _transform.position = new Vector3(
+            longitude * TerrainChunksManager.TerrainChunk.Resolution,
+            _transform.position.y,
+            latitude * TerrainChunksManager.TerrainChunk.Resolution
+        );
+        _viewerOldPosition = new Vector2(_transform.position.x, _transform.position.z);
+        Position = _transform.position;
+    }
 }

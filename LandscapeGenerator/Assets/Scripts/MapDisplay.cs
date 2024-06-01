@@ -1,6 +1,5 @@
-using System.Linq;
-using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine;
 
 public enum DrawMode
 {

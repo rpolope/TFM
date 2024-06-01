@@ -59,7 +59,7 @@ public static class NoiseGenerator
 
     public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters)
     {
-        float ampl = parameters.amplitude;
+        float ampl = 1f;
         float freq = parameters.frequency;
         float accum = 1f, maxAmpl = 0.0f;
         

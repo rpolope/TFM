@@ -1,9 +1,8 @@
-using System.Linq;
 using Unity.Burst;
-using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 public static class MeshGenerator
 {
@@ -32,7 +31,7 @@ public static class MeshGenerator
             float xPos = LODScale * (x - offset) * Scale;
             float zPos = LODScale * (z - offset) * Scale;
             
-            var mapIndex = LODScale * (x + z * TerrainChunksManager.TerrainChunkSize);
+            var mapIndex = LODScale * (x + z * TerrainChunksManager.TerrainChunk.Resolution);
             float height = MapData.HeightMap[mapIndex] * Scale * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);

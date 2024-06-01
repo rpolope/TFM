@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -15,18 +13,6 @@ public class MapGenerator : MonoBehaviour
     public BiomesParameters biomeParameters;
 
     public static MapGenerator Instance;
-
-    private static Climate[] _regions = new[]
-    {
-        Climate.OCEAN,
-        Climate.BEACH,
-        Climate.TEMPERATE_DESERT,
-        Climate.SHRUBLAND,
-        Climate.GRASSLAND,
-        Climate.TEMPERATE_RAIN_FOREST,
-        Climate.SCORCHED,
-        Climate.SNOW
-    };
     
     [BurstCompile]
     private struct GenerateMapJob : IJobParallelFor
@@ -127,20 +113,13 @@ public class MapGenerator : MonoBehaviour
 
     private static Color[] GenerateColorMap(float[] noiseMap)
     {
-        BiomeManager.Initialize();
+        BiomesManager.Initialize();
         
         var mapSize = noiseMap.Length;
         Color[] colorMap = new Color[mapSize];
         for (int i = 0; i < mapSize; i++) {
             
             float currentHeight = noiseMap [i];
-            
-            foreach (var biome in BiomeManager.Biomes)
-            {
-                if (currentHeight > biome.Elevation) continue;
-                colorMap [i] = BiomeManager.GetColorFromBiome(biome);
-                break;
-            }
         }
 
         return colorMap;
@@ -150,7 +129,7 @@ public class MapGenerator : MonoBehaviour
     {
         NativeArray<float> map = new NativeArray<float>(mapSize * mapSize, Allocator.TempJob);
         
-        var generateMapJob = new GenerateMapJob()
+        var generateMapJob = new GenerateMapJob
         {
             Map = map,
             Centre = centre,

@@ -1,7 +1,7 @@
-using TMPro;
+using System;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public struct TerrainParameters
 {
     [Header("Heightmap")]
@@ -10,26 +10,34 @@ public struct TerrainParameters
     [Header("Mesh")]
     public MeshParameters meshParameters;
     
+    public TerrainParameters(NoiseParameters noiseParameters, MeshParameters meshParameters)
+    {
+        this.noiseParameters = noiseParameters;
+        this.meshParameters = meshParameters;
+    }
 }
-[System.Serializable]
+
+
+[Serializable]
 public struct BiomesParameters
 {
-    public Climate[] climates;
+    public ClimateType[] climates;
     public Texture2D[] colorMaps;
     
     public BiomesParameters(string[] textureNames)
     {
         climates = new[]
         {
-            Climate.OCEAN,
-            Climate.BEACH,
-            Climate.TEMPERATE_DESERT,
-            Climate.SHRUBLAND,
-            Climate.GRASSLAND,
-            Climate.TEMPERATE_RAIN_FOREST,
-            Climate.SCORCHED,
-            Climate.SNOW
+            ClimateType.Ocean,
+            ClimateType.Beach,
+            ClimateType.TemperateDesert,
+            ClimateType.Shrubland,
+            ClimateType.Grassland,
+            ClimateType.TemperateRainForest,
+            ClimateType.Scorched,
+            ClimateType.Snow
         };
+        
         colorMaps = new Texture2D[textureNames.Length];
         
         for (int i = 0; i < textureNames.Length; i++)
@@ -43,7 +51,7 @@ public struct BiomesParameters
     }
 }
 
-[System.Serializable]
+[Serializable]
 public struct NoiseParameters
 {   
     public NoiseType noiseType;
@@ -56,9 +64,6 @@ public struct NoiseParameters
     
     [SerializeField]
     public Vector2 offset;
-    
-    [SerializeField, Min(0.001f)]
-    public float amplitude;
     
     [SerializeField, Range(0, 8)]
     public int octaves;
@@ -77,9 +82,23 @@ public struct NoiseParameters
     
     [SerializeField, Range(0.1f, 10f)]
     public float ridgeRoughness;
+    
+    public NoiseParameters(NoiseType type)
+    {
+        noiseType = type;
+        seed = 1; 
+        scale = 5; 
+        offset = Vector2.zero; 
+        octaves = 4;
+        frequency = 0.5f; 
+        persistence = 0.5f; 
+        lacunarity = 1f; 
+        ridgeness = 0.2f; 
+        ridgeRoughness = 0f;
+    }
 }
 
-[System.Serializable]
+[Serializable]
 public struct MeshParameters
 {
     public int resolution;
@@ -89,4 +108,12 @@ public struct MeshParameters
     public float waterLevel;
     [Range(0,6)]
     public int levelsOfDetail;
+
+    public MeshParameters(float waterLevel)
+    {
+        resolution = 11;
+        heightScale = 11;
+        levelsOfDetail = 1;
+        this.waterLevel = waterLevel;
+    }
 }
