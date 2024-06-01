@@ -16,7 +16,7 @@ public static class NoiseGenerator
     {
         float maxPossibleHeight = 0;
         float noiseHeight = 0;
-        float amplitude = parameters.amplitude;
+        float amplitude = 1;
         float frequency = parameters.frequency;
 
         var random = new Random(parameters.seed);

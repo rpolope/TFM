@@ -350,7 +350,7 @@ public class LandscapeManager : MonoBehaviour{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
-			}	
+			}
 		}
 
 		public bool IsVisible() {

@@ -417,19 +417,20 @@ MonoBehaviour:
   drawMode: 0
   mapParameters:
     noiseParameters:
-      noiseType: 1
-      seed: 10
-      scale: 12.83
-      offset: {x: 66.3, y: 0}
-      amplitude: 1
-      octaves: 4
-      frequency: 0.59
-      persistence: 0.465
-      lacunarity: 1.5
-      ridgeRoughness: 4.33
+      noiseType: 0
+      seed: 0
+      scale: 0
+      offset: {x: 0, y: 0}
+      amplitude: 0
+      octaves: 0
+      frequency: 0
+      persistence: 0
+      lacunarity: 0
+      ridgeness: 0
+      ridgeRoughness: 0
     meshParameters:
-      resolution: 5
-      heightScale: 10
+      resolution: 0
+      heightScale: 0
       waterLevel: 0
       levelsOfDetail: 0
   biomeParameters:
@@ -692,11 +693,11 @@ MonoBehaviour:
     visibleChunksThreshold: 2
     useForCollider: 0
   - lod: 1
-    visibleChunksThreshold: 1
+    visibleChunksThreshold: 3
     useForCollider: 1
   - lod: 2
-    visibleChunksThreshold: 0
-    useForCollider: 1
+    visibleChunksThreshold: 5
+    useForCollider: 0
   initialLatitude: 0
   initialLongitude: 0
   terrainParameters:
@@ -710,10 +711,11 @@ MonoBehaviour:
       frequency: 1
       persistence: 0.5
       lacunarity: 1.5
+      ridgeness: 0
       ridgeRoughness: 5
     meshParameters:
       resolution: 241
-      heightScale: 1
+      heightScale: 10
       waterLevel: 0
       levelsOfDetail: 3
   biomesParameters:

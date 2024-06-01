@@ -54,16 +54,16 @@ public static class MeshGenerator
 
         private float GenerateHeight(float2 samplePos)
         {
-            float ridgedFactor = 0.85f;
-            // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
-            
-            if (ridgedFactor > 0)
-                noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
-            
-            noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
-                TerrainParameters.meshParameters.waterLevel :  noiseValue;
+            var noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            // float ridgedFactor = 0.85f;
+            // float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
+            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
+            //
+            // if (ridgedFactor > 0)
+            //     noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
+            //
+            // noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
+            //     TerrainParameters.meshParameters.waterLevel :  noiseValue;
 
             
             return Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
