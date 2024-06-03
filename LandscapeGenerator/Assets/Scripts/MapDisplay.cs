@@ -19,7 +19,7 @@ public static class MapDisplay{
     }
 
     private static void DrawMesh(MeshData meshData, Texture2D texture) {
-        MeshFilter.sharedMesh = meshData.CreateMesh ();
+        MeshFilter.mesh = meshData.CreateMesh ();
         MeshRenderer.sharedMaterial.mainTexture = texture;
     }
     

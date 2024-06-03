@@ -20,14 +20,14 @@ public class MapGenerator : MonoBehaviour
     {
         [NativeDisableParallelForRestriction] 
         public NativeArray<float> Map;
-        public int MapSize;
+        public int Resolution;
         public float2 Centre;
         public NoiseParameters Parameters;
 
         public void Execute(int threadIndex)
         {
-            int x = threadIndex % MapSize;
-            int y = threadIndex / MapSize;
+            int x = threadIndex % Resolution;
+            int y = threadIndex / Resolution;
             
             float2 pos = new float2(x, y) + Centre;
 
@@ -138,20 +138,20 @@ public class MapGenerator : MonoBehaviour
     }
 
 
-    public static float[] GenerateNoiseMap(int mapSize, float2 centre, NoiseParameters parameters)
+    public static float[] GenerateNoiseMap(int resolution, float2 centre, NoiseParameters parameters)
     {
-        NativeArray<float> map = new NativeArray<float>(mapSize * mapSize, Allocator.TempJob);
+        NativeArray<float> map = new NativeArray<float>(resolution * resolution, Allocator.TempJob);
         
         var generateMapJob = new GenerateMapJob
         {
             Map = map,
             Centre = centre,
-            MapSize = mapSize,
+            Resolution = resolution,
             Parameters = parameters
         };
-        generateMapJob.Schedule( mapSize* mapSize, 3000).Complete();
+        generateMapJob.Schedule( resolution* resolution, 3000).Complete();
 
-        var mapArray = new float[mapSize* mapSize];
+        var mapArray = new float[resolution* resolution];
         map.CopyTo(mapArray);
         map.Dispose();
         

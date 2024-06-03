@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public class TerrainChunksManager{
@@ -21,7 +22,8 @@ public class TerrainChunksManager{
 	public static event Action CompleteMeshGenerationEvent;
 
 	private static LODInfo[] _detailLevels;
-
+	private static int _wrapCountX = 1;
+	private static int _wrapCountY = 1;
 	public void Initialize()
 	{
 		_lastLatitude = LandscapeManager.Instance.initialLatitude + 90;
@@ -77,21 +79,29 @@ public class TerrainChunksManager{
 		int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunk.Resolution - 1));
 		int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunk.Resolution - 1));
 		Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
-		
-		for (int yOffset = -_chunksVisibleInViewDst/2; yOffset <= _chunksVisibleInViewDst/2; yOffset++) {
-			for (int xOffset = -_chunksVisibleInViewDst/2; xOffset <= _chunksVisibleInViewDst/2; xOffset++) {
-				
+
+		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
+			for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++)
+			{
 				var viewedChunkCoord = new int2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+				
+				if (viewedChunkCoord.x >= LandscapeManager.MapWidth || viewedChunkCoord.y >= LandscapeManager.MapHeight)
+					Debug.Log("Se visualiza más allá del final del mapa");
+				
+				var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
+				
 				TerrainChunk chunk;
-				if (TerrainChunkDictionary.TryGetValue(viewedChunkCoord, out var value))
+				if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value))
 				{
 					chunk = value;
+					chunk.SetChunkCoord(viewedChunkCoord);
 					SurroundTerrainChunks.Add(chunk);
 					chunk.Update ();
 				} else
 				{
-					chunk = new TerrainChunk(viewedChunkCoord);
-					TerrainChunkDictionary.Add(viewedChunkCoord, chunk);
+					chunk = new TerrainChunk(wrappedChunkCoord);
+					chunk.SetChunkCoord(viewedChunkCoord);
+					TerrainChunkDictionary.Add(wrappedChunkCoord, chunk);
 					SurroundTerrainChunks.Add(chunk);
 				}
 				
@@ -104,10 +114,42 @@ public class TerrainChunksManager{
 		}
 	}
 
+	private int2 GetWrappedChunkCoords(int2 viewedChunkCoord)
+	{
+		int wrappedXCoord = viewedChunkCoord.x;
+		int wrappedYCoord = viewedChunkCoord.y;
+
+		if (viewedChunkCoord.x < -LandscapeManager.MapWidth * _wrapCountX)
+		{
+			wrappedXCoord += LandscapeManager.MapWidth;
+			// _wrapCountX--;
+		}
+
+		if (viewedChunkCoord.x >= LandscapeManager.MapWidth * _wrapCountX)
+		{
+			wrappedXCoord -= LandscapeManager.MapWidth;
+			// _wrapCountX++;
+		}
+
+		if (viewedChunkCoord.y < -LandscapeManager.MapHeight * _wrapCountY)
+		{
+			wrappedYCoord += LandscapeManager.MapHeight;
+			// _wrapCountY--;
+		}
+
+		if (viewedChunkCoord.y >= LandscapeManager.MapHeight * _wrapCountY)
+		{
+			wrappedYCoord -= LandscapeManager.MapHeight;
+			// _wrapCountY++;
+		}
+				
+		return new int2 (wrappedXCoord, wrappedYCoord);
+	}
+
 	void UpdateCulledChunks()
 	{
-		Vector2 viewerForward = Viewer.ForwardV2.normalized;
-		foreach (TerrainChunk chunk in SurroundTerrainChunks)
+		var viewerForward = Viewer.ForwardV2.normalized;
+		foreach (var chunk in SurroundTerrainChunks)
 		{
 			CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
 		}
@@ -133,14 +175,19 @@ public class TerrainChunksManager{
 	public class TerrainChunk
 	{
 		public const int Resolution = 17;
-		public float2 Position => _position;
+		public float2 Position
+		{
+			get => _position;
+			set => _position = value;
+		}
+
 		public GameObject GameObject { get; }
 		public MapData MapData { get; private set; }
 		
 		private static Material _material = new (Shader.Find("Custom/VertexColorWithLighting"));
-		private readonly float2 _position;
-		private readonly Vector3 _positionV3;
+		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
+		private float2 _position;
 		private int2 _coord;
 		private Bounds _bounds;
 		private LOD[] _lods;
@@ -156,18 +203,14 @@ public class TerrainChunksManager{
 		{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
 			
-			_coord = coord;
-			_biome = BiomesManager.GetBiome(_coord);
-			_position = (Resolution - 1) * coord;
-			_positionV3 = new Vector3(_position.x,0,_position.y) * LandscapeManager.Scale;
-
 			GameObject = new GameObject("TerrainChunk");
+			SetChunkCoord(coord);
+			_biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 			meshRenderer.material = _material;
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
-			GameObject.transform.position = _positionV3;
 			GameObject.transform.parent = LandscapeManager.Instance.Transform;
 			_bounds = new Bounds(_positionV3,Vector2.one * (Resolution * LandscapeManager.Scale));
 			
@@ -197,6 +240,7 @@ public class TerrainChunksManager{
 
 				for (int i = 0; i < _detailLevels.Length - 1; i++)
 				{
+					if(i>0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
 					if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
 					    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
 					{
@@ -252,7 +296,7 @@ public class TerrainChunksManager{
 		{
 			if (_coord.Equals(Viewer.ChunkCoord)) return false;
 
-			var chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
+			Vector2 chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
 			chunkCenter += chunkCenter.normalized * (WorldSize / 2);
 			Vector2 chunkDirection = (chunkCenter - Viewer.PositionV2).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
@@ -286,6 +330,14 @@ public class TerrainChunksManager{
 
 		public bool IsVisible() {
 			return GameObject.activeSelf;
+		}
+
+		public void SetChunkCoord(int2 viewedChunkCoord)
+		{
+			_coord = viewedChunkCoord;
+			_position = (Resolution - 1) * viewedChunkCoord;
+			_positionV3 = new Vector3(_position.x,0,_position.y) * LandscapeManager.Scale;
+			GameObject.transform.position = _positionV3;
 		}
 	}
 
