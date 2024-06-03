@@ -22,8 +22,8 @@ public class TerrainChunksManager{
 	public static event Action CompleteMeshGenerationEvent;
 
 	private static LODInfo[] _detailLevels;
-	private static int _wrapCountX = 1;
-	private static int _wrapCountY = 1;
+	private static int _wrapCountX = 0;
+	private static int _wrapCountY = 0;
 	public void Initialize()
 	{
 		_lastLatitude = LandscapeManager.Instance.initialLatitude + 90;
@@ -67,84 +67,76 @@ public class TerrainChunksManager{
 	}
 
 	private void UpdateVisibleChunks() {
+        foreach (var visibleChunk in TerrainChunksVisibleLastUpdate) {
+            visibleChunk.SetVisible(false);
+        }
+        
+        TerrainChunksVisibleLastUpdate.Clear();
+        SurroundTerrainChunks.Clear();
+            
+        int currentChunkCoordX = Mathf.RoundToInt(Viewer.PositionV2.x / (TerrainChunk.Resolution - 1));
+        int currentChunkCoordY = Mathf.RoundToInt(Viewer.PositionV2.y / (TerrainChunk.Resolution - 1));
+        Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 
-		foreach (var visibleChunk in TerrainChunksVisibleLastUpdate)
-		{
-			visibleChunk.SetVisible(false);
-		}
-		
-		TerrainChunksVisibleLastUpdate.Clear();
-		SurroundTerrainChunks.Clear();
-			
-		int currentChunkCoordX = Mathf.RoundToInt (Viewer.PositionV2.x / (TerrainChunk.Resolution - 1));
-		int currentChunkCoordY = Mathf.RoundToInt (Viewer.PositionV2.y / (TerrainChunk.Resolution - 1));
-		Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
+        UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
 
-		for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
-			for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++)
-			{
-				var viewedChunkCoord = new int2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-				
-				if (viewedChunkCoord.x >= LandscapeManager.MapWidth || viewedChunkCoord.y >= LandscapeManager.MapHeight)
-					Debug.Log("Se visualiza más allá del final del mapa");
-				
-				var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
-				
-				TerrainChunk chunk;
-				if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value))
-				{
-					chunk = value;
-					chunk.SetChunkCoord(viewedChunkCoord);
-					SurroundTerrainChunks.Add(chunk);
-					chunk.Update ();
-				} else
-				{
-					chunk = new TerrainChunk(wrappedChunkCoord);
-					chunk.SetChunkCoord(viewedChunkCoord);
-					TerrainChunkDictionary.Add(wrappedChunkCoord, chunk);
-					SurroundTerrainChunks.Add(chunk);
-				}
-				
-				if (chunk.IsVisible())
-					TerrainChunksVisibleLastUpdate.Add(chunk);
-				
-				_lastLatitude = (_lastLatitude + yOffset) % 180;
-				_lastLongitude = (_lastLongitude + yOffset) % 180;
-			}
-		}
-	}
+        for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
+            for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
+                var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+                var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
+                
+                TerrainChunk chunk;
+                if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
+                    chunk = value;
+                    chunk.SetChunkCoord(viewedChunkCoord);
+                    SurroundTerrainChunks.Add(chunk);
+                    chunk.Update();
+                } else {
+                    chunk = new TerrainChunk(wrappedChunkCoord);
+                    chunk.SetChunkCoord(viewedChunkCoord);
+                    TerrainChunkDictionary.Add(wrappedChunkCoord, chunk);
+                    SurroundTerrainChunks.Add(chunk);
+                }
+                
+                if (chunk.IsVisible())
+                    TerrainChunksVisibleLastUpdate.Add(chunk);
+            }
+        }
+    }
 
-	private int2 GetWrappedChunkCoords(int2 viewedChunkCoord)
-	{
-		int wrappedXCoord = viewedChunkCoord.x;
-		int wrappedYCoord = viewedChunkCoord.y;
+    private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
+        if (currentChunkCoordX >= LandscapeManager.MapWidth * _wrapCountX + LandscapeManager.MapWidth) {
+            _wrapCountX++;
+        }
+        if (currentChunkCoordX < -LandscapeManager.MapWidth * _wrapCountX) {
+            _wrapCountX--;
+        }
+        if (currentChunkCoordY >= LandscapeManager.MapHeight * _wrapCountY + LandscapeManager.MapHeight) {
+            _wrapCountY++;
+        }
+        if (currentChunkCoordY < -LandscapeManager.MapHeight * _wrapCountY) {
+            _wrapCountY--;
+        }
+    }
 
-		if (viewedChunkCoord.x < -LandscapeManager.MapWidth * _wrapCountX)
-		{
-			wrappedXCoord += LandscapeManager.MapWidth;
-			// _wrapCountX--;
-		}
+    private int2 GetWrappedChunkCoords(int2 viewedChunkCoord) {
+        int wrappedXCoord = viewedChunkCoord.x;
+        int wrappedYCoord = viewedChunkCoord.y;
 
-		if (viewedChunkCoord.x >= LandscapeManager.MapWidth * _wrapCountX)
-		{
-			wrappedXCoord -= LandscapeManager.MapWidth;
-			// _wrapCountX++;
-		}
+        if (viewedChunkCoord.x < 0) {
+            wrappedXCoord = (viewedChunkCoord.x % LandscapeManager.MapWidth + LandscapeManager.MapWidth) % LandscapeManager.MapWidth;
+        } else if (viewedChunkCoord.x >= LandscapeManager.MapWidth) {
+            wrappedXCoord = viewedChunkCoord.x % LandscapeManager.MapWidth;
+        }
 
-		if (viewedChunkCoord.y < -LandscapeManager.MapHeight * _wrapCountY)
-		{
-			wrappedYCoord += LandscapeManager.MapHeight;
-			// _wrapCountY--;
-		}
-
-		if (viewedChunkCoord.y >= LandscapeManager.MapHeight * _wrapCountY)
-		{
-			wrappedYCoord -= LandscapeManager.MapHeight;
-			// _wrapCountY++;
-		}
-				
-		return new int2 (wrappedXCoord, wrappedYCoord);
-	}
+        if (viewedChunkCoord.y < 0) {
+            wrappedYCoord = (viewedChunkCoord.y % LandscapeManager.MapHeight + LandscapeManager.MapHeight) % LandscapeManager.MapHeight;
+        } else if (viewedChunkCoord.y >= LandscapeManager.MapHeight) {
+            wrappedYCoord = viewedChunkCoord.y % LandscapeManager.MapHeight;
+        }
+                
+        return new int2(wrappedXCoord, wrappedYCoord);
+    }
 
 	void UpdateCulledChunks()
 	{
