@@ -85,8 +85,8 @@ public class LandscapeManager : MonoBehaviour{
 
             for (int j = 0; j < resolution; j++)
             {
-                _fixedBorderHeightValues[j] = northMap.HeightMap[j * resolution + i];
-                southMap.HeightMap[(resolution - 1) * resolution + j * resolution + i] = _fixedBorderHeightValues[j];
+                _fixedBorderHeightValues[j] = northMap.HeightMap[i];
+                southMap.HeightMap[southMap.HeightMap.Length - resolution + j] = _fixedBorderHeightValues[j];
             }
         }
 
