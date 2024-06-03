@@ -27,35 +27,82 @@ public class LandscapeManager : MonoBehaviour{
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
 	private TerrainChunksManager _chunksManager;
-	
-	
-	private void Awake()
-	{
-		if (Instance == null)
-		{
-			Instance = this;
-		}
-		else
-		{
-			Destroy(Instance);
-		}
-	}
 
-	private void Start()
-	{
-		Transform = transform;
-		var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
-		var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
-		Viewer.SetInitialPos(relativeInitialLongitude, relativeInitialLatitude);
-		GenerateMoistureMap();
-		InitializeLatitudeHeats();
-		BiomesManager.Initialize();
+	private static float[] _fixedBorderHeightValues = new float[TerrainChunksManager.TerrainChunk.Resolution];
+	
+	 private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(Instance.gameObject);
+            Instance = this;
+        }
+    }
 
-		GenerateMap();
-		
-		_chunksManager = new TerrainChunksManager();
-		_chunksManager.Initialize();
-	}
+    private void Start()
+    {
+        Transform = transform;
+        var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
+        var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
+        Viewer.SetInitialPos(relativeInitialLongitude, relativeInitialLatitude);
+        GenerateMoistureMap();
+        InitializeLatitudeHeats();
+        BiomesManager.Initialize();
+
+        GenerateMap();
+
+        _chunksManager = new TerrainChunksManager();
+        _chunksManager.Initialize();
+    }
+
+    private void GenerateMap()
+    {
+        Maps = new MapData[MapHeight, MapWidth];
+        for (int y = 0; y < MapHeight; y++)
+        {
+            for (int x = 0; x < MapWidth; x++)
+            {
+                Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution,
+                    new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), terrainParameters.noiseParameters, BiomesManager.GetBiome(new int2(x, y)));
+            }
+        }
+        UnifyMapBorders();
+    }
+
+    private void UnifyMapBorders()
+    {
+        int resolution = TerrainChunksManager.TerrainChunk.Resolution;
+
+        // North and South border unification
+        for (int i = 0; i < MapWidth; i++)
+        {
+            var northMap = Maps[MapHeight - 1, i];
+            var southMap = Maps[0, i];
+
+            for (int j = 0; j < resolution; j++)
+            {
+                _fixedBorderHeightValues[j] = northMap.HeightMap[j * resolution + i];
+                southMap.HeightMap[(resolution - 1) * resolution + j * resolution + i] = _fixedBorderHeightValues[j];
+            }
+        }
+
+        // West and East border unification
+        for (int i = 0; i < MapHeight; i++)
+        {
+            var westMap = Maps[i, 0];
+            var eastMap = Maps[i, MapWidth - 1];
+
+            for (int j = 0; j < resolution; j++)
+            {
+                _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
+                eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
+            }
+        }
+    }
 
 	private void Update()
 	{
@@ -67,79 +114,6 @@ public class LandscapeManager : MonoBehaviour{
 		TerrainChunksManager.CompleteMeshGeneration();
 	}
 	
-	private void GenerateMap()
-	{
-		Maps = new MapData[MapHeight,MapWidth];
-		for (int y = 0; y < MapHeight; y++)
-		{
-			for (int x = 0; x < MapWidth; x++)
-			{
-				Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution,
-					new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), terrainParameters.noiseParameters, BiomesManager.GetBiome(new int2(x, y)));
-			}
-		}
-		// UnifyMapBorders();
-	}
-
-	private void UnifyMapBorders()
-	{
-		int resolution = TerrainChunksManager.TerrainChunk.Resolution;
-
-		// Unify internal borders
-		for (int y = 0; y < MapHeight; y++)
-		{
-			for (int x = 0; x < MapWidth; x++)
-			{
-				MapData currentMap = Maps[x, y];
-
-				// Unify the left border with the right border of the left neighbor
-				if (x > 0)
-				{
-					MapData leftMap = Maps[x - 1, y];
-					for (int i = 0; i < resolution; i++)
-					{
-						currentMap.HeightMap[i * resolution] = leftMap.HeightMap[i * resolution + (resolution - 1)];
-					}
-				}
-
-				// Unify the top border with the bottom border of the top neighbor
-				if (y > 0)
-				{
-					MapData topMap = Maps[x, y - 1];
-					for (int i = 0; i < resolution; i++)
-					{
-						currentMap.HeightMap[i] = topMap.HeightMap[(resolution - 1) * resolution + i];
-					}
-				}
-			}
-		}
-
-		// Unify the leftmost and rightmost borders
-		for (int y = 0; y < MapHeight; y++)
-		{
-			MapData leftmostMap = Maps[0, y];
-			MapData rightmostMap = Maps[MapWidth - 1, y];
-			for (int i = 0; i < resolution; i++)
-			{
-				leftmostMap.HeightMap[i * resolution] = rightmostMap.HeightMap[i * resolution + (resolution - 1)];
-				rightmostMap.HeightMap[i * resolution + (resolution - 1)] = leftmostMap.HeightMap[i * resolution];
-			}
-		}
-
-		// Unify the topmost and bottommost borders
-		for (int x = 0; x < MapWidth; x++)
-		{
-			MapData topmostMap = Maps[x, 0];
-			MapData bottommostMap = Maps[x, MapHeight - 1];
-			for (int i = 0; i < resolution; i++)
-			{
-				topmostMap.HeightMap[i] = bottommostMap.HeightMap[(resolution - 1) * resolution + i];
-				bottommostMap.HeightMap[(resolution - 1) * resolution + i] = topmostMap.HeightMap[i];
-			}
-		}
-	}
-
-    
 	public void GenerateFixedMoistureMap()
 	{
 		MoistureMap = Enumerable.Repeat(FixedMoisture, MapHeight * MapWidth).ToArray();
