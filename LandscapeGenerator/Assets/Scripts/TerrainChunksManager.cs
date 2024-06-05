@@ -176,7 +176,7 @@ public class TerrainChunksManager{
 		public GameObject GameObject { get; }
 		public MapData MapData { get; private set; }
 		
-		private static Material _material = new (Shader.Find("Custom/VertexColorWithLighting"));
+		private static Material _material = new (Shader.Find("Standard"));
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
 		private float2 _position;
