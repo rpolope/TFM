@@ -33,7 +33,7 @@ public static class MapDisplay{
             DrawTexture (TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         } else if (drawMode == DrawMode.Mesh) {
             var meshData = new MeshData(mapSize, 0);
-            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, new float2(), mapData,ref meshData).Complete();
+            MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, 1, mapData,ref meshData).Complete();
             DrawMesh (meshData, TextureGenerator.TextureFromColorMap (mapData.ColorMap.ToArray(), mapSize));
         }
     }

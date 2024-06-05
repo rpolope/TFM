@@ -20,7 +20,6 @@ public static class MeshGenerator
         public int Resolution;
         public int FacesCount;
         public float Scale;
-        public float2 Center;
         [ReadOnly]
         public MapData MapData;
         public int LODScale;
@@ -57,26 +56,9 @@ public static class MeshGenerator
                 Triangles[baseIndex + 5] = vertexIndex + 1;
             }
         }
-
-        private float GenerateHeight(float2 samplePos)
-        {
-            var noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            // float ridgedFactor = 0.85f;
-            // float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
-            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, TerrainParameters.noiseParameters);
-            //
-            // if (ridgedFactor > 0)
-            //     noiseValue = Mathf.Pow(noiseValue, TerrainParameters.noiseParameters.ridgeRoughness);
-            //
-            // noiseValue = noiseValue < TerrainParameters.meshParameters.waterLevel ? 
-            //     TerrainParameters.meshParameters.waterLevel :  noiseValue;
-
-            
-            return Scale * noiseValue * TerrainParameters.meshParameters.heightScale;
-        }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, float2 center, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -86,7 +68,6 @@ public static class MeshGenerator
             Colors = meshData.Colors,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
-            Center = center,
             Scale = scale,
             MapData = mapData,
             LODScale = meshData.LODScale,
