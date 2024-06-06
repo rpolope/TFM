@@ -176,7 +176,7 @@ public class TerrainChunksManager{
 		public GameObject GameObject { get; }
 		public MapData MapData { get; private set; }
 		
-		private static Material _material = new (Shader.Find("Standard"));
+		private static Material _material = new (Shader.Find("Custom/Terrain"));
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
 		private float2 _position;
