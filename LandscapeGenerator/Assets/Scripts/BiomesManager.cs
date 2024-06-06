@@ -24,20 +24,18 @@ public enum ClimateType
 public static class BiomesManager
 {
     private static Biome[,] _biomes;
-    internal static bool Initialized;
     
     private static Texture2D _colorMapTexture;
     public static Color[][] ColorMap { get; private set; }
-    public static Texture2D TextureTest;
-
-    public static void Initialize(bool fromMapVisualizer = false)
+    private static bool _isInitialized = false;
+    public static void Initialize()
     {
-        // if (_initialized) return;
+        if (_isInitialized && !Application.isPlaying) return;
         
         LoadColorMapTexture();
-        if (!fromMapVisualizer)
+        if (Application.isPlaying)
             InitializeBiomes();
-        Initialized = true;
+        _isInitialized = true;
     }
 
     private static void TestColorRangeColorSampling(Color[] colorGradient)
@@ -64,15 +62,14 @@ public static class BiomesManager
 
     private static void LoadColorMapTexture()
     {
-        _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-discrete");
-        // _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-smooth");
+        // _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-discrete");
+        _colorMapTexture = Resources.Load<Texture2D>("Textures/biome-lookup-smooth");
         if (_colorMapTexture == null)
         {
             Debug.LogError("No se pudo cargar la textura biome-lookup-discrete.");
             return;
         }
 
-        TextureTest = new Texture2D(_colorMapTexture.width, _colorMapTexture.height);
         ColorMap = new Color[_colorMapTexture.height][];
         for (int y = 0; y < _colorMapTexture.height; y++)
         {
@@ -80,12 +77,8 @@ public static class BiomesManager
             for (int x = 0; x < _colorMapTexture.width; x++)
             {
                 ColorMap[y][x] = _colorMapTexture.GetPixel(y, x);
-                TextureTest.SetPixel(x, y, ColorMap[y][x]);
             }
         }
-        
-        TextureTest.Apply();
-        // TestColorRangeColorSampling(ColorMap[Mathf.RoundToInt(LandscapeManager.FixedMoisture * 127)]);
     }
 
     private static void InitializeBiomes()
@@ -135,7 +128,7 @@ public class Biome
         Moisture = moisture;
         Heat = heat;
         ClimateType = GetClimateType(moisture, heat);
-        ColorGradient = BiomesManager.ColorMap[Mathf.RoundToInt(Moisture * 128)];
+        ColorGradient = BiomesManager.ColorMap[Mathf.RoundToInt(Moisture * 127)];
         // TerrainParameters = new TerrainParameters(new NoiseParameters(GetNoiseType()), new MeshParameters(0.1f));
         TerrainParameters = new TerrainParameters(new NoiseParameters(NoiseType.Perlin), new MeshParameters(0.1f));
     }

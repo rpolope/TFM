@@ -15,7 +15,6 @@ public static class MeshGenerator
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
         [NativeDisableParallelForRestriction]
-        public NativeArray<Color> Colors;
         public TerrainParameters TerrainParameters;
         public int Resolution;
         public int FacesCount;
@@ -38,7 +37,6 @@ public static class MeshGenerator
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
-            Colors[index] = MapData.ColorMap[mapIndex];
             
             if (index < FacesCount)
             {
@@ -58,17 +56,16 @@ public static class MeshGenerator
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, float scale, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
             Vertices = meshData.Vertices,
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
-            Colors = meshData.Colors,
             Resolution = resolution,
             FacesCount = meshData.Triangles.Length / 6,
-            Scale = scale,
+            Scale = terrainParameters.meshParameters.scale,
             MapData = mapData,
             LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters
@@ -84,7 +81,6 @@ public class MeshData {
     public NativeArray<Vector3> Vertices;
     public NativeArray<int> Triangles;
     public NativeArray<float2> UVs;
-    public NativeArray<Color> Colors;
 
     public readonly int LODScale;
 
@@ -95,7 +91,6 @@ public class MeshData {
         Vertices = new NativeArray<Vector3>(resolution * resolution, Allocator.Persistent);
         Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
         UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
-        Colors = new NativeArray<Color>(resolution * resolution, Allocator.Persistent);
     }
 
     public Mesh CreateMesh() {
@@ -106,7 +101,6 @@ public class MeshData {
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
-        mesh.SetColors(Colors);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         

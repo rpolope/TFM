@@ -9,12 +9,11 @@ public class MapGenerator : MonoBehaviour
 {
     public bool autoUpdate = true;
     public DrawMode drawMode;
-    public TerrainParameters mapParameters;
-    [Header("Biomes Params")]
-    public BiomesParameters biomeParameters;
+    public NoiseData noise; 
+    public TerrainData terrain;
+    public TextureData textureData;
+    public Material terrainMaterial;
 
-    public static MapGenerator Instance;
-    
     [BurstCompile]
     private struct GenerateMapJob : IJobParallelFor
     {
@@ -91,25 +90,15 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(Instance);
-        }
-    }
+    public static MapData GenerateMapData(int resolution, NoiseParameters parameters, Biome biome, float2 centre = new float2()) {
 
-    public static MapData GenerateMapData(int resolution, float2 centre, NoiseParameters parameters, Biome biome) {
-
+        BiomesManager.Initialize();
+        
         float[] noiseMap = GenerateNoiseMap(resolution, centre, parameters);
         
-        Color[] colorMap = GenerateColorMap(noiseMap, biome);
+        // Color[] colorMap = GenerateColorMap(noiseMap, biome);
 	
-        return new MapData (noiseMap, colorMap);
+        return new MapData (noiseMap);
     }
 
     private static Color[] GenerateColorMap(float[] noiseMap, Biome biome)
@@ -137,7 +126,6 @@ public class MapGenerator : MonoBehaviour
         return colorMapArray;
     }
 
-
     public static float[] GenerateNoiseMap(int resolution, float2 centre, NoiseParameters parameters)
     {
         NativeArray<float> map = new NativeArray<float>(resolution * resolution, Allocator.TempJob);
@@ -157,21 +145,51 @@ public class MapGenerator : MonoBehaviour
         
         return mapArray;
     }
+
+    public TerrainParameters GetTerrainParameters()
+    {
+        return new TerrainParameters(noise.parameters, terrain.parameters);
+    }
+    
+    void OnValidate() {
+
+        BiomesManager.Initialize();
+        
+        if (terrain != null) {
+            terrain.OnValuesUpdated -= OnValuesUpdated;
+            terrain.OnValuesUpdated += OnValuesUpdated;
+        }
+        if (noise != null) {
+            noise.OnValuesUpdated -= OnValuesUpdated;
+            noise.OnValuesUpdated += OnValuesUpdated;
+        }
+        if (textureData != null) {
+            textureData.OnValuesUpdated -= OnTextureValuesUpdated;
+            textureData.OnValuesUpdated += OnTextureValuesUpdated;
+        }
+    }
+    
+    void OnValuesUpdated() {
+        if (!Application.isPlaying) {
+            MapDisplay.DrawMapInEditor(drawMode, GenerateMapData(terrain.parameters.resolution, noise.parameters,new Biome(0f, 0f)), GetTerrainParameters());
+        }
+    }
+    
+    void OnTextureValuesUpdated() {
+        textureData.ApplyToMaterial (terrainMaterial);
+    }
 }
 public struct MapData {
     public NativeArray<float> HeightMap;
-    public NativeArray<Color> ColorMap;
 
-    public MapData (float[] heightMap, Color[] colorMap)
+    public MapData (float[] heightMap)
     {
         HeightMap = new NativeArray<float>(heightMap, Allocator.Persistent);
-        ColorMap = new NativeArray<Color>(colorMap, Allocator.Persistent);;
     }
 
     public void Dispose()
     {
         HeightMap.Dispose();
-        ColorMap.Dispose();
     }
 }
 

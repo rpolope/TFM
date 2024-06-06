@@ -2,10 +2,11 @@ using System;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public const float Scale = 1f;
+	public const float Scale = 2.5f;
 	public const int MapHeight = 33;
 	public const int MapWidth = 33;
 	public static LandscapeManager Instance;
@@ -14,6 +15,7 @@ public class LandscapeManager : MonoBehaviour{
 	public static float[] MoistureMap { get; set; }
 	
 	public Transform Transform { get; private set; }
+
 	public int initialLatitude;
 	public int initialLongitude;
 
@@ -47,6 +49,7 @@ public class LandscapeManager : MonoBehaviour{
 
     private void Start()
     {
+	    terrainData.parameters.scale = Scale;
         Transform = transform;
         var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
         var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
@@ -68,8 +71,7 @@ public class LandscapeManager : MonoBehaviour{
         {
             for (int x = 0; x < MapWidth; x++)
             {
-                Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution,
-                    new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), noiseData.parameters, BiomesManager.GetBiome(new int2(x, y)));
+                Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution, noiseData.parameters, BiomesManager.GetBiome(new int2(x, y)), new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1));
             }
         }
         UnifyMapBorders();

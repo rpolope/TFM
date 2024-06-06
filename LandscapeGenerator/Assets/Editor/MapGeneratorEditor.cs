@@ -13,18 +13,18 @@ namespace Editor
 			MapDisplay.MeshFilter = mapGenerator.gameObject.GetComponent<MeshFilter>();
 			MapDisplay.MeshRenderer = mapGenerator.gameObject.GetComponent<MeshRenderer>();
 			MapDisplay.TextureRender = mapGenerator.gameObject.GetComponent<Renderer>();
-			BiomesManager.Initialize(true);
-			
+
+			// BiomesManager.Initialize();
+			//
 			if (DrawDefaultInspector ()) {
 				if (mapGenerator.autoUpdate) {
-					var mapData = MapGenerator.GenerateMapData(mapGenerator.mapParameters.meshParameters.resolution, new float2(), mapGenerator.mapParameters.noiseParameters, new Biome(0f, 0f));
-					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.mapParameters);
+					var mapData = MapGenerator.GenerateMapData(mapGenerator.terrain.parameters.resolution, mapGenerator.noise.parameters, new Biome(0f, 0f), new float2(1,1));
+					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());
 				}
 			}
-
 			if (GUILayout.Button ("Generate")) {
-				var mapData = MapGenerator.GenerateMapData(mapGenerator.mapParameters.meshParameters.resolution, new float2(), mapGenerator.mapParameters.noiseParameters,  new Biome(0f, 0f));
-				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.mapParameters);		
+				var mapData = MapGenerator.GenerateMapData(mapGenerator.terrain.parameters.resolution, mapGenerator.noise.parameters, new Biome(0f, 0f), new float2(1,1));
+				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());		
 			}
 		}
 	}

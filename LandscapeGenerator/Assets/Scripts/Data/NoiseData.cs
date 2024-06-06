@@ -3,12 +3,14 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu()]
-public class NoiseData : ScriptableObject
+public class NoiseData : UpdatableData
 {
     public NoiseParameters parameters;
 
-    private void OnValidate()
+    protected override void OnValidate()
     {
-        Debug.Log("Cambio los valores");
+        Debug.Log("Cambio los valores de generación de ruido");
+        
+        base.OnValidate();
     }
 }
