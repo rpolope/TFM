@@ -354,7 +354,9 @@ public class TerrainChunksManager{
 		{
 			_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(LandscapeManager.Instance.terrainParameters, resolution , LandscapeManager.Scale, _chunk.MapData, ref _meshData);
+			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
+				LandscapeManager.Instance.terrainData.parameters);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution , LandscapeManager.Scale, _chunk.MapData, ref _meshData);
 			RequestedMesh = true;
 		}
 

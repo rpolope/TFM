@@ -16,7 +16,9 @@ public class LandscapeManager : MonoBehaviour{
 	public Transform Transform { get; private set; }
 	public int initialLatitude;
 	public int initialLongitude;
-	public TerrainParameters terrainParameters;
+
+	public NoiseData noiseData;
+	public TerrainData terrainData;
 	public NoiseParameters moistureParameters;
 	public BiomesParameters biomesParameters;
 	public Viewer viewer;
@@ -67,7 +69,7 @@ public class LandscapeManager : MonoBehaviour{
             for (int x = 0; x < MapWidth; x++)
             {
                 Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution,
-                    new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), terrainParameters.noiseParameters, BiomesManager.GetBiome(new int2(x, y)));
+                    new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1), noiseData.parameters, BiomesManager.GetBiome(new int2(x, y)));
             }
         }
         UnifyMapBorders();

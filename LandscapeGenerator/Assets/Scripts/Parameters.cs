@@ -101,6 +101,8 @@ public struct NoiseParameters
 [Serializable]
 public struct MeshParameters
 {
+    [Min(1.0f)]
+    public float scale;
     public int resolution;
     [Min(1)]
     public float heightScale;
@@ -111,6 +113,7 @@ public struct MeshParameters
 
     public MeshParameters(float waterLevel)
     {
+        scale = 2.5f;
         resolution = 11;
         heightScale = 11;
         levelsOfDetail = 1;
