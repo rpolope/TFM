@@ -18,7 +18,7 @@ public class LandscapeManager : MonoBehaviour{
 
 	public int initialLatitude;
 	public int initialLongitude;
-
+	public MapGenerator mapGenerator;
 	public NoiseData noiseData;
 	public TerrainData terrainData;
 	public NoiseParameters moistureParameters;
@@ -62,6 +62,8 @@ public class LandscapeManager : MonoBehaviour{
 
         _chunksManager = new TerrainChunksManager();
         _chunksManager.Initialize();
+        
+        
     }
 
     private void GenerateMap()
@@ -71,7 +73,7 @@ public class LandscapeManager : MonoBehaviour{
         {
             for (int x = 0; x < MapWidth; x++)
             {
-                Maps[x, y] = MapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution, noiseData.parameters, BiomesManager.GetBiome(new int2(x, y)), new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1));
+                Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1));
             }
         }
         UnifyMapBorders();
@@ -106,6 +108,14 @@ public class LandscapeManager : MonoBehaviour{
                 eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
             }
         }
+    }
+
+    private void DisposeMaps()
+    {
+	    foreach (var map in Maps)
+	    {
+		    map.Dispose();
+	    }
     }
 
 	private void Update()

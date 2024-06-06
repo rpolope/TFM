@@ -27,7 +27,7 @@ public static class MapDisplay
     
     public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters)
     {
-        var mapSize = terrainParameters.meshParameters.resolution;
+        var resolution = terrainParameters.meshParameters.resolution;
 
         switch (drawMode)
         {
@@ -36,8 +36,8 @@ public static class MapDisplay
                 break;
             case DrawMode.Mesh:
             {
-                var meshData = new MeshData(mapSize, 0);
-                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, mapSize, mapData,ref meshData).Complete();
+                var meshData = new MeshData(resolution, 0);
+                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, mapData,ref meshData).Complete();
                 DrawMesh (meshData);
                 break;
             }

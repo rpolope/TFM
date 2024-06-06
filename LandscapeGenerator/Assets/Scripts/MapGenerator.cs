@@ -3,14 +3,16 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {
     public bool autoUpdate = true;
     public DrawMode drawMode;
-    public NoiseData noise; 
-    public TerrainData terrain;
+    public NoiseData noiseData; 
+    public TerrainData terrainData;
     public TextureData textureData;
     public Material terrainMaterial;
 
@@ -51,11 +53,13 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public static MapData GenerateMapData(int resolution, NoiseParameters parameters, Biome biome, float2 centre = new float2()) {
-
-        BiomesManager.Initialize();
+    public MapData GenerateMapData(int resolution, NoiseParameters parameters, float2 centre = default) {
         
-        float[] noiseMap = GenerateNoiseMap(resolution, centre, parameters);
+        centre = centre.Equals(default) ? new float2(1f, 1f) : centre;
+        
+        var noiseMap = GenerateNoiseMap(resolution, centre, parameters);
+        
+        textureData.UpdateMeshHeights(terrainMaterial, terrainData.MinHeight, terrainData.MaxHeight);
         
         return new MapData (noiseMap);
     }
@@ -82,20 +86,18 @@ public class MapGenerator : MonoBehaviour
 
     public TerrainParameters GetTerrainParameters()
     {
-        return new TerrainParameters(noise.parameters, terrain.parameters);
+        return new TerrainParameters(noiseData.parameters, terrainData.parameters);
     }
     
     void OnValidate() {
-
-        BiomesManager.Initialize();
         
-        if (terrain != null) {
-            terrain.OnValuesUpdated -= OnValuesUpdated;
-            terrain.OnValuesUpdated += OnValuesUpdated;
+        if (terrainData != null) {
+            terrainData.OnValuesUpdated -= OnValuesUpdated;
+            terrainData.OnValuesUpdated += OnValuesUpdated;
         }
-        if (noise != null) {
-            noise.OnValuesUpdated -= OnValuesUpdated;
-            noise.OnValuesUpdated += OnValuesUpdated;
+        if (noiseData != null) {
+            noiseData.OnValuesUpdated -= OnValuesUpdated;
+            noiseData.OnValuesUpdated += OnValuesUpdated;
         }
         if (textureData != null) {
             textureData.OnValuesUpdated -= OnTextureValuesUpdated;
@@ -105,7 +107,7 @@ public class MapGenerator : MonoBehaviour
     
     void OnValuesUpdated() {
         if (!Application.isPlaying) {
-            MapDisplay.DrawMapInEditor(drawMode, GenerateMapData(terrain.parameters.resolution, noise.parameters,new Biome(0f, 0f)), GetTerrainParameters());
+            MapDisplay.DrawMapInEditor(drawMode, GenerateMapData(terrainData.parameters.resolution, noiseData.parameters), GetTerrainParameters());
         }
     }
     

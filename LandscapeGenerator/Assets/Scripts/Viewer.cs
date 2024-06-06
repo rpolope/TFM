@@ -54,9 +54,9 @@ public class Viewer : MonoBehaviour
     public static void SetInitialPos(int longitude, int latitude)
     {
         _transform.position = new Vector3(
-            longitude * TerrainChunksManager.TerrainChunk.Resolution,
+            longitude * TerrainChunksManager.TerrainChunk.WorldSize,
             _transform.position.y,
-            latitude * TerrainChunksManager.TerrainChunk.Resolution
+            latitude * TerrainChunksManager.TerrainChunk.WorldSize
         );
         _viewerOldPosition = new Vector2(_transform.position.x, _transform.position.z);
         Position = _transform.position;

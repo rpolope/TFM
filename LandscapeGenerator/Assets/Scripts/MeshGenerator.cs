@@ -22,6 +22,7 @@ public static class MeshGenerator
         [ReadOnly]
         public MapData MapData;
         public int LODScale;
+        public int ChunkFullResolution;
 
         public void Execute(int index)
         {
@@ -32,7 +33,7 @@ public static class MeshGenerator
             float xPos = LODScale * (x - offset) * Scale;
             float zPos = LODScale * (z - offset) * Scale;
             
-            var mapIndex = LODScale * (x + z * TerrainChunksManager.TerrainChunk.Resolution);
+            var mapIndex = LODScale * (x + z * ChunkFullResolution);
             float height = MapData.HeightMap[mapIndex] * Scale * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
@@ -68,7 +69,8 @@ public static class MeshGenerator
             Scale = terrainParameters.meshParameters.scale,
             MapData = mapData,
             LODScale = meshData.LODScale,
-            TerrainParameters = terrainParameters
+            TerrainParameters = terrainParameters,
+            ChunkFullResolution = terrainParameters.meshParameters.resolution
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         

@@ -14,16 +14,15 @@ namespace Editor
 			MapDisplay.MeshRenderer = mapGenerator.gameObject.GetComponent<MeshRenderer>();
 			MapDisplay.TextureRender = mapGenerator.gameObject.GetComponent<Renderer>();
 
-			// BiomesManager.Initialize();
-			//
 			if (DrawDefaultInspector ()) {
 				if (mapGenerator.autoUpdate) {
-					var mapData = MapGenerator.GenerateMapData(mapGenerator.terrain.parameters.resolution, mapGenerator.noise.parameters, new Biome(0f, 0f), new float2(1,1));
+					var mapData = mapGenerator.GenerateMapData(mapGenerator.terrainData.parameters.resolution, mapGenerator.noiseData.parameters);
 					MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());
 				}
 			}
-			if (GUILayout.Button ("Generate")) {
-				var mapData = MapGenerator.GenerateMapData(mapGenerator.terrain.parameters.resolution, mapGenerator.noise.parameters, new Biome(0f, 0f), new float2(1,1));
+			if (GUILayout.Button ("Generate"))
+			{
+				var mapData = mapGenerator.GenerateMapData(mapGenerator.terrainData.parameters.resolution, mapGenerator.noiseData.parameters);
 				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());		
 			}
 		}
