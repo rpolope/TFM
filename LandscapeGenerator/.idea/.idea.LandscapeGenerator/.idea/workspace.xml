@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4219218e-71fa-411b-8084-e4a0f91751da" name="Changes" comment="FINALMENTE SE MEZCLAN LAS TEXTURAS EN BASE A SU ALTURA!!&#10;&#10;Cambios en TextureData.cs: Se ha creado un nuevo tipo de dato: Layer, que contiene la información de color y textura de cada altura de terreno, junto a su nivel de intensidad y su ancho de mezclado. Se han añadido nuevos atributos al shader como el array de texturas, el color strength y se han renombrado algunas variables. &#10;&#10;Cambios en Terrain.shader: Se ha creado el método triplanar que samplea el valor de la textura que se le pasa de aucerdo al valor de la normal en el fragmento que se está procesando y se han renombrado algunas variables.">
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Terrain.shader" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Terrain.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Data/TextureData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Data/TextureData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Grass.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Grass.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Rocks 1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Rocks 1.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Rocks 2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Rocks 2.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Sandy grass.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Sandy grass.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Snow.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Snow.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Stony ground.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Stony ground.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Tileable noise.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Tileable noise.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/Water.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Water.png.meta" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;rpoloq&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="4699e480-e5d6-487e-9062-cd5c1038674b" />
+        <option name="url" value="https://github.com/rpolope/TFM.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Data/UpdatableData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/MeshGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ide.vscode@1.2.5/Editor/VSCodeScriptEditor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@1.2.6/Unity.Mathematics/float2.gen.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@1.2.6/Unity.Mathematics/int2.gen.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/16/d36dd008/JobHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/22/e51669ab/NativeArray`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/2f/856782ea/Bounds.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/72/e64c3d3c/JobsUtility.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/97/6e5a19da/Transform.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/99/4911f495/Vector2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/be/23601abe/Texture2D.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/ca/b1f3e6bc/GameObject.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/cc/8c5cff9b/IJobParallelForExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/eb/e4744bf2/Component.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/ee/a1fc3e8f/Mathf.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3b24cc7fa9794ed8ab04312c53e6dedd172c00/f5/c893af2b/Vector2Int.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/10/c33b99b1/Texture2D.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/38/83fe72cd/Mesh.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/46/461f1058/IJobParallelForExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/59/0efca81e/GameObject.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/71/81422d7c/Vector2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/7d/68925f41/LightProbes.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/80/c876f949/JobsUtility.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/ae/5173276e/Material.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/ce/87b510d7/JobHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/d3/5ab5527c/NativeArray`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/55fbbbd17b724c15b6abe8c1a3e3289c175c00/d8/de570855/AtomicSafetyHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/b4/393a8c0f/Action.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/787acc3c9a4c471ba7d971300105af2446ac00/09/20930374/Buffer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/787acc3c9a4c471ba7d971300105af2446ac00/37/bfe20658/String.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/787acc3c9a4c471ba7d971300105af2446ac00/9f/e722f5f0/__BinaryParser.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/787acc3c9a4c471ba7d971300105af2446ac00/b3/2c4303c7/ThrowHelper.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/79c7b132c51745cbae03eebea8111c0e175600/63/858427db/IMGUIContainer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/79c7b132c51745cbae03eebea8111c0e175600/d8/69be1af6/ListViewDraggerAnimated.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/98b2aface95e4962a9052e7f1344672010fc00/a2/5c9c9884/Enumerable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9f6d3cd9a046437b8a19354e8f6cf2c03b600/d8/3ce3b1fe/FontAsset.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a675c3b64da6474b9fa5007cb5424433956000/7f/6153fa46/Editor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a675c3b64da6474b9fa5007cb5424433956000/81/7de5218d/InspectorElement.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a675c3b64da6474b9fa5007cb5424433956000/86/e8ee29b9/EditorPerformanceTracker.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a675c3b64da6474b9fa5007cb5424433956000/dc/cafd5cf4/UnityBeeDriver.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/43/ac7446bb/Action.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/46/dcf5bf78/Buffer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/52/d12b995e/String.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/b0/75598434/InvalidOperationException.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/b6/91fe6c40/ThrowHelper.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b11ba2a8fbf24f219f7cc98532a1130446ac00/ef/3d4252f5/FileStream.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b54eaf4963a54fba850ab55ad04d0ce23c00/f0/87b3e442/NativeInputSystem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c91a25f185b743118a39aafa100dff0959c00/a0/38ab117e/RetainedMode.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d054a9182977441aa432503a474315ba284000/d7/6155c8a2/Socket.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/e21066235cfc4b108fbac5f916ec2a7a3c00/04/504d03a0/NativeInputSystem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/27/8ba03002/EventDispatcherGate.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/7c/adef06ab/MouseCaptureDispatchingStrategy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/8b/2ff46446/BaseVisualElementPanel.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/b1/407e9251/UIElementsUtility.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/c9/82a576b8/CallbackEventHandler.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/cd/8de0cd3a/IMGUIContainer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ea801f3ed0fd4af29867174222859987178200/d8/2c4c5861/EventDispatcher.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fe7039efe678478d9c83e73bc6a6566d94b400/29/a84b123d/SerializedObject.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fe7039efe678478d9c83e73bc6a6566d94b400/31/db0d4e28/InspectorElement.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fe7039efe678478d9c83e73bc6a6566d94b400/7f/e77b0782/ProfilerWindow.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fe7039efe678478d9c83e73bc6a6566d94b400/ef/b15039d7/SerializedProperty.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/3ea01e77be99618395f448b16bd7cc2bd4248bd9e5d8474964b2d97f39c5d74/System.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a27bb736f83a7da8a673184cc3a01a315fbfadaaae0bdde75d79cbec74353f/System.Runtime.Serialization.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2fBBljg5kvqNj0fsZysR59RsovE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.23501427&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/texturing__with__triplanar__shader&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propDebugger&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\rafik\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\DecompilerCache&quot;,
+      &quot;C:\\Users\\rafik\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\SourcesCache&quot;,
+      &quot;C:\\Users\\rafik\\AppData\\Local\\Symbols\\src&quot;
+    ]
+  }
+}</component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2022.3.28f1\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Proyectos\TFM\LandscapeGenerator -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Proyectos\TFM\LandscapeGenerator" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2022.3.28f1\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath C:\Proyectos\TFM\LandscapeGenerator -testResults Logs/results.xml -testPlatform EditMode -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Proyectos\TFM\LandscapeGenerator" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4219218e-71fa-411b-8084-e4a0f91751da" name="Changes" comment="" />
+      <created>1713264745532</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1713264745532</updated>
+      <workItem from="1713264747313" duration="3832000" />
+      <workItem from="1713277514823" duration="494000" />
+      <workItem from="1713278039403" duration="2993000" />
+      <workItem from="1713343149069" duration="9213000" />
+      <workItem from="1713363892187" duration="11769000" />
+      <workItem from="1713428933903" duration="9291000" />
+      <workItem from="1713451204998" duration="9905000" />
+      <workItem from="1713513224782" duration="10927000" />
+      <workItem from="1713537280960" duration="11226000" />
+      <workItem from="1713549300419" duration="43000" />
+      <workItem from="1713549350654" duration="1000" />
+      <workItem from="1713549361274" duration="162000" />
+      <workItem from="1713600089271" duration="8915000" />
+      <workItem from="1713629077526" duration="6105000" />
+      <workItem from="1713781349207" duration="103000" />
+      <workItem from="1713782049728" duration="960000" />
+      <workItem from="1713783105378" duration="2995000" />
+      <workItem from="1713796807765" duration="6834000" />
+      <workItem from="1713858931279" duration="620000" />
+      <workItem from="1714758718102" duration="15930000" />
+      <workItem from="1715093150912" duration="10518000" />
+      <workItem from="1715152868736" duration="13451000" />
+      <workItem from="1715177333708" duration="11169000" />
+      <workItem from="1715238936195" duration="11663000" />
+      <workItem from="1715264276564" duration="7080000" />
+      <workItem from="1715325055712" duration="10929000" />
+      <workItem from="1715351637406" duration="9483000" />
+      <workItem from="1715412620317" duration="5441000" />
+      <workItem from="1715418534595" duration="6962000" />
+      <workItem from="1715510780584" duration="19225000" />
+      <workItem from="1715610538780" duration="9404000" />
+      <workItem from="1715674794283" duration="12812000" />
+      <workItem from="1715695945767" duration="11792000" />
+      <workItem from="1715758103136" duration="10358000" />
+      <workItem from="1715782549828" duration="12125000" />
+      <workItem from="1715845004307" duration="12850000" />
+      <workItem from="1715868826164" duration="12140000" />
+      <workItem from="1715931424059" duration="6285000" />
+      <workItem from="1715942092944" duration="2961000" />
+      <workItem from="1715956596649" duration="10177000" />
+      <workItem from="1716019115097" duration="9801000" />
+      <workItem from="1716191354589" duration="7069000" />
+      <workItem from="1716215022213" duration="9599000" />
+      <workItem from="1716277995285" duration="11712000" />
+      <workItem from="1716300973163" duration="3150000" />
+      <workItem from="1716304576763" duration="1401000" />
+      <workItem from="1716675476500" duration="8084000" />
+      <workItem from="1716687014226" duration="343000" />
+      <workItem from="1716723787279" duration="3969000" />
+      <workItem from="1716748623508" duration="18624000" />
+      <workItem from="1716818889424" duration="12038000" />
+      <workItem from="1716844515356" duration="15000" />
+      <workItem from="1716844591198" duration="3161000" />
+      <workItem from="1716882203710" duration="11400000" />
+      <workItem from="1716906299454" duration="11434000" />
+      <workItem from="1716931376205" duration="3040000" />
+      <workItem from="1716934465263" duration="1421000" />
+      <workItem from="1716966413241" duration="10880000" />
+      <workItem from="1716977455024" duration="722000" />
+      <workItem from="1716980044374" duration="3865000" />
+      <workItem from="1716992035836" duration="10573000" />
+      <workItem from="1717017310748" duration="4915000" />
+      <workItem from="1717055508995" duration="4270000" />
+      <workItem from="1717063757289" duration="6060000" />
+      <workItem from="1717079597330" duration="15457000" />
+      <workItem from="1717140329280" duration="13223000" />
+      <workItem from="1717167598120" duration="288000" />
+      <workItem from="1717167925071" duration="4114000" />
+      <workItem from="1717173488653" duration="6793000" />
+      <workItem from="1717180435326" duration="1239000" />
+      <workItem from="1717228709820" duration="12548000" />
+      <workItem from="1717251429707" duration="13621000" />
+      <workItem from="1717349195063" duration="1206000" />
+      <workItem from="1717401986298" duration="12580000" />
+      <workItem from="1717424378455" duration="12547000" />
+      <workItem from="1717449657605" duration="4289000" />
+      <workItem from="1717487585505" duration="12509000" />
+      <workItem from="1717513676353" duration="7794000" />
+      <workItem from="1717534865049" duration="3653000" />
+      <workItem from="1717574202010" duration="10239000" />
+      <workItem from="1717598674488" duration="4514000" />
+      <workItem from="1717613518291" duration="299000" />
+      <workItem from="1717623672592" duration="1549000" />
+      <workItem from="1717661439541" duration="10461000" />
+      <workItem from="1717684485278" duration="1818000" />
+      <workItem from="1717688048945" duration="8429000" />
+      <workItem from="1717746811891" duration="9854000" />
+      <workItem from="1717769834671" duration="6024000" />
+    </task>
+    <task id="LOCAL-00018" summary="Implementación del batching en la generación de chunks">
+      <option name="closed" value="true" />
+      <created>1716810837991</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1716810837992</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Cambio en el tipo de ruido con el que se crea el TerrainParameters en los Biomes al Perlin por defecto. Comentado el código de la función de DiplayMap. Eliminación del parametro amplitude de Parameters.cs. Modificación de los vértices de la mesh del plano en el constructor d elos chunks.">
+      <option name="closed" value="true" />
+      <created>1716821098035</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1716821098035</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Movida la lógica de renderizado del chunk al MapDisplay, en la función DisplayChunk">
+      <option name="closed" value="true" />
+      <created>1716821349811</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1716821349811</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Se comienza a implementar la actualziación de chunks visibles.">
+      <option name="closed" value="true" />
+      <created>1716821508384</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1716821508384</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Adición de todos los métodos y variables para llevar a cabo la actualización de la visiblidad de los chunks conforme al movimiento del jugador. Todavía no funciona debido a la no implementación del método update de la clase chunk. &#10;&#10;COMIENZO DE LA IMPLMENTACIÓN DE UPDATE EN LA CLASE CHUNK">
+      <option name="closed" value="true" />
+      <created>1716824564941</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1716824564941</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Adaptaciones para que el diccionario de chunks en TerrainChunksManager.cs se inicialice cuando se crea el batch que contiene los chunks y se actualiza bien el culling al girar pero no al desplazarse.">
+      <option name="closed" value="true" />
+      <created>1716830268590</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1716830268590</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Corrección en la visiblidad de los chunks cuando se actualizan y desactivación de los batches y chunks en el constructor.&#10;&#10;El problema de los index out of range al obtener el chunks sobre el que se posiciona el viewer en el inicialize venía de un mal offset en el cálculo de _lastLattitude y _lastLongitude, el cual se &quot;deshardcodeado&quot; y parece ir bien.">
+      <option name="closed" value="true" />
+      <created>1716887599453</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1716887599453</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Se ha he hecho TerrainChunksManager.cs clase no estática y se ha dado como atributo a los Batch. Se ha cambiado la lógica que gestiona la activación y displayeado de chunks para que se controle desde los batches.">
+      <option name="closed" value="true" />
+      <created>1716916130731</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1716916130732</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Implementación de la generación de meshes asíncornas con jobs y solucionado el problema del uso por más de un job del array heightmap de la map data haciendo el atributo readonly en el job.">
+      <option name="closed" value="true" />
+      <created>1716934143662</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1716934143662</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Correccion en el mapeo de las coordenadas iniciales a los valores manejables entre [0, MapHeigth] y [0, MapWidth]">
+      <option name="closed" value="true" />
+      <created>1716935195665</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1716935195665</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Se ha vuelto a poner MeshGenerator como clase estática">
+      <option name="closed" value="true" />
+      <created>1716967772014</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1716967772015</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Pasado las constantes de resolución y worldsize de los chunks a la clase TerrainChunk. Y adición de mesh a los batches.&#10;&#10;COMINEZA PRUEBA DE ELIMINAR LOS BATCHES Y DEJAR LA GENERACIÓN EN MANOS DEL TerrainChunksManager.cs">
+      <option name="closed" value="true" />
+      <created>1716972443108</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1716972443108</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Añadidos script de pruebas para generar diferentes lod a partir de una malla original con lod 0. Cambiada la lógica para generar todos los chunks sin batches.">
+      <option name="closed" value="true" />
+      <created>1716981401716</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1716981401716</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Corrección añadida: Se cambia el lod a partir de la malla con resolución total y se mantiene el tamaño constante.">
+      <option name="closed" value="true" />
+      <created>1716993128822</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1716993128822</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Modificaciones en TerrainChunksManager.cs, TerrainChunk y TerrainManagerWithCorrutine.cs (nuevo archivo) para generar un nuevo mapa usando corrutinas (implementación inciada). Actualmente se generan lso chunks correctamente a medida que se mueve el viewer con el lod adecuado.">
+      <option name="closed" value="true" />
+      <created>1717006781801</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1717006781802</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Eliminado el script TerrainManagerWithCorutine">
+      <option name="closed" value="true" />
+      <created>1717067418508</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1717067418508</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Separación de la lógica de generación y gestión de los chunks de LandscapeManager.cs. Creación de TerrainChunksManager.cs y traspaso de las clases de TerrainChunk de los lods a esta clase">
+      <option name="closed" value="true" />
+      <created>1717172055368</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1717172055368</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Adición del job GenerateColorMapJob. COMIENZA LA REFACTORIZACIÓN PARA SEPARAR LA CREACIÓN DE MAPAS DE LA MESH">
+      <option name="closed" value="true" />
+      <created>1717236124311</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1717236124311</updated>
+    </task>
+    <task id="LOCAL-00036" summary="Corrección de la posición del viewer a la latitud y longitud icniales del mapa y creación del array de mapDatas">
+      <option name="closed" value="true" />
+      <created>1717238181664</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1717238181664</updated>
+    </task>
+    <task id="LOCAL-00037" summary="CONSEGUIDO!!! Separación existosa de la generación de los mapas de alturas y de las meshes de los chunks.">
+      <option name="closed" value="true" />
+      <created>1717253874944</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1717253874944</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Actualziación de los scripts de BiomesManager.cs y Parameters.cs. Actualización de Viewer.cs (multitud de campos han pasado a estáticos). La resolución de los chunks y su tamaño global han pasado a la clase TerrainChunk. Se han añadido los métodos para la cración de la tabla de calor por latitudes y el mapa de humedad, además de dichos atributos.">
+      <option name="closed" value="true" />
+      <created>1717257791218</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1717257791218</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Los chunks se colorean según su temperatura de latitud y su humedad!!&#10;&#10;Implementado el método GenerateColorMap haciendo uso del job de generación de colores en MapGenerator.cs. Asignación de los colores de los vértices en el MeshGenerator.cs, en el job.">
+      <option name="closed" value="true" />
+      <created>1717262561258</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1717262561263</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Se ha aumentado el número de chunks visibles + algunos renombramientos">
+      <option name="closed" value="true" />
+      <created>1717264319157</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1717264319157</updated>
+    </task>
+    <task id="LOCAL-00041" summary="Se consigue que los chunks se cambien ven de posición cuando se hace un wrap en la dirección positiva del eje Z y el eje X, pero falla cuando se intenta hacer más de un wrap en las direcciones positvas y cuando baja de 0 en las direcciones negativas.">
+      <option name="closed" value="true" />
+      <created>1717411245930</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1717411245930</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Corrección del método unify bordes para dar valores fijos a los límites del mapa">
+      <option name="closed" value="true" />
+      <created>1717437467117</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1717437467117</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Correcciones en UnifyBorders">
+      <option name="closed" value="true" />
+      <created>1717438596032</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1717438596032</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Funciona el wrap around!!">
+      <option name="closed" value="true" />
+      <created>1717438658237</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1717438658237</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Versión de prueba funcional pero no oficial!! Cambios para hacer pruebas y probar parámetros. Se ha modfiicado el tamaño del moisture map y su escala para dar mejores resultados. Se han sacado nuevas tareas y crrecciones. Se ha investigado sobre el fallo de colocación del viewer cuando la escala cambia.">
+      <option name="closed" value="true" />
+      <created>1717453963296</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1717453963296</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Cambios en la generación del terreno basado en biomas!! Se ha cambiado la fórmula para calcular el calor (y el color) en base a la altura, se han implementado métodos para generación de biomas con valroes de ruido propios en la clase TerrainParameters y ajsutados los niveles de humedad en base a la latitud. También se ha modificado el método UnifyBorders y la inicializacion del mapa en el start de LandscapeManager.cs para tratar de hacer que los bordes coincidan aunque AÚN NO COINCIDEN!">
+      <option name="closed" value="true" />
+      <created>1717498594862</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1717498594862</updated>
+    </task>
+    <task id="LOCAL-00047" summary="variaciones en los valores de los parámetros de los biomas para que no sean tan escarpados. Agregada constante en MapGenerator para que cuando un valor de altura sobre pase un umbral se le añada ridged nosie.">
+      <option name="closed" value="true" />
+      <created>1717500996616</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1717500996616</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Añadido parámetro IsIsland a la clase NoiseParameters. Corrección de memory leaks en meshGenerator: Faltaba el dipsose del NativeArray Colors.&#10;&#10;SE COMIENZA LA ISNTANCIACIÓN DE OBJETOS!">
+      <option name="closed" value="true" />
+      <created>1717513824491</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1717513824491</updated>
+    </task>
+    <task id="LOCAL-00049" summary="NO SE HA COMENZADO LA INSTANCIACIÓN DE OBEJTOS. Se ha añadido la generación de fallofmap y la lógica para determinar si un bioma es isla o no (posibilidad de pasar esta decisión al chunk y pasarselo como parámetros en el contructor al bioma). también se ha añadido la lógica para aplanar la altura en el MeshGenerator.cs al nivel del agua (se puede modificar para añadir un plano a esa altura y no tener que modificar la altura de los vértices).">
+      <option name="closed" value="true" />
+      <created>1717521489497</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1717521489497</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Se han añadido los scripts de PoissonDiskSampler.cs, ObjectPlacer.cs y la clase BiomesAssetsManager para gestionar los objetos de cada bioma">
+      <option name="closed" value="true" />
+      <created>1717537465121</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1717537465122</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Refactorizaciones para mejorar la legiblidad">
+      <option name="closed" value="true" />
+      <created>1717538035842</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1717538035843</updated>
+    </task>
+    <task id="LOCAL-00052" summary="BiomeAssetManger.cs se ha movido a un archivo aparte. Se cambiado BiomeAsset para que guarde toda la información de cada asset como alturas min y max, biomas en los que puede aparecer, etc. Se han cambiado los métodos de BiomesManager.cs y se ha conseguido que se instancien objetos, aunque en posiciones erroneas, y solo se instancia un tipo de biomeasset. También se ha cambiado la adición del falloff (se resta en lugar de multiplicarse. Además se debe considerar implementar un fallof map general que se reutilice para los chunks).">
+      <option name="closed" value="true" />
+      <created>1717588244797</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1717588244797</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Cambios en BiomeAssetManger.cs: devuelve el GameObject instanciado y a AssetSize se le ha asociado un valor numérico.&#10;Cambios en BiomesManager.cs: Se ha mockeado el valor de islandProbability y TerrainParameters a unos por defecto.&#10;Cambios en ObjectPlacer.cs: Se ha hecho clase estática y se ha modificado el método PlaceObjects para que tenga en cuenta las posiciones de los items instanciados de mayor tamaño anteriromente. También se ha modifcado el método TerrainHeightAt para que obtenga de manera analítica la altura de un punto del terreno a partir de los vértices entorno a los que se encuentra, pero es un métood muy poco fiable.&#10;Cambios en TerrainChunksManager.cs: Se ha cambiado el método InstantiateBiomeAssets para usar el ObjectPlacer.">
+      <option name="closed" value="true" />
+      <created>1717605321785</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1717605321790</updated>
+    </task>
+    <task id="LOCAL-00054" summary="cambio en TerrainChunksManager.cs: cambio en el shader utilizado para crear el material al Standard, dado que se ha perdido el sahder de color por vértice e iluminación.">
+      <option name="closed" value="true" />
+      <created>1717613592377</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1717613592377</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Creación de scriptableObjects: TerrainData.cs y NoiseData.cs. Modificación de LandscapeManager.cs para añadir esos nuevos scritpableObjects como atributos públicos.">
+      <option name="closed" value="true" />
+      <created>1717665397600</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1717665397600</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Cambios en BiomesManager.cs: Eliminación de la textura para tests y su inicialización. Adición de control de inicialización más de una a través de _isInitialized y de Application.isPlaying.&#10;&#10;Cambios en MapGenerator.cs: Eliminación de TerrainParameters y sustitución por NoiseData, TerrainData y TextureData. se ha eliminado el atributo Instance, se ha eliminado el parámetro centre de la llamada a GenerateMapData (se ha dado valor por defecto en la declaración del método y ya no es necesario a pesar el valor por defecto). Suscripción y dessuscripción al evento de actualización de valores de los scriptableObjects de ruido y terreno en el método OnValidate. Implementación de GetTerrainParameters, OnValuesUpdated y OnTextureValuesUpdated. &#10;Cambios en MapData: Se ha eliminado el atributo ColorMap y sus llamadas desde otros métodos como los de MapDisplay.cs.&#10;&#10;Cambios en MapDisplay.cs: se ha eliminado el caso ColorMap del método DisplaymapInEditor dado que ya no se va a tener en cuenta el mapa de colores para la representación de los mapas. Elimincación del parámetro texture en DrawMesh y modificación de la escala del meshfilter.&#10;&#10;Cambios en MeshGenerator.cs: Se ha eliminado la asignación de color a los vértices a la hora de crear la mesh.">
+      <option name="closed" value="true" />
+      <created>1717685202595</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1717685202595</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Cambios en MapGenerator.cs: Eliminación del job de generación del colorMap y del método GenerateColorMap">
+      <option name="closed" value="true" />
+      <created>1717685808934</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1717685808934</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Cambios en el gitignore y adición del shader del terreno, asignado al ChunkMaterial.mat">
+      <option name="closed" value="true" />
+      <created>1717688214906</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1717688214906</updated>
+    </task>
+    <task id="LOCAL-00059" summary="SOLUIONADO EL PROBLEMA DE LA GENERACIÓN DEFORME DE LA MESH AL GENERARLA DESDE EL EDITOR!!&#10;&#10;Cambios en MeshGenerator.cs: se ha agregado un atributo que representa la resolución completa de los chunks para no usar directamente el valor de TerrainChunk.Resolution sino el del terrainData.&#10;&#10;Se han agregado las arrow functions: MinHeight y MaxHeight a TerrainData.cs para obtener los valores minimos y maximos posibles de la malla.&#10;&#10;Cambios en TextureData.cs: Se ha agregado el método UpdateMeshHeights&#10;&#10;Cambios en Viewer.cs: Se multiplica por WorldSize no por Resolution en SetInitialPos&#10;&#10;Se ha agregado el Shader del terreno!&#10;&#10;Cambios en LandscapeManager.cs: Se ha agregado atributo mapGenerator publico. Se ha implementado el método DiposeMaps para cuando se necesite. &#10;&#10;Cambios en MapDisplay.cs: renombramiento de mapSize&gt;resolution&#10;&#10;Cambios en MapGenerator.cs: renombramiento de los scritableObjects, eliminación de la incialización de BiomesManager y asignación de valor por defecto al parámetro center en la declaración + gestión de la recepción del parámetro para asignarle valor. Adición de         textureData.UpdateMeshHeights(terrainMaterial, terrainData.MinHeight, terrainData.MaxHeight);&#10; en el GenerateMapData. Eliminación del parámetro por defecto de Biome en las llamadas a GenerateMapData.&#10; &#10; Cambios en MapGeneratorEditor.cs: Se usa atributo no estático para llamar a GenerateMapData.">
+      <option name="closed" value="true" />
+      <created>1717694430758</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1717694430758</updated>
+    </task>
+    <task id="LOCAL-00060" summary="Cambios en TerrainChunksManager.cs: Se ha dado el custom shader a los chunks en el constructor y se ha modificado el valor devuelto por MinHeight y MaxHeight en TerrainData.cs">
+      <option name="closed" value="true" />
+      <created>1717696525712</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1717696525715</updated>
+    </task>
+    <task id="LOCAL-00061" summary="SE COLOREA CON GRADIENTE DE BLANCO Y NEGRO EN BASE A LAS ALTURAS DE LSO PIXELES MEDIANTE EL SAHDER!!&#10;&#10;&#10;Cambios en LandscapeManager.cs: Se ha cambiado el valor por defecto de Scale a 1f. En el Start, en lugar de incializar el valor del scriptableObject de scale con el de Scale, se ha hecho al revés.&#10;&#10;Cambios en TerrainData.cs: se modifcado el valor devuelto por MinHeight y MaxHeight.&#10;&#10;Cambios en TextureData.cs: Se ha añadido la llamada a UpdateMeshHeights cuando se llama a ApplyMaterial con las variables de _savedMinHeight y _savedMaxHeight.">
+      <option name="closed" value="true" />
+      <created>1717758077642</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1717758077642</updated>
+    </task>
+    <task id="LOCAL-00062" summary="SE COLOREA LA MESH POR ALTURAS CON EL SHADER!!&#10;&#10;Cambios en TerrainData.cs: se ha puesto como 0 como valor minimos de altura&#10;&#10;Cambios en TextureData.cs: Se han agregado los array de float y de color para agregar los colores y las altruas a las que estos se muestran sobre el terreno, y se pasan al matrerial en UpdateMeshHeights.&#10;&#10;Terrain.shader: Se ha implementado la coloración de los fragmentos en base a las alturas base de los colores y la altura del fragmento">
+      <option name="closed" value="true" />
+      <created>1717760524204</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1717760524204</updated>
+    </task>
+    <task id="LOCAL-00063" summary="SE AÑADEN LAS TEXTURAS INCIALES PARA CREAR EL TEXTURIZADO DE LAS MESHES. &#10;&#10;SE COMIENZA LA IMPLEMENTACIÓN PARA TEXTURIZAR MESHES SEGÚN LAS ALTRUAS">
+      <option name="closed" value="true" />
+      <created>1717760864577</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1717760864577</updated>
+    </task>
+    <task id="LOCAL-00064" summary="Se mezclan los colores en los límites, NO TIENEN LÍMITES ESTRICTOS!&#10;&#10;Cambios en Terrain.shader: Se ha agregado el array de blends, la constante epsilon, un atributo de tipo texture2d y textureScale y se ha cambiado la manera de asignar valor al albedo usando el array de blends. &#10;&#10;Cambios en ChunkMaterial.mat: Se le ha agregado una textura (la del traibuto del shader)&#10;&#10;Cambios en TextureData.cs: se han añadido dos constantes y se ha pasado el array de blends al material. También se han pasado las asignaciones de las variables del shader al método ApplyToMaterial.">
+      <option name="closed" value="true" />
+      <created>1717770894898</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1717770894902</updated>
+    </task>
+    <task id="LOCAL-00065" summary="SE HA IMPLEMENTADO LA MEZCLA TRIPLANAR DE TEXTURAS SEGÚN LAS NORMALES!">
+      <option name="closed" value="true" />
+      <created>1717772161318</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1717772161318</updated>
+    </task>
+    <task id="LOCAL-00066" summary="FINALMENTE SE MEZCLAN LAS TEXTURAS EN BASE A SU ALTURA!!&#10;&#10;Cambios en TextureData.cs: Se ha creado un nuevo tipo de dato: Layer, que contiene la información de color y textura de cada altura de terreno, junto a su nivel de intensidad y su ancho de mezclado. Se han añadido nuevos atributos al shader como el array de texturas, el color strength y se han renombrado algunas variables. &#10;&#10;Cambios en Terrain.shader: Se ha creado el método triplanar que samplea el valor de la textura que se le pasa de aucerdo al valor de la normal en el fragmento que se está procesando y se han renombrado algunas variables.">
+      <option name="closed" value="true" />
+      <created>1717775974899</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1717775974899</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="SHOW_ONLY_CHANGED_IN_SELECTION_DIFF" value="false" />
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="Correcciones en UnifyBorders" />
+    <MESSAGE value="Funciona el wrap around!!" />
+    <MESSAGE value="Versión de prueba funcional pero no oficial!! Cambios para hacer pruebas y probar parámetros. Se ha modfiicado el tamaño del moisture map y su escala para dar mejores resultados. Se han sacado nuevas tareas y crrecciones. Se ha investigado sobre el fallo de colocación del viewer cuando la escala cambia." />
+    <MESSAGE value="Cambios en la generación del terreno basado en biomas!! Se ha cambiado la fórmula para calcular el calor (y el color) en base a la altura, se han implementado métodos para generación de biomas con valroes de ruido propios en la clase TerrainParameters y ajsutados los niveles de humedad en base a la latitud. También se ha modificado el método UnifyBorders y la inicializacion del mapa en el start de LandscapeManager.cs para tratar de hacer que los bordes coincidan aunque AÚN NO COINCIDEN!" />
+    <MESSAGE value="variaciones en los valores de los parámetros de los biomas para que no sean tan escarpados. Agregada constante en MapGenerator para que cuando un valor de altura sobre pase un umbral se le añada ridged nosie." />
+    <MESSAGE value="Añadido parámetro IsIsland a la clase NoiseParameters. Corrección de memory leaks en meshGenerator: Faltaba el dipsose del NativeArray Colors.&#10;&#10;SE COMIENZA LA ISNTANCIACIÓN DE OBJETOS!" />
+    <MESSAGE value="NO SE HA COMENZADO LA INSTANCIACIÓN DE OBEJTOS. Se ha añadido la generación de fallofmap y la lógica para determinar si un bioma es isla o no (posibilidad de pasar esta decisión al chunk y pasarselo como parámetros en el contructor al bioma). también se ha añadido la lógica para aplanar la altura en el MeshGenerator.cs al nivel del agua (se puede modificar para añadir un plano a esa altura y no tener que modificar la altura de los vértices)." />
+    <MESSAGE value="Se han añadido los scripts de PoissonDiskSampler.cs, ObjectPlacer.cs y la clase BiomesAssetsManager para gestionar los objetos de cada bioma" />
+    <MESSAGE value="Refactorizaciones para mejorar la legiblidad" />
+    <MESSAGE value="BiomeAssetManger.cs se ha movido a un archivo aparte. Se cambiado BiomeAsset para que guarde toda la información de cada asset como alturas min y max, biomas en los que puede aparecer, etc. Se han cambiado los métodos de BiomesManager.cs y se ha conseguido que se instancien objetos, aunque en posiciones erroneas, y solo se instancia un tipo de biomeasset. También se ha cambiado la adición del falloff (se resta en lugar de multiplicarse. Además se debe considerar implementar un fallof map general que se reutilice para los chunks)." />
+    <MESSAGE value="Cambios en BiomeAssetManger.cs: devuelve el GameObject instanciado y a AssetSize se le ha asociado un valor numérico.&#10;Cambios en BiomesManager.cs: Se ha mockeado el valor de islandProbability y TerrainParameters a unos por defecto.&#10;Cambios en ObjectPlacer.cs: Se ha hecho clase estática y se ha modificado el método PlaceObjects para que tenga en cuenta las posiciones de los items instanciados de mayor tamaño anteriromente. También se ha modifcado el método TerrainHeightAt para que obtenga de manera analítica la altura de un punto del terreno a partir de los vértices entorno a los que se encuentra, pero es un métood muy poco fiable.&#10;Cambios en TerrainChunksManager.cs: Se ha cambiado el método InstantiateBiomeAssets para usar el ObjectPlacer." />
+    <MESSAGE value="cambio en TerrainChunksManager.cs: cambio en el shader utilizado para crear el material al Standard, dado que se ha perdido el sahder de color por vértice e iluminación." />
+    <MESSAGE value="Creación de scriptableObjects: TerrainData.cs y NoiseData.cs. Modificación de LandscapeManager.cs para añadir esos nuevos scritpableObjects como atributos públicos." />
+    <MESSAGE value="Cambios en BiomesManager.cs: Eliminación de la textura para tests y su inicialización. Adición de control de inicialización más de una a través de _isInitialized y de Application.isPlaying.&#10;&#10;Cambios en MapGenerator.cs: Eliminación de TerrainParameters y sustitución por NoiseData, TerrainData y TextureData. se ha eliminado el atributo Instance, se ha eliminado el parámetro centre de la llamada a GenerateMapData (se ha dado valor por defecto en la declaración del método y ya no es necesario a pesar el valor por defecto). Suscripción y dessuscripción al evento de actualización de valores de los scriptableObjects de ruido y terreno en el método OnValidate. Implementación de GetTerrainParameters, OnValuesUpdated y OnTextureValuesUpdated. &#10;Cambios en MapData: Se ha eliminado el atributo ColorMap y sus llamadas desde otros métodos como los de MapDisplay.cs.&#10;&#10;Cambios en MapDisplay.cs: se ha eliminado el caso ColorMap del método DisplaymapInEditor dado que ya no se va a tener en cuenta el mapa de colores para la representación de los mapas. Elimincación del parámetro texture en DrawMesh y modificación de la esclaa del meshfilter.&#10;&#10;Cambios en MeshGenerator.cs: Se ha eliminado la asignación de color a los vértices a la hora de crear la mesh." />
+    <MESSAGE value="Cambios en BiomesManager.cs: Eliminación de la textura para tests y su inicialización. Adición de control de inicialización más de una a través de _isInitialized y de Application.isPlaying.&#10;&#10;Cambios en MapGenerator.cs: Eliminación de TerrainParameters y sustitución por NoiseData, TerrainData y TextureData. se ha eliminado el atributo Instance, se ha eliminado el parámetro centre de la llamada a GenerateMapData (se ha dado valor por defecto en la declaración del método y ya no es necesario a pesar el valor por defecto). Suscripción y dessuscripción al evento de actualización de valores de los scriptableObjects de ruido y terreno en el método OnValidate. Implementación de GetTerrainParameters, OnValuesUpdated y OnTextureValuesUpdated. &#10;Cambios en MapData: Se ha eliminado el atributo ColorMap y sus llamadas desde otros métodos como los de MapDisplay.cs.&#10;&#10;Cambios en MapDisplay.cs: se ha eliminado el caso ColorMap del método DisplaymapInEditor dado que ya no se va a tener en cuenta el mapa de colores para la representación de los mapas. Elimincación del parámetro texture en DrawMesh y modificación de la escala del meshfilter.&#10;&#10;Cambios en MeshGenerator.cs: Se ha eliminado la asignación de color a los vértices a la hora de crear la mesh." />
+    <MESSAGE value="Cambios en MapGenerator.cs: Eliminación del job de generación del colorMap y del método GenerateColorMap" />
+    <MESSAGE value="Cambios en el gitignore y adición del shader del terreno, asignado al ChunkMaterial.mat" />
+    <MESSAGE value="SOLUIONADO EL PROBLEMA DE LA GENERACIÓN DEFORME DE LA MESH AL GENERARLA DESDE EL EDITOR!!&#10;&#10;Cambios en MeshGenerator.cs: se ha agregado un atributo que representa la resolución completa de los chunks para no usar directamente el valor de TerrainChunk.Resolution sino el del terrainData.&#10;&#10;Se han agregado las arrow functions: MinHeight y MaxHeight a TerrainData.cs para obtener los valores minimos y maximos posibles de la malla.&#10;&#10;Cambios en TextureData.cs: Se ha agregado el método UpdateMeshHeights&#10;&#10;Cambios en Viewer.cs: Se multiplica por WorldSize no por Resolution en SetInitialPos&#10;&#10;Se ha agregado el Shader del terreno!&#10;&#10;Cambios en LandscapeManager.cs: Se ha agregado atributo mapGenerator publico. Se ha implementado el método DiposeMaps para cuando se necesite. &#10;&#10;Cambios en MapDisplay.cs: renombramiento de mapSize&gt;resolution&#10;&#10;Cambios en MapGenerator.cs: renombramiento de los scritableObjects, eliminación de la incialización de BiomesManager y asignación de valor por defecto al parámetro center en la declaración + gestión de la recepción del parámetro para asignarle valor. Adición de         textureData.UpdateMeshHeights(terrainMaterial, terrainData.MinHeight, terrainData.MaxHeight);&#10; en el GenerateMapData. Eliminación del parámetro por defecto de Biome en las llamadas a GenerateMapData.&#10; &#10; Cambios en MapGeneratorEditor.cs: Se usa atributo no estático para llamar a GenerateMapData." />
+    <MESSAGE value="Cambios en TerrainChunksManager.cs: Se ha dado el custom shader a los chunks en el constructor y se ha modificado el valor devuelto por MinHeight y MaxHeight en TerrainData.cs" />
+    <MESSAGE value="SE COLOREA CON GRADIENTE DE BLANCO Y NEGRO EN BASE A LAS ALTURAS DE LSO PIXELES MEDIANTE EL SAHDER!!&#10;&#10;&#10;Cambios en LandscapeManager.cs: Se ha cambiado el valor por defecto de Scale a 1f. En el Start, en lugar de incializar el valor del scriptableObject de scale con el de Scale, se ha hecho al revés.&#10;&#10;Cambios en TerrainData.cs: se modifcado el valor devuelto por MinHeight y MaxHeight.&#10;&#10;Cambios en TextureData.cs: Se ha añadido la llamada a UpdateMeshHeights cuando se llama a ApplyMaterial con las variables de _savedMinHeight y _savedMaxHeight." />
+    <MESSAGE value="SE COLOREA LA MESH POR ALTURAS CON EL SHADER!!&#10;&#10;Cambios en TerrainData.cs: se ha puesto como 0 como valor minimos de altura&#10;&#10;Cambios en TextureData.cs: Se han agregado los array de float y de color para agregar los colores y las altruas a las que estos se muestran sobre el terreno, y se pasan al matrerial en UpdateMeshHeights.&#10;&#10;Terrain.shader: Se ha implementado la coloración de los fragmentos en base a las alturas base de los colores y la altura del fragmento" />
+    <MESSAGE value="SE AÑADEN LAS TEXTURAS INCIALES PARA CREAR EL TEXTURIZADO DE LAS MESHES. &#10;&#10;SE COMIENZA LA IMPLEMENTACIÓN PARA TEXTURIZAR MESHES SEGÚN LAS ALTRUAS" />
+    <MESSAGE value="Se mezclan los colores en los límites, NO TIENEN LÍMITES ESTRICTOS!&#10;&#10;Cambios en Terrain.shader: Se ha agregado el array de blends, la constante epsilon, un atributo de tipo texture2d y textureScale y se ha cambiado la manera de asignar valor al albedo usando el array de blends. &#10;&#10;Cambios en ChunkMaterial.mat: Se le ha agregado una textura (la del traibuto del shader)&#10;&#10;Cambios en TextureData.cs: se han añadido dos constantes y se ha pasado el array de blends al material. También se han pasado las asignaciones de las variables del shader al método ApplyToMaterial." />
+    <MESSAGE value="SE HA IMPLEMENTADO LA MEZCLA TRIPLANAR DE TEXTURAS SEGÚN LAS NORMALES!" />
+    <MESSAGE value="FINALMENTE SE MEZCLAN LAS TEXTURAS EN BASE A SU ALTURA!!&#10;&#10;Cambios en TextureData.cs: Se ha creado un nuevo tipo de dato: Layer, que contiene la información de color y textura de cada altura de terreno, junto a su nivel de intensidad y su ancho de mezclado. Se han añadido nuevos atributos al shader como el array de texturas, el color strength y se han renombrado algunas variables. &#10;&#10;Cambios en Terrain.shader: Se ha creado el método triplanar que samplea el valor de la textura que se le pasa de aucerdo al valor de la normal en el fragmento que se está procesando y se han renombrado algunas variables." />
+    <option name="LAST_COMMIT_MESSAGE" value="FINALMENTE SE MEZCLAN LAS TEXTURAS EN BASE A SU ALTURA!!&#10;&#10;Cambios en TextureData.cs: Se ha creado un nuevo tipo de dato: Layer, que contiene la información de color y textura de cada altura de terreno, junto a su nivel de intensidad y su ancho de mezclado. Se han añadido nuevos atributos al shader como el array de texturas, el color strength y se han renombrado algunas variables. &#10;&#10;Cambios en Terrain.shader: Se ha creado el método triplanar que samplea el valor de la textura que se le pasa de aucerdo al valor de la normal en el fragmento que se está procesando y se han renombrado algunas variables." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.InvalidOperationException" isInternal="false" displayValue="InvalidOperationException" namespaceName="System">
+            <option name="internal" value="false" />
+          </properties>
+          <option name="timeStamp" value="10" />
+        </breakpoint>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.ObjectDisposedException" isInternal="false" displayValue="ObjectDisposedException" namespaceName="System">
+            <option name="internal" value="false" />
+          </properties>
+          <option name="timeStamp" value="12" />
+        </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Data/TerrainData.cs</url>
+          <line>10</line>
+          <properties documentPath="C:\Proyectos\TFM\LandscapeGenerator\Assets\Scripts\Data\TerrainData.cs" initialLine="10" containingFunctionPresentation="Property 'MaxHeight'">
+            <startOffsets>
+              <option value="282" />
+            </startOffsets>
+            <endOffsets>
+              <option value="327" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="Type#System.Collections.Generic.KeyValuePair`2" memberName="Value" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
