@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public const float Scale = 2.5f;
+	public static float Scale = 1f;
 	public const int MapHeight = 33;
 	public const int MapWidth = 33;
 	public static LandscapeManager Instance;
@@ -49,7 +49,7 @@ public class LandscapeManager : MonoBehaviour{
 
     private void Start()
     {
-	    terrainData.parameters.scale = Scale;
+	    Scale = terrainData.parameters.scale;
         Transform = transform;
         var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
         var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
