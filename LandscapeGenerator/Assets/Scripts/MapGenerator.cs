@@ -41,7 +41,6 @@ public class MapGenerator : MonoBehaviour
         private float GenerateHeight(float2 samplePos)
         {
             float ridgedFactor = Parameters.ridgeness;
-            // float noiseValue = NoiseGenerator.GetNoiseValue(samplePos, TerrainParameters.noiseParameters);
             
             float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, Parameters);
             noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, Parameters);
