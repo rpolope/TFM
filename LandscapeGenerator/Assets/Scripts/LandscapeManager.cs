@@ -107,17 +107,17 @@ public class LandscapeManager : MonoBehaviour{
         }
 
         // West and East border unification
-        // for (int i = 0; i < MapHeight; i++)
-        // {
-        //     var westMap = Maps[0, i];
-        //     var eastMap = Maps[MapWidth - 1, 0];
-        //
-        //     for (int j = 0; j < resolution; j++)
-        //     {
-	       //      _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
-        //         eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
-        //     }
-        // }
+        for (int i = 0; i < MapHeight; i++)
+        {
+            var westMap = Maps[0, i];
+            var eastMap = Maps[MapWidth - 1, i];
+        
+            for (int j = 0; j < resolution; j++)
+            {
+	            _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
+                eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
+            }
+        }
     }
 
     private void DisposeMaps()
