@@ -85,11 +85,13 @@ public class TerrainChunksManager{
                 if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
                     chunk = value;
                     chunk.SetChunkCoord(viewedChunkCoord);
-                    SurroundTerrainChunks.Add(chunk);
                     chunk.Update();
+                    SurroundTerrainChunks.Add(chunk);
+
                 } else {
                     chunk = new TerrainChunk(wrappedChunkCoord);
                     chunk.SetChunkCoord(viewedChunkCoord);
+                    chunk.Update();
                     TerrainChunkDictionary.Add(wrappedChunkCoord, chunk);
                     SurroundTerrainChunks.Add(chunk);
                 }
@@ -198,7 +200,8 @@ public class TerrainChunksManager{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
 			
 			GameObject = new GameObject("TerrainChunk");
-			
+			_coord = coord;
+
 			_biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
@@ -207,7 +210,6 @@ public class TerrainChunksManager{
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
 			Transform = GameObject.transform;
-			SetChunkCoord(coord);
 			Transform.parent = LandscapeManager.Instance.Transform;
 			
 			_lodMeshes = new LODMesh[_detailLevels.Length];
@@ -219,8 +221,6 @@ public class TerrainChunksManager{
 			}
 
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
-			
-			Update();
 		}
 
 		public void Update()
@@ -332,7 +332,7 @@ public class TerrainChunksManager{
 		{
 			_coord = viewedChunkCoord;
 			_position = (Resolution - 1) * viewedChunkCoord;
-			_positionV3 = new Vector3(_coord.x,0,_coord.y) * WorldSize;
+			_positionV3 = new Vector3(viewedChunkCoord.x,0,viewedChunkCoord.y) * WorldSize;
 			Transform.position = _positionV3;
 		}
 	}
