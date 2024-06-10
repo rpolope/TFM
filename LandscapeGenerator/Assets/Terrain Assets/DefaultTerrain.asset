@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 1
   parameters:
-    scale: 2.5
+    scale: 2.1
     resolution: 241
-    heightScale: 5
-    waterLevel: 0.158
-    levelsOfDetail: 2
+    heightScale: 17.67
+    waterLevel: 0.267
+    levelsOfDetail: 3

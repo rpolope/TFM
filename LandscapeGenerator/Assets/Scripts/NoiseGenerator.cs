@@ -43,13 +43,14 @@ public static class NoiseGenerator
             frequency *= parameters.lacunarity;
         }
 
+        noiseHeight /= (maxPossibleHeight/0.9f);
+        
         if (parameters.ridgeness > 0){
-            noiseHeight += parameters.ridgeness * GetFractalRidgeNoise(position, parameters, ref maxPossibleHeight);
+            noiseHeight = (1 - parameters.ridgeness) * noiseHeight + parameters.ridgeness * GetFractalRidgeNoise(position, parameters, ref maxPossibleHeight);
             noiseHeight = Mathf.Pow(noiseHeight, parameters.ridgeRoughness);
         }
         
-        float normalizedHeight = noiseHeight / (maxPossibleHeight/0.9f);
-        noiseHeight = Mathf.Clamp(normalizedHeight, 0, maxPossibleHeight);
+        noiseHeight = Mathf.Clamp(noiseHeight, 0, maxPossibleHeight);
         
         return noiseHeight;
     }

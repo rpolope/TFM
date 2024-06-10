@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 1
   parameters:
-    noiseType: 1
+    noiseType: 0
     seed: 1
     scale: 40
     offset: {x: 0, y: 0}
@@ -22,5 +22,5 @@ MonoBehaviour:
     frequency: 1
     persistence: 0.491
     lacunarity: 1.9
-    ridgeness: 0.138
-    ridgeRoughness: 2.5
+    ridgeness: 0.725
+    ridgeRoughness: 4.65

@@ -30,22 +30,8 @@ public class MapGenerator : MonoBehaviour
             float2 pos = new float2(x, y) + Centre;
 
             float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
-            // float value = GenerateHeight(pos);
             
             Map[threadIndex] = value;
-        }
-        
-        private float GenerateHeight(float2 samplePos)
-        {
-            float ridgedFactor = Parameters.ridgeness;
-            
-            float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, Parameters);
-            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, Parameters);
-            //
-            // if (ridgedFactor > 0)
-            //     noiseValue = Mathf.Pow(noiseValue, Parameters.ridgeRoughness);
-
-            return noiseValue;
         }
     }
 

@@ -171,12 +171,6 @@ public class TerrainChunksManager{
 	public class TerrainChunk
 	{
 		public const int Resolution = 241;
-		public float2 Position
-		{
-			get => _position;
-			set => _position = value;
-		}
-
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public MapData MapData { get; private set; }
@@ -184,7 +178,7 @@ public class TerrainChunksManager{
 		internal static readonly Material Material = new (Shader.Find("Custom/Terrain"));
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
-		private float2 _position;
+
 		private int2 _coord;
 		private LOD[] _lods;
 		public static readonly float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
@@ -331,7 +325,6 @@ public class TerrainChunksManager{
 		public void SetChunkCoord(int2 viewedChunkCoord)
 		{
 			_coord = viewedChunkCoord;
-			_position = (Resolution - 1) * viewedChunkCoord;
 			_positionV3 = new Vector3(viewedChunkCoord.x,0,viewedChunkCoord.y) * WorldSize;
 			Transform.position = _positionV3;
 		}
