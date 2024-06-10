@@ -7,8 +7,8 @@ using UnityEngine.Serialization;
 public class LandscapeManager : MonoBehaviour{
 	
 	public static float Scale = 1f;
-	public const int MapHeight = 33;
-	public const int MapWidth = 33;
+	public const int MapHeight = 9;
+	public const int MapWidth = 9;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	public static float[] LatitudeHeats { get; private set; }
@@ -21,6 +21,7 @@ public class LandscapeManager : MonoBehaviour{
 	public MapGenerator mapGenerator;
 	public NoiseData noiseData;
 	public TerrainData terrainData;
+	public TextureData textureData;
 	public NoiseParameters moistureParameters;
 	public BiomesParameters biomesParameters;
 	public Viewer viewer;

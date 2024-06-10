@@ -1,11 +1,8 @@
-using System.Reflection;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -32,8 +29,8 @@ public class MapGenerator : MonoBehaviour
             
             float2 pos = new float2(x, y) + Centre;
 
-            // float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
-            float value = GenerateHeight(pos);
+            float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
+            // float value = GenerateHeight(pos);
             
             Map[threadIndex] = value;
         }
@@ -43,10 +40,10 @@ public class MapGenerator : MonoBehaviour
             float ridgedFactor = Parameters.ridgeness;
             
             float noiseValue = (1 - ridgedFactor) * NoiseGenerator.GetNoiseValue(samplePos, Parameters);
-            noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, Parameters);
-            
-            if (ridgedFactor > 0)
-                noiseValue = Mathf.Pow(noiseValue, Parameters.ridgeRoughness);
+            // noiseValue += ridgedFactor * NoiseGenerator.GetFractalRidgeNoise(samplePos, Parameters);
+            //
+            // if (ridgedFactor > 0)
+            //     noiseValue = Mathf.Pow(noiseValue, Parameters.ridgeRoughness);
 
             return noiseValue;
         }
@@ -106,6 +103,7 @@ public class MapGenerator : MonoBehaviour
     
     void OnValuesUpdated() {
         if (!Application.isPlaying) {
+            textureData.ApplyToMaterial (terrainMaterial);
             MapDisplay.DrawMapInEditor(drawMode, GenerateMapData(terrainData.parameters.resolution, noiseData.parameters), GetTerrainParameters());
         }
     }

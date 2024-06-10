@@ -43,7 +43,13 @@ public static class NoiseGenerator
             frequency *= parameters.lacunarity;
         }
 
-        float normalizedHeight = noiseHeight / (maxPossibleHeight / 0.9f);
+        float maxheight = 0f;
+        if (parameters.ridgeness > 0){
+            noiseHeight += parameters.ridgeness * GetFractalRidgeNoise(position, parameters, ref maxPossibleHeight);
+            noiseHeight = Mathf.Pow(noiseHeight, parameters.ridgeRoughness);
+        }
+        
+        float normalizedHeight = noiseHeight / (maxPossibleHeight/0.9f);
         noiseHeight = Mathf.Clamp(normalizedHeight, 0, maxPossibleHeight);
         
         return noiseHeight;
@@ -57,11 +63,11 @@ public static class NoiseGenerator
         return 2 * (0.5f - Mathf.Abs(0.5f - Mathf.PerlinNoise(sample.x, sample.y)));
     }
 
-    public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters)
+    public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters, ref float maxAmpl)
     {
         float ampl = 1f;
         float freq = parameters.frequency;
-        float accum = 1f, maxAmpl = 0.0f;
+        float accum = 1f;
         
         for (int o = 0; o < parameters.octaves; o++)
         {

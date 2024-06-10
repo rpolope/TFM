@@ -28,7 +28,7 @@ public class TerrainChunksManager{
 	{
 		_lastLatitude = LandscapeManager.Instance.initialLatitude + 90;
 		_lastLongitude = LandscapeManager.Instance.initialLongitude + 90;
-		
+		LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
 		_chunksVisibleInViewDst = 0;
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
@@ -166,7 +166,7 @@ public class TerrainChunksManager{
 
 	public class TerrainChunk
 	{
-		public const int Resolution = 17;
+		public const int Resolution = 241;
 		public float2 Position
 		{
 			get => _position;
@@ -176,7 +176,7 @@ public class TerrainChunksManager{
 		public GameObject GameObject { get; }
 		public MapData MapData { get; private set; }
 		
-		private static Material _material = new (Shader.Find("Custom/Terrain"));
+		internal static readonly Material Material = new (Shader.Find("Custom/Terrain"));
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
 		private float2 _position;
@@ -200,7 +200,8 @@ public class TerrainChunksManager{
 			_biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
-			meshRenderer.material = _material;
+
+			meshRenderer.material = Material;
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
 			GameObject.transform.parent = LandscapeManager.Instance.Transform;

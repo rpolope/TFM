@@ -4,17 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4219218e-71fa-411b-8084-e4a0f91751da" name="Changes" comment="FINALMENTE SE MEZCLAN LAS TEXTURAS EN BASE A SU ALTURA!!&#10;&#10;Cambios en TextureData.cs: Se ha creado un nuevo tipo de dato: Layer, que contiene la información de color y textura de cada altura de terreno, junto a su nivel de intensidad y su ancho de mezclado. Se han añadido nuevos atributos al shader como el array de texturas, el color strength y se han renombrado algunas variables. &#10;&#10;Cambios en Terrain.shader: Se ha creado el método triplanar que samplea el valor de la textura que se le pasa de aucerdo al valor de la normal en el fragmento que se está procesando y se han renombrado algunas variables.">
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Terrain.shader" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Terrain.shader" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Data/TextureData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Data/TextureData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Grass.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Grass.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Rocks 1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Rocks 1.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Rocks 2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Rocks 2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Sandy grass.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Sandy grass.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Snow.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Snow.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Stony ground.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Stony ground.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Tileable noise.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Tileable noise.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/Water.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/Water.png.meta" afterDir="false" />
+    <list default="true" id="4219218e-71fa-411b-8084-e4a0f91751da" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.LandscapeGenerator/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LandscapeGenerator/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/ChunkMaterial.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/ChunkMaterial.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Main.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Main.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Data/TerrainData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Data/TerrainData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/LandscapeManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/LandscapeManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/MapGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/MapGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/NoiseGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/NoiseGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/TerrainChunksManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/TerrainChunksManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultNoise.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultNoise.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultTerrain.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultTerrain.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultTexture.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Terrain Assets/DefaultTexture.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +120,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.23501427&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/texturing__with__triplanar__shader&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -270,6 +271,7 @@
       <workItem from="1717688048945" duration="8429000" />
       <workItem from="1717746811891" duration="9854000" />
       <workItem from="1717769834671" duration="6024000" />
+      <workItem from="1718003618898" duration="1917000" />
     </task>
     <task id="LOCAL-00018" summary="Implementación del batching en la generación de chunks">
       <option name="closed" value="true" />
@@ -677,7 +679,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -728,19 +742,6 @@
           </properties>
           <option name="timeStamp" value="12" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/Data/TerrainData.cs</url>
-          <line>10</line>
-          <properties documentPath="C:\Proyectos\TFM\LandscapeGenerator\Assets\Scripts\Data\TerrainData.cs" initialLine="10" containingFunctionPresentation="Property 'MaxHeight'">
-            <startOffsets>
-              <option value="282" />
-            </startOffsets>
-            <endOffsets>
-              <option value="327" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <pin-to-top-manager>
