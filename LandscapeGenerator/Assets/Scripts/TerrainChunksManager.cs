@@ -16,10 +16,6 @@ public class TerrainChunksManager{
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
-	[Range(-90, 90)]
-	private int _lastLatitude;
-	[Range(-90, 90)]
-	private int _lastLongitude;
 	
 	public static event Action CompleteMeshGenerationEvent;
 	private static LODInfo[] _detailLevels;
@@ -27,8 +23,6 @@ public class TerrainChunksManager{
 	private static int _wrapCountY;
 	public void Initialize()
 	{
-		_lastLatitude = LandscapeManager.Instance.initialLatitude + 90;
-		_lastLongitude = LandscapeManager.Instance.initialLongitude + 90;
 		LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),

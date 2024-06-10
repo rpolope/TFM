@@ -96,28 +96,28 @@ public class LandscapeManager : MonoBehaviour{
         // North and South border unification
         for (int i = 0; i < MapWidth; i++)
         {
-            var northMap = Maps[MapHeight - 1, i];
-            var southMap = Maps[0, i];
+            var northMap = Maps[i, MapHeight - 1];
+            var southMap = Maps[i, 0];
 
             for (int j = 0; j < resolution; j++)
             {
-                _fixedBorderHeightValues[j] = northMap.HeightMap[i];
-                southMap.HeightMap[southMap.HeightMap.Length - resolution + j] = _fixedBorderHeightValues[j];
+	            _fixedBorderHeightValues[j] = northMap.HeightMap[northMap.HeightMap.Length - j - 1];
+                southMap.HeightMap[resolution - 1 - j] = _fixedBorderHeightValues[j];
             }
         }
 
         // West and East border unification
-        for (int i = 0; i < MapHeight; i++)
-        {
-            var westMap = Maps[i, 0];
-            var eastMap = Maps[i, MapWidth - 1];
-
-            for (int j = 0; j < resolution; j++)
-            {
-                _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
-                eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
-            }
-        }
+        // for (int i = 0; i < MapHeight; i++)
+        // {
+        //     var westMap = Maps[0, i];
+        //     var eastMap = Maps[MapWidth - 1, 0];
+        //
+        //     for (int j = 0; j < resolution; j++)
+        //     {
+	       //      _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
+        //         eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
+        //     }
+        // }
     }
 
     private void DisposeMaps()

@@ -16,6 +16,6 @@ MonoBehaviour:
   parameters:
     scale: 1
     resolution: 241
-    heightScale: 15
+    heightScale: 5
     waterLevel: 0.158
     levelsOfDetail: 2
