@@ -52,19 +52,28 @@ public class LandscapeManager : MonoBehaviour{
     {
 	    Scale = terrainData.parameters.scale;
         Transform = transform;
-        var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
-        var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
-        Viewer.SetInitialPos(relativeInitialLongitude, relativeInitialLatitude);
+        
         GenerateMoistureMap();
         InitializeLatitudeHeats();
         BiomesManager.Initialize();
 
         GenerateMap();
-
+        
+        var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
+        var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
+        Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
+        SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
+        
         _chunksManager = new TerrainChunksManager();
         _chunksManager.Initialize();
-        
-        
+    }
+
+    private void SetViewerInitPos(int relativeInitialLongitude, int relativeInitialLatitude)
+    {
+	    // var initChunk = TerrainChunksManager.GetChunk(new int2(relativeInitialLongitude, relativeInitialLatitude));
+	    var initPos = new float2((relativeInitialLongitude) * TerrainChunksManager.TerrainChunk.WorldSize,
+		    (relativeInitialLatitude) * TerrainChunksManager.TerrainChunk.WorldSize);
+	    Viewer.SetInitialPos(initPos);
     }
 
     private void GenerateMap()

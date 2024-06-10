@@ -9,8 +9,6 @@ public class NoiseData : UpdatableData
 
     protected override void OnValidate()
     {
-        Debug.Log("Cambio los valores de generación de ruido");
-        
         base.OnValidate();
     }
 }

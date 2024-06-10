@@ -11,8 +11,6 @@ public class TerrainData : UpdatableData
 
     protected override void OnValidate()
     {
-        Debug.Log("Cambio los valores del terreno");
-        
         base.OnValidate();
     }
 }

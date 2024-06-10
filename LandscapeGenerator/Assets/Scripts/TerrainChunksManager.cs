@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
 public class TerrainChunksManager{
+	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.5f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 3;
+	private static int _chunksVisibleInViewDst = 4;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
@@ -20,25 +22,25 @@ public class TerrainChunksManager{
 	private int _lastLongitude;
 	
 	public static event Action CompleteMeshGenerationEvent;
-
 	private static LODInfo[] _detailLevels;
-	private static int _wrapCountX = 0;
-	private static int _wrapCountY = 0;
+	private static int _wrapCountX;
+	private static int _wrapCountY;
 	public void Initialize()
 	{
 		_lastLatitude = LandscapeManager.Instance.initialLatitude + 90;
 		_lastLongitude = LandscapeManager.Instance.initialLongitude + 90;
 		LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
-		_chunksVisibleInViewDst = 0;
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
 			new LODInfo(1, 3, true),
 			new LODInfo(2, 4, false)
 		};
-		foreach (var detailLevel in _detailLevels)
-		{
-			_chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
-		}
+		
+		// _chunksVisibleInViewDst = 0;
+		// foreach (var detailLevel in _detailLevels)
+		// {
+		// 	_chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
+		// }
 		
 		UpdateVisibleChunks ();
 		/**/
@@ -74,8 +76,8 @@ public class TerrainChunksManager{
         TerrainChunksVisibleLastUpdate.Clear();
         SurroundTerrainChunks.Clear();
             
-        int currentChunkCoordX = Mathf.RoundToInt(Viewer.PositionV2.x / (TerrainChunk.Resolution - 1));
-        int currentChunkCoordY = Mathf.RoundToInt(Viewer.PositionV2.y / (TerrainChunk.Resolution - 1));
+        int currentChunkCoordX = Mathf.RoundToInt(Viewer.PositionV2.x / (TerrainChunk.WorldSize));
+        int currentChunkCoordY = Mathf.RoundToInt(Viewer.PositionV2.y / (TerrainChunk.WorldSize));
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
@@ -104,7 +106,13 @@ public class TerrainChunksManager{
         }
     }
 
-    private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
+	private bool CoordsInMap(int2 wrappedChunkCoord)
+	{
+		return wrappedChunkCoord.x is < LandscapeManager.MapWidth and >= 0 &&
+		       wrappedChunkCoord.y is < LandscapeManager.MapHeight and >= 0;
+	}
+
+	private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
         if (currentChunkCoordX >= LandscapeManager.MapWidth * _wrapCountX + LandscapeManager.MapWidth) {
             _wrapCountX++;
         }
@@ -174,6 +182,7 @@ public class TerrainChunksManager{
 		}
 
 		public GameObject GameObject { get; }
+		public Transform Transform { get; private set; }
 		public MapData MapData { get; private set; }
 		
 		internal static readonly Material Material = new (Shader.Find("Custom/Terrain"));
@@ -181,7 +190,6 @@ public class TerrainChunksManager{
 		private readonly LODMesh[] _lodMeshes;
 		private float2 _position;
 		private int2 _coord;
-		private Bounds _bounds;
 		private LOD[] _lods;
 		public static readonly float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
 		private int _lodIndex = -1;
@@ -196,7 +204,7 @@ public class TerrainChunksManager{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
 			
 			GameObject = new GameObject("TerrainChunk");
-			SetChunkCoord(coord);
+			
 			_biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
@@ -204,8 +212,9 @@ public class TerrainChunksManager{
 			meshRenderer.material = Material;
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 			
-			GameObject.transform.parent = LandscapeManager.Instance.Transform;
-			_bounds = new Bounds(_positionV3,Vector2.one * (Resolution * LandscapeManager.Scale));
+			Transform = GameObject.transform;
+			SetChunkCoord(coord);
+			Transform.parent = LandscapeManager.Instance.Transform;
 			
 			_lodMeshes = new LODMesh[_detailLevels.Length];
 			for (int i = 0; i < _detailLevels.Length; i++) {
@@ -329,8 +338,8 @@ public class TerrainChunksManager{
 		{
 			_coord = viewedChunkCoord;
 			_position = (Resolution - 1) * viewedChunkCoord;
-			_positionV3 = new Vector3(_position.x,0,_position.y) * LandscapeManager.Scale;
-			GameObject.transform.position = _positionV3;
+			_positionV3 = new Vector3(_coord.x,0,_coord.y) * WorldSize;
+			Transform.position = _positionV3;
 		}
 	}
 

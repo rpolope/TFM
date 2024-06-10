@@ -1,7 +1,6 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Viewer : MonoBehaviour
 {
@@ -14,8 +13,7 @@ public class Viewer : MonoBehaviour
     private int2 _chunkCoord;
     private Vector3 _velocity;
 
-    public static Vector2 PositionV2 => new (Position.x, Position.z);
-    public static Vector3 Position;
+    public static Vector2 PositionV2 => new (_transform.position.x, _transform.position.z);
     public static Vector2 ForwardV2 => new (_transform.forward.x, _transform.forward.z);
     public static int2 ChunkCoord { get; set; }
     public static float FOV => _mainCamera.fieldOfView;
@@ -38,7 +36,6 @@ public class Viewer : MonoBehaviour
     private void Update()
     {
         _transform.position += _velocity * Time.deltaTime;
-        Position = _transform.position;
         _rotationY = _transform.rotation.eulerAngles.y;
     }
 
@@ -50,15 +47,14 @@ public class Viewer : MonoBehaviour
 
     public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 5f;
                                      // TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
-
-    public static void SetInitialPos(int longitude, int latitude)
+    
+    public static void SetInitialPos(float2 position)
     {
         _transform.position = new Vector3(
-            longitude * TerrainChunksManager.TerrainChunk.WorldSize,
+            position.x,
             _transform.position.y,
-            latitude * TerrainChunksManager.TerrainChunk.WorldSize
+            position.y
         );
-        _viewerOldPosition = new Vector2(_transform.position.x, _transform.position.z);
-        Position = _transform.position;
+        _viewerOldPosition = new Vector2(position.x, position.y);
     }
 }
