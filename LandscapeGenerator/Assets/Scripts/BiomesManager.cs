@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum ClimateType
 {
@@ -21,43 +23,24 @@ public enum ClimateType
     Taiga
 }
 
-public static class BiomesManager
+public class BiomesManager : MonoBehaviour
 {
+    public List<BiomeAsset> biomesAssets;
+
+    private static BiomesAssetsManager _assetsManager;
     private static Biome[,] _biomes;
-    
     private static Texture2D _colorMapTexture;
     public static Color[][] ColorMap { get; private set; }
     private static bool _isInitialized = false;
-    public static void Initialize()
+    public void Initialize()
     {
         if (_isInitialized && !Application.isPlaying) return;
         
         LoadColorMapTexture();
+        _assetsManager = new BiomesAssetsManager(biomesAssets);
         if (Application.isPlaying)
             InitializeBiomes();
         _isInitialized = true;
-    }
-
-    private static void TestColorRangeColorSampling(Color[] colorGradient)
-    {
-        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        plane.transform.position += Vector3.up * 3;
-
-        MeshRenderer meshRenderer = plane.GetComponent<MeshRenderer>();
-        int resolution = 11;
-
-        Color[] colors = new Color[resolution * resolution];
-        
-        for (int i = 0; i < colors.Length; i++)
-        {
-            var row = i / resolution;
-            var color = row / resolution;
-            var latitude = Mathf.Abs((float)row / (resolution - 1) - 0.5f);
-            colors[i] = colorGradient[color * 127];
-        }
-
-        Texture2D texture = TextureGenerator.TextureFromColorMap(colors, resolution);
-        meshRenderer.sharedMaterial.mainTexture = texture;
     }
 
     private static void LoadColorMapTexture()
@@ -121,7 +104,8 @@ public class Biome
     public float Moisture { get; private set; }
     public float Heat { get; private set; }
     public Color[] ColorGradient { get; private set; }
-    private ClimateType ClimateType { get; set; }
+    public ClimateType ClimateType { get; set; }
+    public List<BiomeAsset> Assets { get; set; }
 
     public Biome(float heat, float moisture)
     {
@@ -131,6 +115,7 @@ public class Biome
         ColorGradient = BiomesManager.ColorMap[Mathf.RoundToInt(Moisture * 127)];
         // TerrainParameters = new TerrainParameters(new NoiseParameters(GetNoiseType()), new MeshParameters(0.1f));
         TerrainParameters = new TerrainParameters(new NoiseParameters(NoiseType.Perlin), new MeshParameters(0.1f));
+        Assets = BiomesAssetsManager.GetAssetsForBiome(ClimateType);
     }
 
     public void Update() { }

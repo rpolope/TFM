@@ -23,7 +23,7 @@ public class LandscapeManager : MonoBehaviour{
 	public TerrainData terrainData;
 	public TextureData textureData;
 	public NoiseParameters moistureParameters;
-	public BiomesParameters biomesParameters;
+	public BiomesManager biomesManager;
 	public Viewer viewer;
 	public CullingMode culling;
 
@@ -55,7 +55,7 @@ public class LandscapeManager : MonoBehaviour{
         
         GenerateMoistureMap();
         InitializeLatitudeHeats();
-        BiomesManager.Initialize();
+        biomesManager.Initialize();
 
         GenerateMap();
         

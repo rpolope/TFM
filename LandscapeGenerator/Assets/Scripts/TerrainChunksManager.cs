@@ -174,7 +174,8 @@ public class TerrainChunksManager{
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public MapData MapData { get; private set; }
-		
+		public Biome Biome { get; }
+
 		internal static readonly Material Material = new (Shader.Find("Custom/Terrain"));
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
@@ -183,7 +184,6 @@ public class TerrainChunksManager{
 		private LOD[] _lods;
 		public static readonly float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
 		private int _lodIndex = -1;
-		private Biome _biome;
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
@@ -196,7 +196,7 @@ public class TerrainChunksManager{
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
 
-			_biome = BiomesManager.GetBiome(_coord);
+			Biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 
