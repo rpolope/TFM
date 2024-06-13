@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 public class BiomesAssetsManager
 {
@@ -36,11 +37,9 @@ public class BiomesAssetsManager
         return null;
     }
     
-    public static List<BiomeAsset> GetAssetsForType(AssetType type, [NotNull] List<BiomeAsset> biomeAssets)
+    public static List<BiomeAsset> GetAssetsForType(List<BiomeAsset> biomeAssets, AssetType type)
     {
-        if (biomeAssets == null) throw new ArgumentNullException(nameof(biomeAssets));
-        
-        return biomeAssets.Where(b => b.type == type).ToList();
+        return biomeAssets?.Where(b => b.type == type).ToList();
     }
 }
 
@@ -57,14 +56,18 @@ public enum AssetSize
     Small = 1
 }
 
-[Serializable]
 [CreateAssetMenu()]
 public class BiomeAsset: ScriptableObject
 {
     public AssetType type;
     public AssetSize size;
     public ClimateType[] biomes;
+    [SerializeField]
     public GameObject gameObject;
     public float minHeight;
     public float maxHeight;
+    [Min(0.1f)]
+    public float radius;
+    [Range(0, 1)]
+    public float density;
 }

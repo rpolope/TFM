@@ -7,12 +7,12 @@ using UnityEngine.Serialization;
 public class LandscapeManager : MonoBehaviour{
 	
 	public static float Scale = 1f;
-	public const int MapHeight = 9;
-	public const int MapWidth = 9;
+	public const int MapHeight = 3;
+	public const int MapWidth = 3;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
-	public static float[] LatitudeHeats { get; private set; }
-	public static float[] MoistureMap { get; set; }
+	private static float[] LatitudeHeats { get; set; }
+	private static float[] MoistureMap { get; set; }
 	
 	public Transform Transform { get; private set; }
 
@@ -59,8 +59,8 @@ public class LandscapeManager : MonoBehaviour{
 
         GenerateMap();
         
-        var relativeInitialLatitude = Mathf.RoundToInt(((initialLatitude + 90f) / 180f) * MapHeight);
-        var relativeInitialLongitude = Mathf.RoundToInt(((initialLongitude + 90f) / 180f) * MapWidth);
+        var relativeInitialLatitude = (int)(((initialLatitude + 90f) / 180f) * MapHeight);
+        var relativeInitialLongitude = (int)(((initialLongitude + 90f) / 180f) * MapWidth);
         Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
         
@@ -86,7 +86,7 @@ public class LandscapeManager : MonoBehaviour{
                 Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1));
             }
         }
-        UnifyMapBorders();
+        // UnifyMapBorders();
     }
 
     private void UnifyMapBorders()
@@ -161,12 +161,12 @@ public class LandscapeManager : MonoBehaviour{
 	private static void InitializeLatitudeHeats()
 	{
 		LatitudeHeats = new float[MapHeight];
-		const float ecuador = (MapHeight - 1) * 0.5f;
+		const float ecuador = MapHeight * 0.5f;
         
 		for (int latitude = 0; latitude < MapHeight; latitude++)
 		{
 			float distanceFromEcuador = Math.Abs(latitude - ecuador);
-			float heat = distanceFromEcuador / ecuador;
+			float heat = 1 - distanceFromEcuador/ecuador;
             
 			LatitudeHeats[latitude] = heat;
 		}

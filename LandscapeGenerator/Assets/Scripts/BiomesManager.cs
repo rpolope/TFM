@@ -96,6 +96,11 @@ public class BiomesManager : MonoBehaviour
     {
         return _biomes[coordinates.x, coordinates.y];
     }
+
+    public static GameObject Instantiate(GameObject biomeAsset, Vector3 position)
+    {
+        return Instantiate(biomeAsset, position, Quaternion.identity);
+    }
 }
 
 public class Biome

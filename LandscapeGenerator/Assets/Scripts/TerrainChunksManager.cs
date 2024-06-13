@@ -10,7 +10,7 @@ public class TerrainChunksManager{
 	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.5f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 4;
+	private static int _chunksVisibleInViewDst = 1;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
@@ -70,8 +70,8 @@ public class TerrainChunksManager{
         TerrainChunksVisibleLastUpdate.Clear();
         SurroundTerrainChunks.Clear();
             
-        int currentChunkCoordX = Mathf.RoundToInt(Viewer.PositionV2.x / (TerrainChunk.WorldSize));
-        int currentChunkCoordY = Mathf.RoundToInt(Viewer.PositionV2.y / (TerrainChunk.WorldSize));
+        int currentChunkCoordX = (int)(Viewer.PositionV2.x / TerrainChunk.WorldSize);
+        int currentChunkCoordY = (int)(Viewer.PositionV2.y / TerrainChunk.WorldSize);
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
@@ -80,6 +80,8 @@ public class TerrainChunksManager{
             for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
                 var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
                 var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
+                
+                if (viewedChunkCoord.Equals(Viewer.ChunkCoord)) Debug.Log("Chunk Actual");
                 
                 TerrainChunk chunk;
                 if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
@@ -175,6 +177,9 @@ public class TerrainChunksManager{
 		public Transform Transform { get; private set; }
 		public MapData MapData { get; private set; }
 		public Biome Biome { get; }
+		public Dictionary<AssetType, List<GameObject>> Assets;
+		public int2 Position => _coord * (Resolution - 1);
+		public Vector3 WorldPos => new Vector3(_coord.x, 0, _coord.y) * WorldSize;
 
 		internal static readonly Material Material = new (Shader.Find("Custom/Terrain"));
 		private Vector3 _positionV3;
@@ -187,6 +192,8 @@ public class TerrainChunksManager{
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
+		private bool _objectsPlaced = false;
+		private bool _objectsVisible = false;
 		
 
 		public TerrainChunk(int2 coord)
@@ -195,7 +202,12 @@ public class TerrainChunksManager{
 			
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
-
+			Assets = new Dictionary<AssetType, List<GameObject>> 
+			{ 
+				{AssetType.Inorganic, new List<GameObject>()}, 
+				{AssetType.Organic, new List<GameObject>()}
+			};
+			
 			Biome = BiomesManager.GetBiome(_coord);
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
@@ -221,7 +233,7 @@ public class TerrainChunksManager{
 		{
 			var chunksFromViewer = Viewer.ChunkCoord - _coord;
 			chunksFromViewer = new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
-			bool inDistance = chunksFromViewer.x < _chunksVisibleInViewDst && 
+			bool inDistance = Viewer.ChunkCoord.Equals(_coord) || chunksFromViewer.x < _chunksVisibleInViewDst && 
 			                  chunksFromViewer.y < _chunksVisibleInViewDst;
 			
 			if (inDistance)
@@ -230,7 +242,7 @@ public class TerrainChunksManager{
 
 				for (int i = 0; i < _detailLevels.Length - 1; i++)
 				{
-					if(i>0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
+					if (i > 0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
 					if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
 					    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
 					{
@@ -279,7 +291,6 @@ public class TerrainChunksManager{
 			}
 
 			CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
-			
 		}
 
 		public bool IsCulled(Vector2 viewerForward)
@@ -298,7 +309,7 @@ public class TerrainChunksManager{
 		public void SetVisible(bool visible) {
 			GameObject.SetActive (visible);
 		}
-		
+
 		private void CompleteMeshGeneration()
 		{
 			if (IsVisible())
@@ -315,6 +326,48 @@ public class TerrainChunksManager{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
+
+				if (_objectsPlaced) return;
+				
+				ObjectPlacer.PlaceObjects(this, AssetType.Organic);
+				ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
+				_objectsPlaced = true;
+				_objectsVisible = true;
+				Transform.GetChild(0)?.gameObject.SetActive(true);
+
+				// ManageObjectsPlacement();
+			}
+		}
+
+		// Caso 1: Si los objetos están colocados y visibles en el chunk actual del viewer, no hacer nada
+		// Caso 2: Si los objetos no están visibles y el viewer no está en el chunk, no hacer nada
+		// Caso 3: Si el viewer está en el chunk y los objetos no están colocados, colocarlos y hacerlos visibles
+		// Caso 4: Si el viewer está en el chunk, los objetos están colocados pero no visibles, hacerlos visibles
+		// Caso 5: Si el viewer no está en el chunk pero los objetos están visibles, ocultarlos
+
+		private void ManageObjectsPlacement()
+		{
+			if (_objectsPlaced && _coord.Equals(Viewer.ChunkCoord) && _objectsVisible) return;
+
+			if (!_coord.Equals(Viewer.ChunkCoord) && !_objectsVisible) return;
+
+			if (_coord.Equals(Viewer.ChunkCoord) && !_objectsPlaced)
+			{
+				ObjectPlacer.PlaceObjects(this, AssetType.Organic);
+				ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
+				_objectsPlaced = true;
+				_objectsVisible = true;
+				Transform.GetChild(0)?.gameObject.SetActive(true);
+			}
+			else if (_coord.Equals(Viewer.ChunkCoord) && _objectsPlaced && !_objectsVisible)
+			{
+				Transform.GetChild(0)?.gameObject.SetActive(true);
+				_objectsVisible = true;
+			}
+			else if (!_coord.Equals(Viewer.ChunkCoord) && _objectsPlaced && _objectsVisible)
+			{
+				Transform.GetChild(0)?.gameObject.SetActive(false);
+				_objectsVisible = false;
 			}
 		}
 
