@@ -83,14 +83,26 @@ public static class ObjectPlacer
     private static List<Vector3> GetCenterPointsForSize(AssetSize size, Vector3 worldPos)
     {
         var offset = TerrainChunk.WorldSize * 0.5f;
-        return size switch
+        switch (size)
         {
-            // AssetSize.Large => new List<Vector3> {Vector3.zero},
-            AssetSize.Large => new List<Vector3> {worldPos + new Vector3(-offset, 0, -offset)},
-            AssetSize.Medium => PlacedPositions[AssetSize.Large],
-            AssetSize.Small => PlacedPositions[AssetSize.Medium],
-            _ => new List<Vector3>()
-        };
+            case AssetSize.Large:
+                return new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) };
+
+            case AssetSize.Medium:
+                return PlacedPositions[AssetSize.Large].Count > 0 
+                    ? PlacedPositions[AssetSize.Large] 
+                    : new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) };
+
+            case AssetSize.Small:
+                if (PlacedPositions[AssetSize.Medium].Count > 0)
+                    return PlacedPositions[AssetSize.Medium];
+                if (PlacedPositions[AssetSize.Large].Count > 0)
+                    return PlacedPositions[AssetSize.Large];
+                return new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) };
+
+            default:
+                return new List<Vector3>();
+        }
     }
     
     private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, float raycastHeight)
