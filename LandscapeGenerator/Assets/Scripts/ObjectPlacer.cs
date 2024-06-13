@@ -112,12 +112,7 @@ public static class ObjectPlacer
         {
             hitPosition = hit.point;
             rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-            Debug.Log($"Hit at {hit.point}, normal: {hit.normal}");
             return true;
-        }
-        else
-        {
-            Debug.LogWarning($"Raycast did not hit at position: {position} from height: {raycastHeight}");
         }
         hitPosition = Vector3.zero;
         rotation = Quaternion.identity;

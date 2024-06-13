@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class TerrainChunksManager{
 	
-	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.5f;
+	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	private static int _chunksVisibleInViewDst = 1;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
@@ -69,9 +69,16 @@ public class TerrainChunksManager{
         
         TerrainChunksVisibleLastUpdate.Clear();
         SurroundTerrainChunks.Clear();
-            
-        int currentChunkCoordX = (int)(Viewer.PositionV2.x / TerrainChunk.WorldSize);
-        int currentChunkCoordY = (int)(Viewer.PositionV2.y / TerrainChunk.WorldSize);
+        
+        float offset = TerrainChunk.WorldSize / 2f;
+
+        int currentChunkCoordX = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
+        int currentChunkCoordY = (int)((Viewer.PositionV2.y + offset) / TerrainChunk.WorldSize);
+
+        
+        if (!new int2(currentChunkCoordX, currentChunkCoordY).Equals(Viewer.ChunkCoord))
+			Debug.Log($"Chunk Actual: {Viewer.ChunkCoord}");
+        
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
 
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
@@ -81,7 +88,6 @@ public class TerrainChunksManager{
                 var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
                 var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
                 
-                if (viewedChunkCoord.Equals(Viewer.ChunkCoord)) Debug.Log("Chunk Actual");
                 
                 TerrainChunk chunk;
                 if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
@@ -103,12 +109,6 @@ public class TerrainChunksManager{
             }
         }
     }
-
-	private bool CoordsInMap(int2 wrappedChunkCoord)
-	{
-		return wrappedChunkCoord.x is < LandscapeManager.MapWidth and >= 0 &&
-		       wrappedChunkCoord.y is < LandscapeManager.MapHeight and >= 0;
-	}
 
 	private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
         if (currentChunkCoordX >= LandscapeManager.MapWidth * _wrapCountX + LandscapeManager.MapWidth) {
