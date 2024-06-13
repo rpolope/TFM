@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Object = UnityEngine.Object;
 
 public class BiomesAssetsManager
 {
@@ -62,8 +58,7 @@ public class BiomeAsset: ScriptableObject
     public AssetType type;
     public AssetSize size;
     public ClimateType[] biomes;
-    [SerializeField]
-    public GameObject gameObject;
+    public List<GameObject> gameObjects;
     public float minHeight;
     public float maxHeight;
     [Min(0.1f)]

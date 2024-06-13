@@ -121,10 +121,15 @@ public static class ObjectPlacer
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Transform parent)
     {
-        var instance = BiomesManager.Instantiate(asset.gameObject, position);
+        var rnd = new System.Random();
+        var randIndex = asset.gameObjects.Count > 1 ? rnd.Next(asset.gameObjects.Count) : 0;
+        
+        var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position);
         instance.transform.up = GetNormalAt(position);
         instance.transform.parent = parent;
-        instance.transform.position -= instance.transform.up * Random.Range(0.25f, 1f);
+        instance.transform.up = Quaternion.Euler(0f, Random.Range(0f, 359f), 0f) * Vector3.up;
+        instance.transform.localScale *= Random.Range(0.8f, 1.2f);
+        instance.transform.position -= instance.transform.up * 0.1f;
     }
     
 
