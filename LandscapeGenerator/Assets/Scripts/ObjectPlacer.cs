@@ -14,11 +14,11 @@ public static class ObjectPlacer
 
         if (assets == null)
         {
+            SetAssetsParent(chunk);
             Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
             return;
         }
         var assetsParent = SetAssetsParent(chunk);
-
         
         PlacedPositions[AssetSize.Large] = new List<Vector3>();
         PlacedPositions[AssetSize.Medium] = new List<Vector3>();
@@ -49,7 +49,7 @@ public static class ObjectPlacer
                     {
                         if (!IsPositionValid(hitPosition, asset)) continue;
                     
-                        PlaceAsset(asset, hitPosition, chunk.Transform);
+                        PlaceAsset(asset, hitPosition, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
                         assetsPlacedCount++;    
                     }

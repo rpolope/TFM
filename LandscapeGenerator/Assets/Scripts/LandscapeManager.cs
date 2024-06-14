@@ -7,8 +7,8 @@ using UnityEngine.Serialization;
 public class LandscapeManager : MonoBehaviour{
 	
 	public static float Scale = 1f;
-	public const int MapHeight = 3;
-	public const int MapWidth = 3;
+	public const int MapHeight = 9;
+	public const int MapWidth = 9;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	private static float[] LatitudeHeats { get; set; }
@@ -86,7 +86,7 @@ public class LandscapeManager : MonoBehaviour{
                 Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunksManager.TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunksManager.TerrainChunk.Resolution - 1));
             }
         }
-        // UnifyMapBorders();
+        UnifyMapBorders();
     }
 
     private void UnifyMapBorders()

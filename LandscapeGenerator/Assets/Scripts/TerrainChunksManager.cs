@@ -10,7 +10,7 @@ public class TerrainChunksManager{
 	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 1;
+	private static int _chunksVisibleInViewDst = 3;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
@@ -326,16 +326,16 @@ public class TerrainChunksManager{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
+				//
+				// if (_objectsPlaced) return;
+				//
+				// ObjectPlacer.PlaceObjects(this, AssetType.Organic);
+				// ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
+				// _objectsPlaced = true;
+				// _objectsVisible = true;
+				// Transform.GetChild(0)?.gameObject.SetActive(true);
 
-				if (_objectsPlaced) return;
-				
-				ObjectPlacer.PlaceObjects(this, AssetType.Organic);
-				ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
-				_objectsPlaced = true;
-				_objectsVisible = true;
-				Transform.GetChild(0)?.gameObject.SetActive(true);
-
-				// ManageObjectsPlacement();
+				ManageObjectsPlacement();
 			}
 		}
 
