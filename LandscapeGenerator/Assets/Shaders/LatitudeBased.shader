@@ -3,7 +3,8 @@ Shader "Custom/LatitudeBasedWithNoise"
     Properties
     {
         _MainTex ("Gradient Texture", 2D) = "white" {}
-        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        _TempNoiseTex ("Temperature Noise Texture", 2D) = "white" {}
+        _MoistureNoiseTex ("Moisture Noise Texture", 2D) = "white" {}
         _NoiseScale ("Noise Scale", Float) = 1.0
     }
     SubShader
@@ -16,7 +17,8 @@ Shader "Custom/LatitudeBasedWithNoise"
         #pragma target 3.0
 
         sampler2D _MainTex;
-        sampler2D _NoiseTex;
+        sampler2D _TempNoiseTex;
+        sampler2D _MoistureNoiseTex;
         float _NoiseScale;
 
         struct Input {
@@ -25,22 +27,53 @@ Shader "Custom/LatitudeBasedWithNoise"
             float3 worldNormal;
         };
 
+        half4 determineColor(float temp, float moisture)
+        {
+            half4 color;
+
+            if (temp < 0.33) // Zonas frías
+            {
+                if (moisture < 0.33)
+                    color = half4(0.5, 0.5, 1.0, 1.0); // Tundra
+                else if (moisture < 0.66)
+                    color = half4(0.4, 0.4, 0.8, 1.0); // Taiga
+                else
+                    color = half4(0.3, 0.3, 0.7, 1.0); // Bosque boreal
+            }
+            else if (temp < 0.66) // Zonas templadas
+            {
+                if (moisture < 0.33)
+                    color = half4(0.2, 0.7, 0.2, 1.0); // Pradera
+                else if (moisture < 0.66)
+                    color = half4(0.1, 0.6, 0.1, 1.0); // Bosque templado
+                else
+                    color = half4(0.0, 0.5, 0.0, 1.0); // Selva tropical
+            }
+            else // Zonas cálidas
+            {
+                if (moisture < 0.33)
+                    color = half4(1.0, 0.9, 0.5, 1.0); // Desierto
+                else if (moisture < 0.66)
+                    color = half4(0.8, 0.8, 0.2, 1.0); // Sabana
+                else
+                    color = half4(0.6, 0.6, 0.0, 1.0); // Bosque seco
+            }
+
+            return color;
+        }
+
+
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            // Usar la coordenada uv.y para determinar el color de la textura
-            float2 uv = IN.uv_MainTex;
+            float2 lat = IN.uv_MainTex;
 
-            // Obtener valor de ruido para suavizar la transición
-            float noiseValue = tex2D(_NoiseTex, IN.uv_MainTex * _NoiseScale).r;
+            float distortion = tex2D(_TempNoiseTex, IN.uv_MainTex * _NoiseScale).r;
 
-            // Ajustar la latitud con el valor de ruido
-            uv = uv + (noiseValue - 0.5f) * 0.1f;
+            lat = lat + (distortion - 0.5f) * 0.1f;
+            lat = saturate(lat);
+            float moisture = tex2D(_MoistureNoiseTex, IN.uv_MainTex * _NoiseScale).r;
 
-            // Limitar latitud ajustada a [0, 1]
-            uv = saturate(uv);
-
-            // Obtener color de la textura de gradiente
-            half4 color = tex2D(_MainTex, uv);
+            half4 color = tex2D(_MainTex, determineColor(lat, moisture));
             o.Albedo = color.rgb;
             o.Alpha = 1.0;
         }

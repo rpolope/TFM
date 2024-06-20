@@ -110,8 +110,9 @@ public class LandscapeManager : MonoBehaviour{
 
             for (int j = 0; j < resolution; j++)
             {
-	            _fixedBorderHeightValues[j] = northMap.HeightMap[northMap.HeightMap.Length - j - 1];
-                southMap.HeightMap[resolution - 1 - j] = _fixedBorderHeightValues[j];
+	            _fixedBorderHeightValues[j] = 0.5f * (northMap.HeightMap[northMap.HeightMap.Length - j - 1] + southMap.HeightMap[resolution - 1 - j]);
+	            southMap.HeightMap[resolution - 1 - j] = _fixedBorderHeightValues[j];
+	            northMap.HeightMap[northMap.HeightMap.Length - j - 1] = _fixedBorderHeightValues[j];
             }
         }
 
@@ -123,8 +124,9 @@ public class LandscapeManager : MonoBehaviour{
         
             for (int j = 0; j < resolution; j++)
             {
-	            _fixedBorderHeightValues[j] = westMap.HeightMap[j * resolution];
-                eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
+	            _fixedBorderHeightValues[j] = 0.5f * (westMap.HeightMap[j * resolution] + eastMap.HeightMap[j * resolution + resolution - 1]);
+	            eastMap.HeightMap[j * resolution + resolution - 1] = _fixedBorderHeightValues[j];
+	            westMap.HeightMap[j * resolution] = _fixedBorderHeightValues[j];
             }
         }
     }
