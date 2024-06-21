@@ -339,21 +339,6 @@ public class TerrainChunksManager{
 		{
 			string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
-			
-			Material.SetColor("_Color 1", new Color(0, 0, 0, 1));
-			Material.SetColor("_Color2", new Color(0.173f, 0.357f, 0.863f, 1));
-			Material.SetColor("_Color3", new Color(0.592f, 0.941f, 1f, 1));
-			Material.SetColor("_Color4", new Color(0.329f, 0.941f, 0.761f, 1));
-			Material.SetColor("_Color5", new Color(0.208f, 0.839f, 0.125f, 1));
-			Material.SetColor("_Color6", new Color(0.580f, 0.957f, 0.243f, 1));
-			Material.SetColor("_Color7", new Color(0.957f, 0.831f, 0.243f, 1));
-			Material.SetColor("_Color8", new Color(0.945f, 0.588f, 0.133f, 1));
-			Material.SetColor("_Color9", Color.red);
-			
-			
-			Material.SetFloat("_ChunkResolution", TerrainChunk.Resolution);
-			Material.SetFloat("_MapWidth", LandscapeManager.MapWidth);
-			Material.SetFloat("_MapHeight", LandscapeManager.MapHeight);
 		}
 	}
 
