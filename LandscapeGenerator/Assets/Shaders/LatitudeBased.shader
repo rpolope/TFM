@@ -4,15 +4,18 @@ Shader "Custom/BiomeBased"
     {
         _MainTex ("Gradient Texture", 2D) = "white" {}
         _TempNoiseTex ("Temperature Noise Texture", 2D) = "white" {}
+        _TemperatureNoiseScale ("Temperature Distorsion Scale", Float) = 1.0
+
         _MoistureNoiseTex ("Moisture Noise Texture", 2D) = "white" {}
-        
+        _MoistureNoiseScale ("Moisture Noise Scale", Float) = 1.0
+
         _TundraTex ("Tundra Texture", 2D) = "white" {}
         _TaigaTex ("Taiga Texture", 2D) = "white" {}
         _ForestTex ("Forest Texture", 2D) = "white" {}
         _GrasslandTex ("Grassland Texture", 2D) = "white" {}
         _DesertTex ("Desert Texture", 2D) = "white" {}
         
-        _NoiseScale ("Noise Scale", Float) = 1.0
+        _TextureNoiseScale ("Texture Scale", Float) = 1.0
     }
     SubShader
     {
@@ -33,7 +36,9 @@ Shader "Custom/BiomeBased"
         sampler2D _GrasslandTex;
         sampler2D _DesertTex;
 
-        float _NoiseScale;
+        float _TextureNoiseScale;
+        float _TemperatureNoiseScale;
+        float _MoistureNoiseScale;
 
         struct Input {
             float2 uv_MainTex;
@@ -47,43 +52,37 @@ Shader "Custom/BiomeBased"
             {
                 if (moisture < 0.33)
                     return tex2D(_TundraTex, uv); // Tundra
-                else if (moisture < 0.66)
+                if (moisture < 0.66)
                     return tex2D(_TaigaTex, uv); // Taiga
-                else
-                    return tex2D(_ForestTex, uv); // Bosque boreal
+                return tex2D(_ForestTex, uv);// Bosque boreal
             }
-            else if (temp < 0.66) // Zonas templadas
+            if (temp < 0.66) // Zonas templadas
             {
                 if (moisture < 0.33)
                     return tex2D(_GrasslandTex, uv); // Pradera
-                else if (moisture < 0.66)
+                if (moisture < 0.66)
                     return tex2D(_ForestTex, uv); // Bosque templado
-                else
-                    return tex2D(_ForestTex, uv); // Selva tropical
+                return tex2D(_ForestTex, uv); // Selva tropical
             }
-            else // Zonas cálidas
-            {
-                if (moisture < 0.33)
-                    return tex2D(_DesertTex, uv); // Desierto
-                else if (moisture < 0.66)
-                    return tex2D(_GrasslandTex, uv); // Sabana
-                else
-                    return tex2D(_ForestTex, uv); // Bosque seco
-            }
+            // Zonas cálidas
+            if (moisture < 0.33)
+                return tex2D(_DesertTex, uv); // Desierto
+            if (moisture < 0.66)
+                return tex2D(_GrasslandTex, uv); // Sabana
+            return tex2D(_ForestTex, uv);  // Bosque seco
         }
-
 
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             float temp = tex2D(_MainTex, IN.uv_MainTex).r;
-            float distortion = tex2D(_TempNoiseTex, IN.uv_MainTex * _NoiseScale).r;
+            float distortion = tex2D(_TempNoiseTex, IN.uv_MainTex * _TemperatureNoiseScale).r;
             temp = temp + (distortion - 0.5f) * 0.1f;
             temp = saturate(temp);
 
-            float moisture = tex2D(_MoistureNoiseTex, IN.uv_MainTex * _NoiseScale).r;
+            float moisture = tex2D(_MoistureNoiseTex, IN.uv_MainTex * _MoistureNoiseScale).r;
 
-            half4 color = sampleColorFromBiome(temp, moisture, IN.uv_MainTex);
+            half4 color = sampleColorFromBiome(temp, moisture, IN.worldPos.xz * _TextureNoiseScale);
 
             o.Albedo = color.rgb;
             o.Alpha = 1.0;
