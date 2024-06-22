@@ -9,6 +9,8 @@ Shader "Custom/BiomeBased"
         _MoistureNoiseScale ("Moisture Noise Scale", Float) = 1.0
         
         _TextureNoiseScale ("Texture Scale", Float) = 1.0
+        _WaterHeight ("Water Height", Float) = 10
+        _SnowHeight ("Snow Height", Float) = 1
     }
     SubShader
     {
@@ -35,14 +37,15 @@ Shader "Custom/BiomeBased"
         sampler2D _MainTex;
         sampler2D _MoistureNoiseTex;
 
-
         UNITY_DECLARE_TEX2DARRAY(baseTextures);
-
-
+        
         float _TextureNoiseScale;
         float _TemperatureNoiseScale;
         float _MoistureNoiseScale;
-
+        
+        float _WaterHeight;
+        float _SnowHeight;
+        
         struct Input {
             float2 uv_MainTex;
             float3 worldPos;
@@ -128,6 +131,16 @@ Shader "Custom/BiomeBased"
 		}
         
         float3 sampleBiomeTexture(int biome, float3 worldPos, float scale, float3 blendAxes) {
+            
+            if (worldPos.y < _WaterHeight)
+            {
+                return UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3((worldPos/_TextureNoiseScale).y, (worldPos/_TextureNoiseScale).z, OCEAN));
+            }
+            if (worldPos.y > _SnowHeight)
+            {
+                return triplanar(worldPos, _TextureNoiseScale, blendAxes, SNOW);
+            }
+            
             return triplanar(worldPos, scale, blendAxes, biome);
         }
 

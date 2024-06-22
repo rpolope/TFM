@@ -361,7 +361,8 @@ public class TerrainChunksManager{
 			};
 
 			Material.SetTexture (baseTextures, GenerateTextureArray (biomesTextures.Values.ToArray()));
-
+			Material.SetFloat("_WaterHeight", 10f);
+			Material.SetFloat("_SnowHeight", 11f);
 		}
 
 		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {
