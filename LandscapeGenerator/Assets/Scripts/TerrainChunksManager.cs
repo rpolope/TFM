@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -21,6 +22,7 @@ public class TerrainChunksManager{
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
 	private static int _wrapCountY;
+
 	public void Initialize()
 	{
 		_detailLevels = new [] {
@@ -337,8 +339,42 @@ public class TerrainChunksManager{
 
 		public static void InitializeMaterial()
 		{
-			string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
+			var baseTextures = Shader.PropertyToID("baseTextures");
+			const string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
+			const string texturesPath = "Assets/Textures/";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+			
+			var biomesTextures = new Dictionary<ClimateType, Texture2D>()
+			{
+				{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
+				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
+				{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
+				{ClimateType.Ocean, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Water.png", typeof(Texture2D))},
+				{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
+				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+				{ClimateType.Beach, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+				{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+				{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
+				{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
+				{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 1.png", typeof(Texture2D))},
+				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))}
+			};
+
+			Material.SetTexture (baseTextures, GenerateTextureArray (biomesTextures.Values.ToArray()));
+
+		}
+
+		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {
+			
+			const int textureSize = 512;
+			const TextureFormat textureFormat = TextureFormat.RGB565;
+
+			Texture2DArray textureArray = new Texture2DArray (textureSize, textureSize, textures.Length, textureFormat, true);
+			for (int i = 0; i < textures.Length; i++) {
+				textureArray.SetPixels (textures [i].GetPixels (), i);
+			}
+			textureArray.Apply ();
+			return textureArray;
 		}
 	}
 

@@ -30,10 +30,11 @@ public struct BiomesParameters
         {
             ClimateType.Ocean,
             ClimateType.Beach,
-            ClimateType.TemperateDesert,
+            ClimateType.Desert,
             ClimateType.Shrubland,
             ClimateType.Grassland,
-            ClimateType.TemperateRainForest,
+            ClimateType.Forest,
+            ClimateType.TropicalForest,
             ClimateType.Scorched,
             ClimateType.Snow
         };

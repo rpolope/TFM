@@ -5,14 +5,11 @@ using UnityEngine;
 public enum ClimateType
 {
     Grassland,
-    TemperateDeciduousForest,
+    Forest,
     Ocean,
-    TemperateRainForest,
-    TropicalSeasonalForest,
-    TropicalRainForest,
+    TropicalForest,
     Beach,
-    SubtropicalDesert,
-    TemperateDesert,
+    Desert,
     Scorched,
     Shrubland,
     Tundra,
@@ -139,9 +136,9 @@ public class Biome
     {
         return ClimateType switch
         {
-            ClimateType.Grassland or ClimateType.TemperateDeciduousForest or ClimateType.Ocean => NoiseType.Perlin,
-            ClimateType.TemperateRainForest or ClimateType.TropicalSeasonalForest or ClimateType.TropicalRainForest => NoiseType.Simplex,
-            ClimateType.Beach or ClimateType.SubtropicalDesert or ClimateType.TemperateDesert or ClimateType.Scorched or ClimateType.Shrubland => NoiseType.Voronoi,
+            ClimateType.Grassland or ClimateType.Forest or ClimateType.Ocean => NoiseType.Perlin,
+            ClimateType.TropicalForest => NoiseType.Simplex,
+            ClimateType.Beach or ClimateType.Desert or ClimateType.Scorched or ClimateType.Shrubland => NoiseType.Voronoi,
             ClimateType.Tundra or ClimateType.Snow or ClimateType.Bare or ClimateType.Taiga => NoiseType.Ridged,
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -155,21 +152,20 @@ public class Biome
             > 0.88f => ClimateType.Beach,
             > 0.8f => moisture switch
             {
-                < 0.16f => ClimateType.TemperateDesert,
+                < 0.16f => ClimateType.Desert,
                 < 0.50f => ClimateType.Grassland,
-                < 0.83f => ClimateType.TemperateDeciduousForest,
-                _ => ClimateType.TemperateRainForest
+                < 0.83f => ClimateType.Forest,
+                _ => ClimateType.Forest
             },
             > 0.6f => moisture switch
             {
-                < 0.16f => ClimateType.SubtropicalDesert,
+                < 0.16f => ClimateType.Desert,
                 < 0.33f => ClimateType.Grassland,
-                < 0.66f => ClimateType.TropicalSeasonalForest,
-                _ => ClimateType.TropicalRainForest
+                _ => ClimateType.TropicalForest
             },
             > 0.3f => moisture switch
             {
-                < 0.33f => ClimateType.TemperateDesert,
+                < 0.33f => ClimateType.Desert,
                 < 0.66f => ClimateType.Shrubland,
                 _ => ClimateType.Taiga
             },
@@ -182,4 +178,5 @@ public class Biome
             }
         };
     }
+
 }
