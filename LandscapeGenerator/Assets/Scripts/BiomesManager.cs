@@ -18,13 +18,15 @@ public enum ClimateType
     Taiga
 }
 
-public static class BiomesManager
+public class BiomesManager : MonoBehaviour
 {
     private static Biome[,] _biomes;
     
     private static Texture2D _colorMapTexture;
     public static Color[][] ColorMap { get; private set; }
     private static bool _isInitialized = false;
+
+    public BiomeData[] biomeData;
     public static void Initialize()
     {
         if (_isInitialized && !Application.isPlaying) return;

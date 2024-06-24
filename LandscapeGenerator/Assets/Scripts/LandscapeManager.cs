@@ -66,14 +66,19 @@ public class LandscapeManager : MonoBehaviour{
         Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
         
+        // InitializeMaterial(GameObject.Find("BiomesManager").GetComponent<BiomesManager>().biomeData);
         InitializeMaterial();
         _chunksManager = new TerrainChunksManager();
         _chunksManager.Initialize();
     }
 
-    private void InitializeMaterial()
+    private void InitializeMaterial(BiomeData[] biomeDatas = default)
     {
-	    TerrainChunk.InitializeMaterial();
+	    if (biomeDatas is not null && !biomeDatas.Equals(default))
+			TerrainChunk.InitializeMaterial(biomeDatas);
+	    else
+		    TerrainChunk.InitializeMaterial();
+	    
 	    // textureData.ApplyToMaterial (TerrainChunk.Material);
     }
 
