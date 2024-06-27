@@ -74,9 +74,9 @@ public class LandscapeManager : MonoBehaviour{
 
     private void InitializeMaterial(BiomeData[] biomeDatas = default)
     {
-	    if (biomeDatas is not null && !biomeDatas.Equals(default))
-			TerrainChunk.InitializeMaterial(biomeDatas);
-	    else
+	  //   if (biomeDatas is not null && !biomeDatas.Equals(default))
+			// TerrainChunk.InitializeMaterial(biomeDatas);
+	  //   else
 		    TerrainChunk.InitializeMaterial();
 	    
 	    // textureData.ApplyToMaterial (TerrainChunk.Material);
@@ -100,7 +100,7 @@ public class LandscapeManager : MonoBehaviour{
                 Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunk.Resolution - 1));
             }
         }
-        UnifyMapBorders();
+        // UnifyMapBorders();
     }
 
     private void UnifyMapBorders()

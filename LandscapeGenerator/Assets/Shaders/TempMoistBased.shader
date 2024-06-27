@@ -130,54 +130,55 @@ Shader "Custom/TempMoistMix"
             return TROPICAL_FOREST;
         }
         
-        float3 getInterpolatedValue(float value, float value1, float value2, float value3, float3 color1, float3 color2, float3 color3)
-        {
-            if (value <= value1)
-            {
+        float3 getInterpolatedValue(float value, float value1, float value2, float value3, float3 color1, float3 color2, float3 color3) {
+            if (value <= value1) {
                 return color1;
             }
-            if (value <= value2)
-            {
-                return lerp(color1, color2,inverseLerp(value, value1, value2));
+            if (value <= value2) {
+                return lerp(color1, color2, inverseLerp(value1, value2, value));
             }
-            if (value <= value3)
-            {
-                return lerp(color2, color3, inverseLerp(value, value2, value3));
+            if (value <= value3) {
+                return lerp(color2, color3, inverseLerp(value2, value3, value));
             }
             return color3;
         }
-        
-        
+
         float3 lerpMoistureColor(float3 dryColor, float3 medColor, float3 wetColor, float moisture, float temperature, int dryBiomes[2], int medBiomes[2], int wetBiomes[2]) {
-            float epsilon = 10E-4;
-            float colderDryMinMoist = biomeMinMoist[dryBiomes[0]];
-            float hotterDryMinMoist = biomeMinMoist[dryBiomes[1]];
-            float dryMoistureStrength = inverseLerp(colderDryMinMoist, hotterDryMinMoist, moisture);
-        
-            float colderMedMinMoist = biomeMinMoist[medBiomes[0]];
-            float hotterMedMinMoist = biomeMinMoist[medBiomes[1]];
-            float medMoistureStrength = inverseLerp(colderMedMinMoist, hotterMedMinMoist, moisture);
-        
-            float colderWetMinMoist = biomeMinMoist[wetBiomes[0]];
-            float hotterWetMinMoist = biomeMinMoist[wetBiomes[1]];
-            float wetMoistureStrength = inverseLerp(colderWetMinMoist, hotterWetMinMoist, moisture);
-        
-                
-            return getInterpolatedValue(moisture, dryMoistureStrength, medMoistureStrength, wetMoistureStrength, dryColor, medColor, wetColor);
+            // Obtén los valores mínimos y máximos de humedad de los biomas para cada nivel de humedad.
+            float dryMinMoist = min(biomeMinMoist[dryBiomes[0]], biomeMinMoist[dryBiomes[1]]);
+            float dryMaxMoist = max(biomeMaxMoist[dryBiomes[0]], biomeMaxMoist[dryBiomes[1]]);
+            float medMinMoist = min(biomeMinMoist[medBiomes[0]], biomeMinMoist[medBiomes[1]]);
+            float medMaxMoist = max(biomeMaxMoist[medBiomes[0]], biomeMaxMoist[medBiomes[1]]);
+            float wetMinMoist = min(biomeMinMoist[wetBiomes[0]], biomeMinMoist[wetBiomes[1]]);
+            float wetMaxMoist = max(biomeMaxMoist[wetBiomes[0]], biomeMaxMoist[wetBiomes[1]]);
+            
+            // Ordenar correctamente los valores mínimos de humedad para la interpolación.
+            float lowMoist = min(dryMinMoist, min(medMinMoist, wetMinMoist));
+            float highMoist = max(dryMinMoist, max(medMinMoist, wetMinMoist));
+            
+            // Verifica si los valores están en el orden correcto.
+            // if (lowMoist == dryMinMoist && highMoist == wetMinMoist) {
+            //     return getInterpolatedValue(moisture, dryMinMoist, medMinMoist, wetMinMoist, dryColor, medColor, wetColor);
+            // }
+            // else if (lowMoist == medMinMoist && highMoist == dryMinMoist) {
+            //     return getInterpolatedValue(moisture, medMinMoist, dryMinMoist, wetMinMoist, medColor, dryColor, wetColor);
+            // }
+            // else if (lowMoist == wetMinMoist && highMoist == medMinMoist) {
+            //     return getInterpolatedValue(moisture, wetMinMoist, medMinMoist, dryMinMoist, wetColor, medColor, dryColor);
+            // }
+            
+            // En caso de que los valores no estén en un orden esperado, usa valores fijos de humedad para la interpolación.
+            return getInterpolatedValue(moisture, 0.3f, 0.5f, 0.6f, dryColor, medColor, wetColor);
         }
-        
+
         
         float3 lerpTemperatureColor(float temperature, float moisture) {
-        
             float normalizedTempRange = inverseLerp(-30, 30, temperature);
-        
+
             int tempIndex = floor(normalizedTempRange * 4.0);
             int nextTempIndex = min(tempIndex + 1, 4);
-            float epsilon = 10E-4;
-            float tempFloor = tempIndex;
-            float tempCeil = min(ceil(normalizedTempRange * 4.0), 4);
-            float tempStrength = inverseLerp(tempFloor, tempCeil, normalizedTempRange * 4);
-        
+            float tempStrength = inverseLerp(tempIndex / 4.0, (tempIndex + 1) / 4.0, normalizedTempRange);
+
             const int biomes[15] = {
                 SNOW, SNOW, SNOW,
                 SCORCHED, BARE, TUNDRA,
@@ -185,33 +186,23 @@ Shader "Custom/TempMoistMix"
                 DESERT_WARM, GRASSLAND_COLD, FOREST,
                 DESERT_HOT, GRASSLAND_HOT, TROPICAL_FOREST
             };
-            
+
             int moistureLevelsPerTemp = 3;
             int index = tempIndex * moistureLevelsPerTemp;
             int nextIndex = nextTempIndex * moistureLevelsPerTemp;
-            
+
             int dryBiomes[] = {biomes[index], biomes[nextIndex]};
             int medBiomes[] = {biomes[index + 1], biomes[nextIndex + 1]};
             int wetBiomes[] = {biomes[index + 2], biomes[nextIndex + 2]};
-        
-            float colderDryMinMoist = biomeMinMoist[dryBiomes[0]];
-            float hotterDryMinMoist = biomeMinMoist[dryBiomes[1]];
-            float dryMoistStrength = inverseLerp(colderDryMinMoist - epsilon, hotterDryMinMoist, tempStrength);
+
             float3 dryColor = lerp(BIOME_COLORS[dryBiomes[0]], BIOME_COLORS[dryBiomes[1]], tempStrength);
-            
-            float colderMedMinMoist = biomeMinMoist[medBiomes[0]];
-            float hotterMedMinMoist = biomeMinMoist[medBiomes[1]];
-            float medMoistStrength = inverseLerp(colderMedMinMoist - epsilon, hotterMedMinMoist, tempStrength);
             float3 medColor = lerp(BIOME_COLORS[medBiomes[0]], BIOME_COLORS[medBiomes[1]], tempStrength);
-        
-            float colderWetMinMoist = biomeMinMoist[wetBiomes[0]];
-            float hotterWetMinMoist = biomeMinMoist[wetBiomes[1]];
-            float wetMoistStrength = inverseLerp(colderWetMinMoist - epsilon, hotterWetMinMoist, tempStrength);
             float3 wetColor = lerp(BIOME_COLORS[wetBiomes[0]], BIOME_COLORS[wetBiomes[1]], tempStrength);
-        
+
+            // return dryColor;
             return lerpMoistureColor(dryColor, medColor, wetColor, moisture, temperature, dryBiomes, medBiomes, wetBiomes);
-            // return dryColor;    
         }
+
         
         
         float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
@@ -271,6 +262,7 @@ Shader "Custom/TempMoistMix"
             float temp = getTemperature(latitude, IN.uv_MainTex, IN.worldPos.y);
             float moisture = tex2D(_MoistureNoiseTex, IN.uv_MainTex * _MoistureNoiseScale).r;
             float3 color = lerpTemperatureColor(temp, moisture);
+            float3 debugColor = float3(moisture, moisture, moisture);
             o.Albedo = color;
             o.Alpha = 1.0;
         }
