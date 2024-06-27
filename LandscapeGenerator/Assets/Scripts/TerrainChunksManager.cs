@@ -340,7 +340,7 @@ public class TerrainChunksManager{
 		public static void InitializeMaterial()
 		{
 			var baseTextures = Shader.PropertyToID("baseTextures");
-			const string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
+			const string materialPath = "Assets/Materials/TempMoistMix.mat";
 			const string texturesPath = "Assets/Textures/";
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
@@ -383,17 +383,74 @@ public class TerrainChunksManager{
 			Material.SetFloat("_SnowHeight", 40f);
 			Material.SetFloat("_MaxHeight", LandscapeManager.Instance.terrainData.MaxHeight);
 		}
+
+		private struct BiomeInfo
+		{
+			public int id;
+			public float minTemp;
+			public float maxTemp;
+			public float minMoist;
+			public float maxMoist;
+
+			public BiomeInfo(int id, float minTemp, float maxTemp, float minMoist, float maxMoist)
+			{
+				this.id = id;
+				this.minTemp = minTemp;
+				this.maxTemp = maxTemp;
+				this.minMoist = minMoist;
+				this.maxMoist = maxMoist;
+			}
+		}
+
 		
 		public static void InitializeMaterial(BiomeData[] biomes)
 		{
 			var baseTextures = Shader.PropertyToID("baseTextures");
-			const string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
+			const string materialPath = "Assets/Materials/TempMoistMix.mat";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
-
-			for (int i = 0; i < biomes.Length; i++)
+			
+			
+			BiomeInfo[] biomesData = new BiomeInfo[]
 			{
-				biomes[i].SetBiome(Material);
+				new BiomeInfo(0, -30.0f, -10.0f, 0.2f, 0.5f),  // TUNDRA
+				new BiomeInfo(1, 0.0f, 10.0f, 0.5f, 1.0f),     // FOREST
+				new BiomeInfo(2, 10.0f, 30.0f, 0.33f, 1.0f),   // TROPICAL_FOREST
+				new BiomeInfo(3, -30.0f, -10.0f, 0.0f, 0.1f),  // SCORCHED
+				new BiomeInfo(4, -10.0f, 0.0f, 0.33f, 0.66f),  // SHRUBLAND
+				new BiomeInfo(5, -30.0f, -10.0f, 0.5f, 1.0f),  // SNOW
+				new BiomeInfo(6, -30.0f, -10.0f, 0.1f, 0.2f),  // BARE
+				new BiomeInfo(7, -10.0f, 0.0f, 0.66f, 1.0f),   // TAIGA
+				new BiomeInfo(8, 0.0f, 10.0f, 0.16f, 0.5f),    // GRASSLAND
+				new BiomeInfo(9, 10.0f, 30.0f, 0.16f, 0.33f),  // GRASSLAND 
+				new BiomeInfo(10, -10.0f, 0.0f, 0.0f, 0.33f),  // DESERT
+				new BiomeInfo(11, 0.0f, 10.0f, 0.0f, 0.16f),   // DESERT
+				new BiomeInfo(12, 10.0f, 30.0f, 0.0f, 0.16f)   // DESERT
+			};
+
+			
+			float[] biomeMinTemp = new float[biomesData.Length];
+			float[] biomeMaxTemp = new float[biomesData.Length];
+			float[] biomeMinMoist = new float[biomesData.Length];
+			float[] biomeMaxMoist = new float[biomesData.Length];
+
+			for (int i = 0; i < biomesData.Length; i++)
+			{
+				biomeMinTemp[i] = biomesData[i].minTemp;
+				biomeMaxTemp[i] = biomesData[i].maxTemp;
+				biomeMinMoist[i] = biomesData[i].minMoist;
+				biomeMaxMoist[i] = biomesData[i].maxMoist;
 			}
+
+			Material.SetFloatArray("biomeMinTemp", biomeMinTemp);
+			Material.SetFloatArray("biomeMaxTemp", biomeMaxTemp);
+			Material.SetFloatArray("biomeMinMoist", biomeMinMoist);
+			Material.SetFloatArray("biomeMaxMoist", biomeMaxMoist);
+
+			
+			// for (int i = 0; i < biomes.Length; i++)
+			// {
+			// 	biomes[i].SetBiome(Material);
+			// }
 
 			Material.SetFloat("_WaterHeight", 1f);
 			Material.SetFloat("_SnowHeight", 40f);

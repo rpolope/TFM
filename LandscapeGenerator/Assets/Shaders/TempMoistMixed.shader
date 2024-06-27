@@ -99,7 +99,7 @@ Shader "Custom/TempMoistMix"
             return saturate((value-a)/(b-a));
         }
 
-        float GetTemperature(float latitude, float2 uv, float height) {
+        float getTemperature(float latitude, float2 uv, float height) {
             float temp = lerp(-30, 30, latitude);
             float distortion = tex2D(_TempNoiseTex, uv * _TemperatureNoiseScale).r;
             float heightPerturb = height;
@@ -140,10 +140,10 @@ Shader "Custom/TempMoistMix"
             float epsilon = 10E-4;
             float tempFloor = tempIndex;
             float tempCeil = min(ceil(normalizedTempRange * 4.0), 4);
-            float tempStrength = inverseLerp(tempFloor-epsilon, tempCeil, normalizedTempRange * 4);
+            float tempStrength = inverseLerp(tempFloor, tempCeil, normalizedTempRange * 4);
 
-            const int biomes[16] = {
-                SNOW, SNOW, SNOW, SNOW,
+            const int biomes[15] = {
+                SNOW, SNOW, SNOW,
                 SCORCHED, BARE, TUNDRA,
                 DESERT_COLD, SHRUBLAND, TAIGA,
                 DESERT_WARM, GRASSLAND_COLD, FOREST,
@@ -173,7 +173,7 @@ Shader "Custom/TempMoistMix"
             float wetMoistStrength = inverseLerp(colderWetMinMoist - epsilon, hotterWetMinMoist, tempStrength);
             float3 wetColor = lerp(BIOME_COLORS[wetBiomes[0]], BIOME_COLORS[wetBiomes[1]], tempStrength);
 
-            return medColor;
+            return wetColor;
         }
 
         float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
@@ -228,7 +228,7 @@ Shader "Custom/TempMoistMix"
 
         void surf(Input IN, inout SurfaceOutputStandard o) {
             float latitude = tex2D(_MainTex, IN.uv_MainTex).r;
-            float temp = GetTemperature(latitude, IN.uv_MainTex, IN.worldPos.y);
+            float temp = getTemperature(latitude, IN.uv_MainTex, IN.worldPos.y);
             float moisture = tex2D(_MoistureNoiseTex, IN.uv_MainTex * _MoistureNoiseScale).r;
             float3 color = ComputeBiomeColour(temp, moisture, IN);
             float3 debugColor = float3(temp, temp, temp);
