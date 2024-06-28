@@ -15,7 +15,10 @@ public enum ClimateType
     Tundra,
     Snow,
     Bare,
-    Taiga
+    Taiga,
+    GrasslandHot,
+    DesertWarm,
+    DesertHot
 }
 
 public class BiomesManager : MonoBehaviour
