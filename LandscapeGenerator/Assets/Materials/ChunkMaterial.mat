@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ChunkMaterial
-  m_Shader: {fileID: 4800000, guid: 689e6bb7592dfe044ba149d54bdeb003, type: 3}
+  m_Shader: {fileID: 4800000, guid: f1ffe80edc973fa43a5459f2b29aec0d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -51,11 +51,19 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MoistureNoiseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TempNoiseTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -76,12 +84,17 @@ Material:
     - _Metallic: 0
     - _MinHeight: 15.47
     - _Mode: 0
+    - _MoistureNoiseScale: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
+    - _SnowHeight: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TemperatureNoiseScale: 1
+    - _TextureNoiseScale: 1
     - _UVSec: 0
+    - _WaterHeight: 10
     - _ZWrite: 1
     - testScale: 202.73
     m_Colors:
