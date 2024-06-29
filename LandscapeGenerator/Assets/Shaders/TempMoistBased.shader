@@ -104,8 +104,9 @@ Shader "Custom/TempMoistBased"
             
             float lowMoist = min(dryMinMoist, min(medMinMoist, wetMinMoist));
             float highMoist = max(dryMinMoist, max(medMinMoist, wetMinMoist));
-            
-            return getInterpolatedValue(moisture, 0.3f, 0.5f, 0.6f, dryColor, medColor, wetColor);
+
+            // return medColor;
+            return getInterpolatedValue(moisture, 0.3f, 0.5f, 0.66f, dryColor, medColor, wetColor);
         }
 
         float3 lerpTemperatureColor(float temperature, float moisture, Input IN) {
@@ -143,14 +144,15 @@ Shader "Custom/TempMoistBased"
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            float2 uv = IN.uv_MainTex * _TextureNoiseScale;
+            float2 uv = IN.uv_MainTex;
             float height = IN.worldPos.y;
             float latitude = tex2D(_MainTex, uv).r;
-            float temperature = getTemperature(latitude, uv, height);
+            float temperature = getTemperature(latitude, uv * _TemperatureNoiseScale, height);
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
 
-            float3 terrainColor = lerpTemperatureColor(temperature, moisture, IN);
-            o.Albedo = terrainColor;
+            float3 color = lerpTemperatureColor(temperature, moisture, IN);
+            float3 debugColor = float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture);
+            o.Albedo = debugColor;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
             o.Alpha = 1.0;

@@ -9,8 +9,8 @@ using static TerrainChunksManager;
 public class LandscapeManager : MonoBehaviour{
 	
 	public static float Scale = 1f;
-	public const int MapHeight = 16;
-	public const int MapWidth = 16;
+	public const int MapHeight = 1;
+	public const int MapWidth = 1;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	private static float[] LatitudeHeats { get; set; }

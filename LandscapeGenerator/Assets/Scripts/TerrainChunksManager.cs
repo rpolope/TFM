@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,7 +12,7 @@ public class TerrainChunksManager{
 	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 3;
+	private static int _chunksVisibleInViewDst = 0;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
@@ -24,7 +25,7 @@ public class TerrainChunksManager{
 	private static int _wrapCountY;
 	public void Initialize()
 	{
-		LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
+		// LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
 			new LODInfo(1, 3, true),
@@ -327,16 +328,8 @@ public class TerrainChunksManager{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
-				//
-				// if (_objectsPlaced) return;
-				//
-				// ObjectPlacer.PlaceObjects(this, AssetType.Organic);
-				// ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
-				// _objectsPlaced = true;
-				// _objectsVisible = true;
-				// Transform.GetChild(0)?.gameObject.SetActive(true);
 
-				ManageObjectsPlacement();
+				// ManageObjectsPlacement();
 			}
 		}
 
@@ -405,11 +398,10 @@ public class TerrainChunksManager{
 		public static void InitializeMaterial()
 		{
 			var baseTextures = Shader.PropertyToID("baseTextures");
-			const string materialPath = "Assets/Materials/LatitudeVisualizer.mat";
+			const string materialPath = "Assets/Materials/TempMoistBased.mat";
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			const string texturesPath = "Assets/Textures/";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
-			
 			
 			BiomeInfo[] biomesData = new BiomeInfo[]
 			{
@@ -446,42 +438,39 @@ public class TerrainChunksManager{
 			Material.SetFloatArray("biomeMaxTemp", biomeMaxTemp);
 			Material.SetFloatArray("biomeMinMoist", biomeMinMoist);
 			Material.SetFloatArray("biomeMaxMoist", biomeMaxMoist);
-			
-			// for (int i = 0; i < biomes.Length; i++)
-			// {
-			// 	biomes[i].SetBiome(Material);
-			// }
 
-			var biomesTextures = new Dictionary<ClimateType, Texture2D>()
-			{
-				{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
-				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
-				{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
-				{ClimateType.Ocean, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Water.png", typeof(Texture2D))},
-				{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
-				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.Beach, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
-				{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
-				{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 1.png", typeof(Texture2D))},
-				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))}
-			};
+			// var biomesTextures = new Dictionary<ClimateType, Texture2D>()
+			// {
+			// 	{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
+			// 	{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
+			// 	{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
+			// 	{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+			// 	{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
+			// 	{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
+			// 	{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 1.png", typeof(Texture2D))},
+			// 	{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
+			// 	{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
+			// 	{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
+			// 	{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+			// 	{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+			// 	{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))}
+			// };
 			
 			var mockBiomesTextures = new Dictionary<ClimateType, Texture2D>()
 			{
 				{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tundra_texture.png", typeof(Texture2D))},
-				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "grassland_texture.png", typeof(Texture2D))},
 				{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "forest_texture.png", typeof(Texture2D))},
-				{ClimateType.Ocean, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "ocean_texture.png", typeof(Texture2D))},
 				{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D))},
-				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))},
-				{ClimateType.Beach, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "beach_texture.png", typeof(Texture2D))},
 				{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "scorched_texture.png", typeof(Texture2D))},
 				{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "shrubland_texture.png", typeof(Texture2D))},
 				{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "snow_texture.png", typeof(Texture2D))},
 				{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "bare_texture.png", typeof(Texture2D))},
-				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "taiga_texture.png", typeof(Texture2D))}
+				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "taiga_texture.png", typeof(Texture2D))},
+				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "grassland_texture.png", typeof(Texture2D))},
+				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D))},
+				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_1.png", typeof(Texture2D))},
+				{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))},
+				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))}
 			};
 
 			Material.SetTexture (baseTextures, GenerateTextureArray (mockBiomesTextures.Values.ToArray()));
@@ -532,8 +521,24 @@ public class TerrainChunksManager{
 
 		public void CompleteMeshGeneration()
 		{
-			_meshJobHandle.Complete();
+			_meshJobHandle.Complete(); 
+			NormalizeUVToWorldScale(_chunk.Coord);
 			SetMesh();
+		}
+
+		private void NormalizeUVToWorldScale(float2 coords)
+		{
+			for (int i = 0; i < _meshData.UVs.Length; i++)
+			{
+				var x = i % TerrainChunk.Resolution;
+				var y = i / TerrainChunk.Resolution;
+				_meshData.UVs[i] =
+					new Vector2(
+						(TerrainChunk.Resolution * coords.x + x) /
+						(LandscapeManager.MapWidth * TerrainChunk.Resolution),
+						(TerrainChunk.Resolution * coords.y + y) /
+						(LandscapeManager.MapWidth * TerrainChunk.Resolution));
+			}
 		}
 
 		private void SetMesh()
