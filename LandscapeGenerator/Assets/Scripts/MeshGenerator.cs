@@ -34,7 +34,7 @@ public static class MeshGenerator
             float zPos = LODScale * (z - offset) * Scale;
             
             var mapIndex = LODScale * (x + z * ChunkFullResolution);
-            float height = MapData.HeightMap[mapIndex] * Scale * TerrainParameters.meshParameters.heightScale;
+            float height = MapData.HeightMap[mapIndex] * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));

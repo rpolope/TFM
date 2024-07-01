@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
@@ -83,7 +84,6 @@ public class TerrainChunksManager{
 			Debug.Log($"Chunk Actual: {Viewer.ChunkCoord}");
         
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
-
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
 
         for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
@@ -111,7 +111,9 @@ public class TerrainChunksManager{
                     TerrainChunksVisibleLastUpdate.Add(chunk);
             }
         }
-    }
+
+        Water.UpdateVisibility(LandscapeManager.MapTextures[Viewer.ChunkCoord.x, Viewer.ChunkCoord.y]);
+	}
 
 	private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
         if (currentChunkCoordX >= LandscapeManager.MapWidth * _wrapCountX + LandscapeManager.MapWidth) {
