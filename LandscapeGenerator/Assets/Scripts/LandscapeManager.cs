@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using TreeEditor;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -9,8 +10,8 @@ using static TerrainChunksManager;
 public class LandscapeManager : MonoBehaviour{
 	
 	public static float Scale = 1f;
-	public const int MapHeight = 1;
-	public const int MapWidth = 1;
+	public const int MapHeight = 16;
+	public const int MapWidth = 16;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	private static float[] LatitudeHeats { get; set; }
@@ -66,9 +67,22 @@ public class LandscapeManager : MonoBehaviour{
         Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
         
+        InstantiateWaterPlane();
+
         TerrainChunk.InitializeMaterial();
         _chunksManager = new TerrainChunksManager();
         _chunksManager.Initialize();
+    }
+
+    private void InstantiateWaterPlane()
+    {
+	    var water = GameObject.CreatePrimitive(PrimitiveType.Plane);
+	    var transform = water.transform;
+	    transform.localPosition = new Vector3(Viewer.PositionV2.x, terrainData.parameters.waterLevel * terrainData.parameters.heightScale * Scale, Viewer.PositionV2.y);
+	    var waterSize = ChunksVisibleInViewDist * TerrainChunk.WorldSize;
+	    transform.localScale = new Vector3(waterSize, 1, waterSize);
+	    transform.parent = viewer.transform;
+	    water.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Custom/Water"));
     }
 
     private void SetViewerInitPos(int relativeInitialLongitude, int relativeInitialLatitude)

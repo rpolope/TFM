@@ -68,7 +68,7 @@ Shader "Custom/TempMoistBased"
         float getTemperature(float latitude, float2 uv, float height) {
             float temp = lerp(-30, 30, latitude);
             float distortion = tex2D(_TempNoiseTex, uv * _TemperatureNoiseScale).r;
-            float heightPerturb = height;
+            float heightPerturb = height * 0.01;
             temp = temp - heightPerturb + distortion * 0.01;
             return temp;
         }
@@ -152,7 +152,7 @@ Shader "Custom/TempMoistBased"
 
             float3 color = lerpTemperatureColor(temperature, moisture, IN);
             float3 debugColor = float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture);
-            o.Albedo = debugColor;
+            o.Albedo = color;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
             o.Alpha = 1.0;
