@@ -35,7 +35,7 @@ public class LandscapeManager : MonoBehaviour{
 	
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
-	private TerrainChunksManager _chunksManager;
+	internal TerrainChunksManager ChunksManager;
 
 	private static float[] _fixedBorderHeightValues = new float[TerrainChunk.Resolution];
 	
@@ -69,8 +69,8 @@ public class LandscapeManager : MonoBehaviour{
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
 
         TerrainChunk.InitializeMaterial(terrainData);
-        _chunksManager = new TerrainChunksManager();
-        _chunksManager.Initialize();
+        ChunksManager = gameObject.AddComponent<TerrainChunksManager>();
+        ChunksManager.Initialize();
     }
 
     private void SetViewerInitPos(int relativeInitialLongitude, int relativeInitialLatitude)
@@ -146,12 +146,7 @@ public class LandscapeManager : MonoBehaviour{
 
 	private void Update()
 	{
-		_chunksManager.Update();
-	}
-
-	private void LateUpdate()
-	{
-		CompleteMeshGeneration();
+		ChunksManager.Update();
 	}
 	
 	public void GenerateFixedMoistureMap()

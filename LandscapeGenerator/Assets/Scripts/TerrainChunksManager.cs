@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Jobs;
@@ -6,7 +7,7 @@ using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
-public class TerrainChunksManager{
+public class TerrainChunksManager : MonoBehaviour{
 	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
@@ -297,7 +298,7 @@ public class TerrainChunksManager{
 					}
 					else
 					{
-						lodMesh.RequestMesh();
+						lodMesh.RequestMesh(LandscapeManager.Instance.ChunksManager);
 					}
 				}
 				
@@ -310,7 +311,7 @@ public class TerrainChunksManager{
 					}
 					else
 					{
-						_colliderMesh.RequestMesh();
+						_colliderMesh.RequestMesh(LandscapeManager.Instance.ChunksManager);
 					}
 				}
 				else
@@ -339,7 +340,7 @@ public class TerrainChunksManager{
 			GameObject.SetActive (visible);
 		}
 
-		private void CompleteMeshGeneration()
+		internal void CompleteMeshGeneration()
 		{
 			if (IsVisible())
 			{
@@ -506,7 +507,7 @@ public class TerrainChunksManager{
 				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))}
 			};
 
-			Material.SetTexture (baseTextures, GenerateTextureArray (biomesTextures.Values.ToArray()));
+			Material.SetTexture (baseTextures, GenerateTextureArray (mockBiomesTextures.Values.ToArray()));
 			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : LandscapeManager.Instance.terrainData.parameters.waterLevel);
 			Material.SetFloat("_MaxHeight", terrainData != null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
 		}
@@ -540,15 +541,24 @@ public class TerrainChunksManager{
 			_chunk = chunk;
 			HasMesh = false;
 		}
+		
+		public void RequestMesh(TerrainChunksManager terrainChunksManager) {
+			terrainChunksManager.StartCoroutine(RequestMeshCoroutine());	
+		}
 
-		public void RequestMesh()
-		{
+		private IEnumerator RequestMeshCoroutine() {
 			_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 				LandscapeManager.Instance.terrainData.parameters);
 			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData);
 			RequestedMesh = true;
+			
+			while (!_meshJobHandle.IsCompleted) {
+				yield return null;
+			}
+
+			_chunk.CompleteMeshGeneration();
 		}
 
 		public void CompleteMeshGeneration()

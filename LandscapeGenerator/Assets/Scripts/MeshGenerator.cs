@@ -98,6 +98,44 @@ public class MeshData {
         Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
         UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
     }
+    
+    private Vector3[] CalculateNormals()
+    {
+
+        NativeArray<Vector3> normals = new NativeArray<Vector3>(Vertices.Length, Allocator.TempJob);
+        var computeNormalsJob = new NormalComputeJob()
+        {
+            Vertices = Vertices,
+            Triangles = Triangles,
+            Normals = normals
+        };
+        computeNormalsJob.Schedule(Triangles.Length/3, 3000).Complete();
+
+        // Vector3[] normals = new Vector3[Vertices.Length];
+        // for (int i = 0; i < Triangles.Length; i += 3) {
+        //     int index0 = Triangles[i];
+        //     int index1 = Triangles[i + 1];
+        //     int index2 = Triangles[i + 2];
+        //
+        //     Vector3 v0 = Vertices[index1] - Vertices[index0];
+        //     Vector3 v1 = Vertices[index2] - Vertices[index0];
+        //     Vector3 normal = Vector3.Cross(v0, v1).normalized;
+        //
+        //     normals[index0] += normal;
+        //     normals[index1] += normal;
+        //     normals[index2] += normal;
+        // }
+        //
+        for (int i = 0; i < normals.Length; i++) {
+            normals[i] = normals[i].normalized;
+        }
+
+        var normalsArray = normals.ToArray();
+        normals.Dispose();
+
+        return normalsArray;
+    }
+
 
     public Mesh CreateMesh() {
         Mesh mesh = new Mesh();
@@ -107,6 +145,7 @@ public class MeshData {
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
+        // mesh.SetNormals(CalculateNormals());
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         
@@ -122,4 +161,30 @@ public class MeshData {
         UVs.Dispose();
     }
 
+    [BurstCompile]
+    private struct NormalComputeJob : IJobParallelFor
+    {
+        [NativeDisableParallelForRestriction] 
+        public NativeArray<Vector3> Normals;
+        [ReadOnly]
+        public NativeArray<int> Triangles;
+        [ReadOnly] 
+        public NativeArray<Vector3> Vertices;
+        public void Execute(int threadIndex)
+        {
+            int index = threadIndex * 3;
+            int index0 = Triangles[index];
+            int index1 = Triangles[index + 1];
+            int index2 = Triangles[index + 2];
+
+            Vector3 v0 = Vertices[index1] - Vertices[index0];
+            Vector3 v1 = Vertices[index2] - Vertices[index0];
+            Vector3 normal = Vector3.Cross(v0, v1).normalized;
+
+            Normals[index0] += normal;
+            Normals[index1] += normal;
+            Normals[index2] += normal;
+        }
+    }
 }
+
