@@ -1,4 +1,3 @@
-using TMPro;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -17,6 +16,7 @@ public static class MeshGenerator
         [NativeDisableParallelForRestriction]
         public TerrainParameters TerrainParameters;
         public int Resolution;
+        public float2 ChunkCoords;
         public int FacesCount;
         public float Scale;
         [ReadOnly]
@@ -37,7 +37,10 @@ public static class MeshGenerator
             float height = MapData.HeightMap[mapIndex] * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
-            UVs[index] = new float2((float)x / (Resolution - 1), (float)z / (Resolution - 1));
+            UVs[index] = new float2(
+                (ChunkFullResolution * ChunkCoords.x + x * LODScale) / (LandscapeManager.MapWidth * ChunkFullResolution),
+                (ChunkFullResolution * ChunkCoords.y + z * LODScale) / (LandscapeManager.MapHeight * ChunkFullResolution)
+            );         
             
             if (index < FacesCount)
             {
@@ -57,7 +60,7 @@ public static class MeshGenerator
         }
     }
 
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, int2 coords, MapData mapData, ref MeshData meshData)
     {
         var generateMeshJob = new GenerateMeshJob
         {
@@ -65,6 +68,7 @@ public static class MeshGenerator
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
             Resolution = resolution,
+            ChunkCoords = coords,
             FacesCount = meshData.Triangles.Length / 6,
             Scale = terrainParameters.meshParameters.scale,
             MapData = mapData,

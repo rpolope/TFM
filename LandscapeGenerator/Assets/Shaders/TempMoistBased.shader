@@ -8,8 +8,7 @@ Shader "Custom/TempMoistBased"
         _MoistureNoiseTex ("Moisture Noise Texture", 2D) = "white" {}
         _MoistureNoiseScale ("Moisture Noise Scale", Float) = 1.0
         _TextureNoiseScale ("Texture Scale", Float) = 1.0
-        _WaterHeight ("Water Height", Float) = 10
-        _SnowHeight ("Snow Height", Float) = 1
+        _WaterLevel ("Water Level", Float) = 10
     }
     SubShader
     {
@@ -52,8 +51,6 @@ Shader "Custom/TempMoistBased"
         float _TextureNoiseScale;
         float _TemperatureNoiseScale;
         float _MoistureNoiseScale;
-        float _WaterHeight;
-        float _SnowHeight;
         float _WaterLevel;
 
         struct Input {
@@ -95,18 +92,8 @@ Shader "Custom/TempMoistBased"
             return color3;
         }
 
-        float3 lerpMoistureColor(float3 dryColor, float3 medColor, float3 wetColor, float moisture, int dryBiomes[2], int medBiomes[2], int wetBiomes[2]) {
-            float dryMinMoist = min(biomeMinMoist[dryBiomes[0]], biomeMinMoist[dryBiomes[1]]);
-            float dryMaxMoist = max(biomeMaxMoist[dryBiomes[0]], biomeMaxMoist[dryBiomes[1]]);
-            float medMinMoist = min(biomeMinMoist[medBiomes[0]], biomeMinMoist[medBiomes[1]]);
-            float medMaxMoist = max(biomeMaxMoist[medBiomes[0]], biomeMaxMoist[medBiomes[1]]);
-            float wetMinMoist = min(biomeMinMoist[wetBiomes[0]], biomeMinMoist[wetBiomes[1]]);
-            float wetMaxMoist = max(biomeMaxMoist[wetBiomes[0]], biomeMaxMoist[wetBiomes[1]]);
+        float3 lerpMoistureColor(float3 dryColor, float3 medColor, float3 wetColor, float moisture) {
             
-            float lowMoist = min(dryMinMoist, min(medMinMoist, wetMinMoist));
-            float highMoist = max(dryMinMoist, max(medMinMoist, wetMinMoist));
-
-            // return medColor;
             return getInterpolatedValue(moisture, 0.3f, 0.5f, 0.66f, dryColor, medColor, wetColor);
         }
 
@@ -140,7 +127,7 @@ Shader "Custom/TempMoistBased"
             float3 medColor = lerp(triplanar(IN.worldPos, _TextureNoiseScale, blendAxes, medBiomes[0]), triplanar(IN.worldPos, _TextureNoiseScale, blendAxes, medBiomes[1]), tempStrength);
             float3 wetColor = lerp(triplanar(IN.worldPos, _TextureNoiseScale, blendAxes, wetBiomes[0]), triplanar(IN.worldPos, _TextureNoiseScale, blendAxes, wetBiomes[1]), tempStrength);
 
-            return lerpMoistureColor(dryColor, medColor, wetColor, moisture, dryBiomes, medBiomes, wetBiomes);
+            return lerpMoistureColor(dryColor, medColor, wetColor, moisture);
         }
 
         void surf(Input IN, inout SurfaceOutputStandard o)
@@ -152,18 +139,17 @@ Shader "Custom/TempMoistBased"
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
 
             float slope = dot(IN.worldNormal, float3(0, 1, 0));
-            
-
             float3 color = lerpTemperatureColor(temperature, moisture, IN);
 
             if (temperature > 0 && slope > 0.5)
             {
                 float3 beachColor;
                 float waterLevel = 1;
+                float texScale = 5;
                 if (IN.worldPos.y > waterLevel && IN.worldPos.y < waterLevel + 1) {
                     float3 blendAxes = abs(IN.worldNormal);
                     blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
-                    beachColor = triplanar(IN.worldPos, 1, blendAxes, DESERT_WARM) * float3(1, 0.99,0.65);
+                    beachColor = triplanar(IN.worldPos, texScale, blendAxes, DESERT_WARM) * float3(1, 0.99,0.65);
                     float blendStrength = inverseLerp(waterLevel, waterLevel + 0.95f, IN.worldPos.y);
                     color = lerp(beachColor, color, blendStrength);
                 }

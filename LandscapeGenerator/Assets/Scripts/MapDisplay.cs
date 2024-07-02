@@ -37,7 +37,7 @@ public static class MapDisplay
             case DrawMode.Mesh:
             {
                 var meshData = new MeshData(resolution, 0);
-                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, mapData,ref meshData).Complete();
+                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, new int2(), mapData,ref meshData).Complete();
                 DrawMesh (meshData);
                 break;
             }

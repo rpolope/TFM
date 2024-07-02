@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Runtime.CompilerServices;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
@@ -111,8 +108,8 @@ public class TerrainChunksManager{
                     TerrainChunksVisibleLastUpdate.Add(chunk);
             }
         }
-
-        Water.UpdateVisibility(LandscapeManager.MapTextures[Viewer.ChunkCoord.x, Viewer.ChunkCoord.y]);
+		
+        // Water.UpdateVisibility(LandscapeManager.MapTextures[Viewer.ChunkCoord.x, Viewer.ChunkCoord.y]);
 	}
 
 	private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
@@ -177,7 +174,7 @@ public class TerrainChunksManager{
 
 	public class TerrainChunk
 	{
-		public const int Resolution = 233;
+		public const int Resolution = 241;
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public Vector3 Position { get; private set; }
@@ -201,62 +198,89 @@ public class TerrainChunksManager{
 		private readonly MeshCollider _meshCollider;
 		private bool _objectsPlaced = false;
 		private bool _objectsVisible = false;
+		private static bool _water;
 
 		public TerrainChunk(int2 coord)
 		{
 			CompleteMeshGenerationEvent += CompleteMeshGeneration;
-			
+
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
 			_wrappedCoord = coord;
 			Position = new Vector3(_wrappedCoord.x, 0, _wrappedCoord.y) * (Resolution - 1);
 
 			Biome = BiomesManager.GetBiome(_wrappedCoord);
-			
+
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			meshRenderer.material = Material;
 
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
-			
+
 			Transform = GameObject.transform;
 			Transform.parent = LandscapeManager.Instance.Transform;
-			
+
 			_lodMeshes = new LODMesh[_detailLevels.Length];
-			for (int i = 0; i < _detailLevels.Length; i++) {
+			for (int i = 0; i < _detailLevels.Length; i++)
+			{
 				_lodMeshes[i] = new LODMesh(_detailLevels[i].lod, this);
-				if (_detailLevels[i].useForCollider) {
+				if (_detailLevels[i].useForCollider)
+				{
 					_colliderMesh = _lodMeshes[i];
 				}
 			}
 
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
+
+			_water = UnityEngine.Random.value >= Biome.GetWaterProbability();
+			// if (_water)
+			// {
+			Water.Instantiate(
+				LandscapeManager.Instance.terrainData.parameters.waterLevel,
+				Transform,
+				WorldSize
+			);
+			// }
+
+
+		}
+
+		private int2 CalculateDistanceFromViewer()
+		{
+			var chunksFromViewer = Viewer.ChunkCoord - _coord;
+			return new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
+		}
+
+		private int GetLODFromDistance(int2 chunksFromViewer)
+		{
+			int lodIndex = 0;
+			for (int i = 0; i < _detailLevels.Length - 1; i++)
+			{
+				if (i > 0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
+				if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
+				    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
+				{
+					break;
+				}
+					
+				lodIndex = i + 1;
+					
+			}
+
+			return lodIndex;
 		}
 
 		public void Update()
 		{
-			var chunksFromViewer = Viewer.ChunkCoord - _coord;
-			chunksFromViewer = new int2(Mathf.Abs(chunksFromViewer.x), Mathf.Abs(chunksFromViewer.y));
-			bool inDistance = Viewer.ChunkCoord.Equals(_coord) || chunksFromViewer.x < _chunksVisibleInViewDst && 
+			var chunksFromViewer = CalculateDistanceFromViewer();
+			bool inDistance = chunksFromViewer.x < _chunksVisibleInViewDst && 
 			                  chunksFromViewer.y < _chunksVisibleInViewDst;
 			
 			if (inDistance)
 			{
-				int lodIndex = 0;
-
-				for (int i = 0; i < _detailLevels.Length - 1; i++)
-				{
-					if (i > 0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
-					if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
-					    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
-					{
-						break;
-					}
-					
-					lodIndex = i + 1;
-					
-				}
+				int lodIndex = GetLODFromDistance(chunksFromViewer);
+				
 				if (lodIndex != _lodIndex)
 				{
 					var lodMesh = _lodMeshes[lodIndex];
@@ -319,6 +343,10 @@ public class TerrainChunksManager{
 		{
 			if (IsVisible())
 			{
+				if (_lodIndex < 0)
+				{
+					_lodIndex = GetLODFromDistance(CalculateDistanceFromViewer());
+				}
 				var lodMesh = _lodMeshes[_lodIndex];
 				if (lodMesh.RequestedMesh)
 				{
@@ -398,7 +426,7 @@ public class TerrainChunksManager{
 		}
 
 		
-		public static void InitializeMaterial()
+		public static void InitializeMaterial(TerrainData terrainData = default)
 		{
 			var baseTextures = Shader.PropertyToID("baseTextures");
 			const string materialPath = "Assets/Materials/TempMoistBased.mat";
@@ -407,7 +435,6 @@ public class TerrainChunksManager{
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			const string texturesPath = "Assets/Textures/";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
-			// return;
 
 			BiomeInfo[] biomesData = new BiomeInfo[]
 			{
@@ -458,7 +485,7 @@ public class TerrainChunksManager{
 				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
 				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
 				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
+				{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Shore_Large.jpg", typeof(Texture2D))},
 				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))}
 			};
 			
@@ -480,9 +507,8 @@ public class TerrainChunksManager{
 			};
 
 			Material.SetTexture (baseTextures, GenerateTextureArray (biomesTextures.Values.ToArray()));
-			Material.SetFloat("_WaterHeight", 1f);
-			Material.SetFloat("_SnowHeight", 40f);
-			Material.SetFloat("_MaxHeight", LandscapeManager.Instance.terrainData.MaxHeight);
+			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : LandscapeManager.Instance.terrainData.parameters.waterLevel);
+			Material.SetFloat("_MaxHeight", terrainData != null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
 		}
 		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {
 			
@@ -521,30 +547,14 @@ public class TerrainChunksManager{
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 				LandscapeManager.Instance.terrainData.parameters);
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.MapData, ref _meshData);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData);
 			RequestedMesh = true;
 		}
 
 		public void CompleteMeshGeneration()
 		{
 			_meshJobHandle.Complete(); 
-			NormalizeUVToWorldScale(_chunk.Coord);
 			SetMesh();
-		}
-
-		private void NormalizeUVToWorldScale(float2 coords)
-		{
-			for (int i = 0; i < _meshData.UVs.Length; i++)
-			{
-				var x = i % TerrainChunk.Resolution;
-				var y = i / TerrainChunk.Resolution;
-				_meshData.UVs[i] =
-					new Vector2(
-						(TerrainChunk.Resolution * coords.x + x) /
-						(LandscapeManager.MapWidth * TerrainChunk.Resolution),
-						(TerrainChunk.Resolution * coords.y + y) /
-						(LandscapeManager.MapWidth * TerrainChunk.Resolution));
-			}
 		}
 
 		private void SetMesh()

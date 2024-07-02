@@ -5,18 +5,18 @@ using UnityEngine.UIElements;
 
 public class Water
 {
-    public readonly GameObject GameObject;
+    public static GameObject GameObject;
     public static Material Material;
-    public Water(float heightLevel, Viewer viewer, float size)
+    public static void Instantiate(float heightLevel, Transform parent, float size)
     {
         GameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
         var transform = GameObject.transform;
-        transform.localPosition = Vector3.zero + Vector3.up * heightLevel;
-        transform.localScale = new Vector3(size, 1, size);
-        transform.parent = viewer.transform;
-        Material = GameObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Custom/Water"));
-        // const string materialPath = "Assets/Materials/Water.mat";
-        // Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+        transform.localScale = new Vector3(size/10, 1, size/10);
+        transform.parent = parent;
+        transform.localPosition = Vector3.zero + Vector3.up;
+        const string materialPath = "Assets/Materials/Water.mat";
+        GameObject.GetComponent<MeshRenderer>().sharedMaterial = Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+        GameObject.isStatic = true;
     }
 
     public static void UpdateVisibility(Texture2D heightMap)

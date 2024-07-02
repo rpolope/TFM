@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = System.Random;
 
 public enum ClimateType
 {
@@ -169,6 +170,18 @@ public class Biome
                 < 0.5f => ClimateType.Tundra,
                 _ => ClimateType.Snow
             }
+        };
+    }
+
+    public float GetWaterProbability()
+    {
+        return ClimateType switch
+        {
+            ClimateType.Grassland or ClimateType.Forest or ClimateType.Ocean => 0.5f,
+            ClimateType.TropicalForest => 0.8f,
+            ClimateType.Beach or ClimateType.Desert or ClimateType.Scorched or ClimateType.Shrubland => 0.1f,
+            ClimateType.Tundra or ClimateType.Snow or ClimateType.Bare or ClimateType.Taiga => 0.4f,
+            _ => throw new ArgumentOutOfRangeException(),
         };
     }
 }

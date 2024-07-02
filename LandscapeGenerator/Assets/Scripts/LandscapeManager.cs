@@ -13,7 +13,6 @@ public class LandscapeManager : MonoBehaviour{
 	public const int MapHeight = 16;
 	public const int MapWidth = 16;
 	public static LandscapeManager Instance;
-	public static Water Water;
 	public static MapData[,] Maps { get; private set; }
 	public static Texture2D[,] MapTextures { get; private set; }
 	private static float[] LatitudeHeats { get; set; }
@@ -69,13 +68,7 @@ public class LandscapeManager : MonoBehaviour{
         Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
 
-        Water = new Water(
-	        terrainData.parameters.waterLevel,
-	        viewer,
-	        ChunksVisibleInViewDist * TerrainChunk.WorldSize
-        );
-
-        TerrainChunk.InitializeMaterial();
+        TerrainChunk.InitializeMaterial(terrainData);
         _chunksManager = new TerrainChunksManager();
         _chunksManager.Initialize();
     }

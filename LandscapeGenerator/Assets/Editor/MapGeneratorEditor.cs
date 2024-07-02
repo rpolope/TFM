@@ -23,7 +23,14 @@ namespace Editor
 			if (GUILayout.Button ("Generate"))
 			{
 				var mapData = mapGenerator.GenerateMapData(mapGenerator.terrainData.parameters.resolution, mapGenerator.noiseData.parameters);
-				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());		
+				MapDisplay.DrawMapInEditor(mapGenerator.drawMode, mapData, mapGenerator.GetTerrainParameters());
+
+				if (mapGenerator.drawMode.Equals(DrawMode.Mesh))
+				{
+					Water.Instantiate(mapGenerator.terrainData.parameters.waterLevel,
+						mapGenerator.transform,
+						TerrainChunksManager.TerrainChunk.WorldSize);
+				}
 			}
 		}
 	}
