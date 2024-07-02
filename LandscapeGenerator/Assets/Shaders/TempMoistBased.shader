@@ -54,6 +54,7 @@ Shader "Custom/TempMoistBased"
         float _MoistureNoiseScale;
         float _WaterHeight;
         float _SnowHeight;
+        float _WaterLevel;
 
         struct Input {
             float2 uv_MainTex;
@@ -150,7 +151,24 @@ Shader "Custom/TempMoistBased"
             float temperature = getTemperature(latitude, uv * _TemperatureNoiseScale, height);
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
 
+            float slope = dot(IN.worldNormal, float3(0, 1, 0));
+            
+
             float3 color = lerpTemperatureColor(temperature, moisture, IN);
+
+            if (temperature > 0 && slope > 0.5)
+            {
+                float3 beachColor;
+                float waterLevel = 1;
+                if (IN.worldPos.y > waterLevel && IN.worldPos.y < waterLevel + 1) {
+                    float3 blendAxes = abs(IN.worldNormal);
+                    blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+                    beachColor = triplanar(IN.worldPos, 1, blendAxes, DESERT_WARM) * float3(1, 0.99,0.65);
+                    float blendStrength = inverseLerp(waterLevel, waterLevel + 0.95f, IN.worldPos.y);
+                    color = lerp(beachColor, color, blendStrength);
+                }
+            }
+                
             float3 debugColor = float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture);
             o.Albedo = color;
             o.Metallic = 0.0;
