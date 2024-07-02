@@ -19,8 +19,8 @@ MonoBehaviour:
     scale: 40
     offset: {x: 0, y: 0}
     octaves: 5
-    frequency: 1
-    persistence: 0.491
-    lacunarity: 1.9
-    ridgeness: 0
-    ridgeRoughness: 9.05
+    frequency: 0.55
+    persistence: 0.4
+    lacunarity: 2.5
+    ridgeness: 0.672
+    ridgeRoughness: 6.08
