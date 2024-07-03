@@ -23,6 +23,7 @@ namespace Jobs
         public MapData MapData;
         public int LODScale;
         public int ChunkFullResolution;
+        public bool GlobalUVs;
 
         public void Execute(int index)
         {
@@ -37,10 +38,18 @@ namespace Jobs
             float height = MapData.HeightMap[mapIndex] * TerrainParameters.meshParameters.heightScale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
-            UVs[index] = new float2(
-                (ChunkFullResolution * ChunkCoords.x + x * LODScale) / (LandscapeManager.MapWidth * ChunkFullResolution),
-                (ChunkFullResolution * ChunkCoords.y + z * LODScale) / (LandscapeManager.MapHeight * ChunkFullResolution)
-            );         
+            if (GlobalUVs)
+                UVs[index] = new float2(
+                    (ChunkFullResolution * ChunkCoords.x + x * LODScale) / (LandscapeManager.MapWidth * ChunkFullResolution),
+                    (ChunkFullResolution * ChunkCoords.y + z * LODScale) / (LandscapeManager.MapHeight * ChunkFullResolution)
+                );
+            else
+            {
+                UVs[index] = new float2(
+                    ((float)x * LODScale) / ChunkFullResolution,
+                    ((float)z * LODScale) / ChunkFullResolution
+                );
+            }
             
             if (index < FacesCount)
             {

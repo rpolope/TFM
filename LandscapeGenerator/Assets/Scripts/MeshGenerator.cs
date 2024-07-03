@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, int2 coords, MapData mapData, ref MeshData meshData)
+    public static JobHandle ScheduleMeshGenerationJob(TerrainParameters terrainParameters, int resolution, int2 coords, MapData mapData, ref MeshData meshData, bool globalUVs = true)
     {
         var generateMeshJob = new MeshGenerationJob()
         {
@@ -15,13 +15,14 @@ public static class MeshGenerator
             UVs = meshData.UVs,
             Triangles = meshData.Triangles,
             Resolution = resolution,
+            ChunkFullResolution = terrainParameters.meshParameters.resolution,
             ChunkCoords = coords,
             FacesCount = meshData.Triangles.Length / 6,
             Scale = terrainParameters.meshParameters.scale,
             MapData = mapData,
             LODScale = meshData.LODScale,
             TerrainParameters = terrainParameters,
-            ChunkFullResolution = terrainParameters.meshParameters.resolution
+            GlobalUVs = globalUVs
         };
         var jobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
         

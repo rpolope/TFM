@@ -535,7 +535,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 				LandscapeManager.Instance.terrainData.parameters);
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData);
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData, false);
 			RequestedMesh = true;
 			
 			while (!_meshJobHandle.IsCompleted) {
