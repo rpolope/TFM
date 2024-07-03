@@ -420,7 +420,11 @@ public class TerrainChunksManager : MonoBehaviour{
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			const string texturesPath = "Assets/Textures/";
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
-
+			
+			Material.EnableKeyword("_NORMALMAP");
+			Material.SetTexture ("_NormalMap", (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Normal_Map.jpg", typeof(Texture2D)));
+			// return;
+			
 			BiomeInfo[] biomesData = new BiomeInfo[]
 			{
 				new BiomeInfo(0, -30.0f, -10.0f, 0.1f, 0.5f),  // TUNDRA
