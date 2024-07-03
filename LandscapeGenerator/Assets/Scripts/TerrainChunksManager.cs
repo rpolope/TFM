@@ -18,7 +18,6 @@ public class TerrainChunksManager : MonoBehaviour{
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
 	
-	public static event Action CompleteMeshGenerationEvent;
 	public static int ChunksVisibleInViewDist => _chunksVisibleInViewDst;
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
@@ -56,12 +55,6 @@ public class TerrainChunksManager : MonoBehaviour{
 			Viewer.UpdateOldRotation();
 			UpdateCulledChunks();
 		}
-	}
-
-	
-	public static void CompleteMeshGeneration()
-	{
-		CompleteMeshGenerationEvent?.Invoke();
 	}
 
 	private void UpdateVisibleChunks() {
@@ -109,8 +102,6 @@ public class TerrainChunksManager : MonoBehaviour{
                     TerrainChunksVisibleLastUpdate.Add(chunk);
             }
         }
-		
-        // Water.UpdateVisibility(LandscapeManager.MapTextures[Viewer.ChunkCoord.x, Viewer.ChunkCoord.y]);
 	}
 
 	private void UpdateWrapCount(int currentChunkCoordX, int currentChunkCoordY) {
@@ -126,8 +117,7 @@ public class TerrainChunksManager : MonoBehaviour{
         if (currentChunkCoordY < -LandscapeManager.MapHeight * _wrapCountY) {
             _wrapCountY--;
         }
-    }
-
+    } 
     private int2 GetWrappedChunkCoords(int2 viewedChunkCoord) {
         int wrappedXCoord = viewedChunkCoord.x;
         int wrappedYCoord = viewedChunkCoord.y;
@@ -203,8 +193,6 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		public TerrainChunk(int2 coord)
 		{
-			CompleteMeshGenerationEvent += CompleteMeshGeneration;
-
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
 			_wrappedCoord = coord;
@@ -235,16 +223,12 @@ public class TerrainChunksManager : MonoBehaviour{
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
 
 			_water = UnityEngine.Random.value >= Biome.GetWaterProbability();
-			// if (_water)
-			// {
+			
 			Water.Instantiate(
 				LandscapeManager.Instance.terrainData.parameters.waterLevel,
 				Transform,
 				WorldSize
 			);
-			// }
-
-
 		}
 
 		private int2 CalculateDistanceFromViewer()

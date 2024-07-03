@@ -22,7 +22,7 @@ public static class MapDisplay
 
     private static void DrawMesh(MeshData meshData) {
         MeshFilter.mesh = meshData.CreateMesh ();
-        MeshFilter.transform.localScale = Vector3.one * TerrainChunksManager.TerrainChunk.WorldSize;
+        // MeshFilter.transform.localScale = Vector3.one * TerrainChunksManager.TerrainChunk.WorldSize;
     }
     
     public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters)

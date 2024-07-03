@@ -1,3 +1,4 @@
+using Jobs;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -12,28 +13,6 @@ public class MapGenerator : MonoBehaviour
     public TerrainData terrainData;
     public TextureData textureData;
     public Material terrainMaterial;
-
-    [BurstCompile]
-    private struct GenerateMapJob : IJobParallelFor
-    {
-        [NativeDisableParallelForRestriction] 
-        public NativeArray<float> Map;
-        public int Resolution;
-        public float2 Centre;
-        public NoiseParameters Parameters;
-
-        public void Execute(int threadIndex)
-        {
-            int x = threadIndex % Resolution;
-            int y = threadIndex / Resolution;
-            
-            float2 pos = new float2(x, y) + Centre;
-
-            float value = NoiseGenerator.GetNoiseValue(pos, Parameters);
-            
-            Map[threadIndex] = value;
-        }
-    }
 
     public MapData GenerateMapData(int resolution, NoiseParameters parameters, float2 centre = default) {
         
@@ -50,7 +29,7 @@ public class MapGenerator : MonoBehaviour
     {
         NativeArray<float> map = new NativeArray<float>(resolution * resolution, Allocator.TempJob);
         
-        var generateMapJob = new GenerateMapJob
+        var generateMapJob = new MapGenerationJob()
         {
             Map = map,
             Centre = centre,
