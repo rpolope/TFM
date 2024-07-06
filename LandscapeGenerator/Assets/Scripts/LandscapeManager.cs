@@ -9,7 +9,7 @@ using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public static float Scale = 1f;
+	public const float Scale = 2.5f;
 	public const int MapHeight = 16;
 	public const int MapWidth = 16;
 	public static LandscapeManager Instance;
@@ -28,7 +28,6 @@ public class LandscapeManager : MonoBehaviour{
 	public TextureData textureData;
 	public NoiseParameters moistureParameters;
 	public BiomesManager biomesManager;
-	public Viewer viewer;
 	public CullingMode culling;
 
 	private const float FixedMoisture = 0.1f;
@@ -54,7 +53,7 @@ public class LandscapeManager : MonoBehaviour{
 
     private void Start()
     {
-	    Scale = terrainData.parameters.scale;
+	    // Scale = terrainData.parameters.scale;
         Transform = transform;
         
         GenerateMoistureMap();
@@ -75,7 +74,6 @@ public class LandscapeManager : MonoBehaviour{
 
     private void SetViewerInitPos(int relativeInitialLongitude, int relativeInitialLatitude)
     {
-	    // var initChunk = TerrainChunksManager.GetChunk(new int2(relativeInitialLongitude, relativeInitialLatitude));
 	    var initPos = new float2((relativeInitialLongitude) * TerrainChunk.WorldSize,
 		    (relativeInitialLatitude) * TerrainChunk.WorldSize);
 	    Viewer.SetInitialPos(initPos);

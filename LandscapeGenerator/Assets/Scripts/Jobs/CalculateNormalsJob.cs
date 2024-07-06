@@ -30,4 +30,17 @@ namespace Jobs
             Normals[index2] += normal;
         }
     }
+    
+    
+    [BurstCompile]
+    public struct NormalizeNormalsJob : IJobParallelFor
+    {
+        [NativeDisableParallelForRestriction] 
+        public NativeArray<Vector3> Normals;
+        
+        public void Execute(int index)
+        {
+            Normals[index] = Normals[index].normalized;
+        }
+    }
 }
