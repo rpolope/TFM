@@ -29,7 +29,7 @@ namespace Editor
 				{
 					Water.Instantiate(mapGenerator.terrainData.parameters.waterLevel,
 						mapGenerator.transform,
-						TerrainChunksManager.TerrainChunk.WorldSize);
+						TerrainChunk.WorldSize);
 				}
 			}
 		}

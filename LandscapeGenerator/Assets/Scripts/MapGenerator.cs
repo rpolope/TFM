@@ -69,14 +69,14 @@ public class MapGenerator : MonoBehaviour
     void OnValuesUpdated() {
         if (!Application.isPlaying) {
             // textureData.ApplyToMaterial (terrainMaterial);
-            TerrainChunksManager.TerrainChunk.InitializeMaterial(terrainData);
+            TerrainChunk.InitializeMaterial(terrainData);
             MapDisplay.DrawMapInEditor(drawMode, GenerateMapData(terrainData.parameters.resolution, noiseData.parameters), GetTerrainParameters());
         }
     }
     
     void OnTextureValuesUpdated() {
         // textureData.ApplyToMaterial (terrainMaterial);
-        TerrainChunksManager.TerrainChunk.InitializeMaterial(terrainData);
+        TerrainChunk.InitializeMaterial(terrainData);
     }
 }
 public struct MapData {
