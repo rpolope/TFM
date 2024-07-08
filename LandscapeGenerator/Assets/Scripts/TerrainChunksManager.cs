@@ -28,34 +28,31 @@ public class TerrainChunksManager : MonoBehaviour
 
     public void Initialize()
     {
-        _detailLevels = new[] {
+        _detailLevels = new[]
+        {
             new TerrainChunk.LODInfo(0, 2, false),
             new TerrainChunk.LODInfo(1, 3, true),
             new TerrainChunk.LODInfo(2, 4, false)
         };
 
-        // UpdateVisibleChunks();
+        UpdateVisibleChunks();
 
         _visibleMapSize = 2 * _chunksVisibleInViewDst + 1;
         _backupBorderSize = _visibleMapSize;
         _remainingChunksToCreate -= _visibleMapSize * _visibleMapSize;
 
         var currentChunkCoord = Viewer.GetCurrentChunkCoord();
-        _lastChunkCoords = new int2(currentChunkCoord.x + (_chunksVisibleInViewDst),
-                                    currentChunkCoord.y - (_chunksVisibleInViewDst));
- 
-        
+        _lastChunkCoords = new int2(currentChunkCoord.x + (_chunksVisibleInViewDst), currentChunkCoord.y - (_chunksVisibleInViewDst));
+
         _backupChunksToCreate = _backupBorderSize * 4 + 4;
 
         StartCoroutine(GenerateChunksInBackgroundCoroutine());
     }
 
-
     private IEnumerator GenerateChunksInBackgroundCoroutine()
     {
         while (_backupChunksToCreate > 0)
         {
-
             List<int2> generatedChunkCoords = null;
 
             var task = Task.Run(() => generatedChunkCoords = GenerateBackupChunkCoords());
@@ -74,11 +71,14 @@ public class TerrainChunksManager : MonoBehaviour
             foreach (var coord in generatedChunkCoords)
             {
                 var wrappedChunkCoord = GetWrappedChunkCoords(coord);
+                if (TerrainChunksDictionary.ContainsKey(wrappedChunkCoord) ||
+                    BackupChunksDictionary.ContainsKey(wrappedChunkCoord)) continue;
+
                 var terrainChunk = new TerrainChunk(wrappedChunkCoord, _detailLevels, true);
                 terrainChunk.SetChunkCoord(coord);
                 terrainChunk.Update();
                 BackupChunksDictionary.Add(coord, terrainChunk);
-                _backupChunksToCreate--;
+                _remainingChunksToCreate--;
             }
         }
     }
@@ -126,6 +126,16 @@ public class TerrainChunksManager : MonoBehaviour
                     chunk.SetChunkCoord(viewedChunkCoord);
                     chunk.Update();
                     SurroundTerrainChunks.Add(chunk);
+                }
+                else if (BackupChunksDictionary.TryGetValue(wrappedChunkCoord, out var backup))
+                {
+                    chunk = backup;
+                    chunk.SetChunkCoord(viewedChunkCoord);
+                    chunk.Update();
+                    SurroundTerrainChunks.Add(chunk);
+                    TerrainChunksDictionary.Add(wrappedChunkCoord, chunk);
+                    BackupChunksDictionary.Remove(wrappedChunkCoord);
+                    _backupBorderSize++;
                 }
                 else
                 {
@@ -203,9 +213,7 @@ public class TerrainChunksManager : MonoBehaviour
         var visible = inDistance;
         if (LandscapeManager.Instance.culling == CullingMode.Layer)
         {
-            chunk.GameObject.layer = isCulled ?
-                LayerMask.NameToLayer("Culled") :
-                LayerMask.NameToLayer("Default");
+            chunk.GameObject.layer = isCulled ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default");
         }
         else if (LandscapeManager.Instance.culling == CullingMode.Visibility)
         {
@@ -234,22 +242,24 @@ public class TerrainChunksManager : MonoBehaviour
         for (int i = 0; i <= steps; i++)
         {
             generatedChunkCoords.Add(coord += new int2(0, 1));
+            _backupBorderSize++;
         }
 
         // to right
         for (int i = 0; i <= steps; i++)
         {
             generatedChunkCoords.Add(coord += new int2(1, 0));
+            _backupBorderSize++;
         }
 
-        // to up
+        // to bottom
         for (int i = 0; i <= steps; i++)
         {
             generatedChunkCoords.Add(coord += new int2(0, -1));
+            _backupBorderSize++;
         }
 
         _lastChunkCoords = coord;
-        _backupBorderSize++; // Se suma 1 porque el primer bucle se queda a 1 de acabar y es donde empieza el siguiente bucle.
 
         return generatedChunkCoords;
     }

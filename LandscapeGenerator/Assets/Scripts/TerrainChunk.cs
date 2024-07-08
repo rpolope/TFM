@@ -129,7 +129,7 @@ public class TerrainChunk
 					}
 					else
 					{
-						lodMesh.RequestMesh(LandscapeManager.Instance.ChunksManager);
+						lodMesh.RequestMeshData(LandscapeManager.Instance.ChunksManager);
 					}
 				}
 				
@@ -142,7 +142,7 @@ public class TerrainChunk
 					}
 					else
 					{
-						_colliderMesh.RequestMesh(LandscapeManager.Instance.ChunksManager);
+						_colliderMesh.RequestMeshData(LandscapeManager.Instance.ChunksManager);
 					}
 				}
 				else
@@ -182,12 +182,12 @@ public class TerrainChunk
 				var lodMesh = _lodMeshes[_lodIndex];
 				if (lodMesh.RequestedMesh)
 				{
-					lodMesh.CompleteMeshGeneration();
+					lodMesh.CompleteMesh();
 					_meshFilter.mesh = lodMesh.Mesh;
 
 					if (_lodIndex == 0 && _colliderMesh.RequestedMesh)
 					{
-						_colliderMesh.CompleteMeshGeneration();
+						_colliderMesh.CompleteMesh();
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
@@ -376,26 +376,24 @@ public class TerrainChunk
 				HasMesh = false;
 			}
 		
-			public void RequestMesh(TerrainChunksManager terrainChunksManager) {
-				terrainChunksManager.StartCoroutine(RequestMeshCoroutine());	
+			public void RequestMeshData(TerrainChunksManager terrainChunksManager) {
+				terrainChunksManager.StartCoroutine(RequestMeshDataCoroutine());	
 			}
 
-			private IEnumerator RequestMeshCoroutine() {
+			private IEnumerator RequestMeshDataCoroutine() {
 				_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 				var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 				var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 					LandscapeManager.Instance.terrainData.parameters);
 				_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData, false);
 				RequestedMesh = true;
-			
-				while (!_meshJobHandle.IsCompleted) {
-					yield return null;
-				}
 
+				yield return new WaitUntil(() => _meshJobHandle.IsCompleted);
+			
 				_chunk.CompleteMeshGeneration();
 			}
 
-			public void CompleteMeshGeneration()
+			public void CompleteMesh()
 			{
 				_meshJobHandle.Complete(); 
 				SetMesh();
