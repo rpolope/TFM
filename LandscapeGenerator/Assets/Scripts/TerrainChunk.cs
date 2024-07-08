@@ -36,14 +36,14 @@ public class TerrainChunk
 		private bool _objectsVisible = false;
 		private static bool _water;
 
-		public TerrainChunk(int2 coord, LODInfo[] detailLevels)
+		public TerrainChunk(int2 coord, LODInfo[] detailLevels, bool visible)
 		{
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
 			_wrappedCoord = coord;
 			Position = new Vector3(_wrappedCoord.x, 0, _wrappedCoord.y) * (Resolution - 1);
 
-			Biome = BiomesManager.GetBiome(_wrappedCoord);
+			// Biome = BiomesManager.GetBiome(_wrappedCoord);
 
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
 			meshRenderer.material = Material;
@@ -67,13 +67,15 @@ public class TerrainChunk
 
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
 
-			_water = UnityEngine.Random.value >= Biome.GetWaterProbability();
+			// _water = UnityEngine.Random.value >= Biome.GetWaterProbability();
 			
 			Water.Instantiate(
 				LandscapeManager.Instance.terrainData.parameters.waterLevel,
 				Transform,
 				WorldSize
 			);
+			
+			SetVisible(visible);
 		}
 
 		private int2 CalculateDistanceFromViewer()
@@ -95,7 +97,6 @@ public class TerrainChunk
 				}
 					
 				lodIndex = i + 1;
-					
 			}
 
 			return lodIndex;
@@ -190,7 +191,7 @@ public class TerrainChunk
 					}
 				}
 
-				ManageObjectsPlacement();
+				// ManageObjectsPlacement();
 			}
 		}
 

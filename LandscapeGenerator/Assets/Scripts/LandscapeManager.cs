@@ -1,11 +1,7 @@
 using System;
 using System.Linq;
-using TreeEditor;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
-using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
 	
@@ -68,7 +64,7 @@ public class LandscapeManager : MonoBehaviour{
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
 
         TerrainChunk.InitializeMaterial(terrainData);
-        ChunksManager = gameObject.AddComponent<TerrainChunksManager>();
+        ChunksManager = GetComponent<TerrainChunksManager>();
         ChunksManager.Initialize();
     }
 

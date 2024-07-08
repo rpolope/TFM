@@ -56,4 +56,14 @@ public class Viewer : MonoBehaviour
         );
         _viewerOldPosition = new Vector2(position.x, position.y);
     }
+    
+    
+    public static int2 GetCurrentChunkCoord()
+    {
+        float offset = TerrainChunk.WorldSize / 2f;
+        int xCoord = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
+        int yCoord = (int)((Viewer.PositionV2.y + offset) / TerrainChunk.WorldSize);
+
+        return new int2(xCoord, yCoord);
+    }
 }
