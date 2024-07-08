@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
@@ -36,7 +34,7 @@ public class TerrainChunksManager : MonoBehaviour
             new TerrainChunk.LODInfo(2, 4, false)
         };
 
-        UpdateVisibleChunks();
+        // UpdateVisibleChunks();
 
         _visibleMapSize = 2 * _chunksVisibleInViewDst + 1;
         _backupBorderSize = _visibleMapSize;
@@ -47,7 +45,7 @@ public class TerrainChunksManager : MonoBehaviour
                                     currentChunkCoord.y - (_chunksVisibleInViewDst));
  
         
-        _backupChunksToCreate = _backupBorderSize * _backupBorderSize + 4;
+        _backupChunksToCreate = _backupBorderSize * 4 + 4;
 
         StartCoroutine(GenerateChunksInBackgroundCoroutine());
     }
@@ -60,7 +58,7 @@ public class TerrainChunksManager : MonoBehaviour
 
             List<int2> generatedChunkCoords = null;
 
-            var task = Task.Run(() => generatedChunkCoords = GenerateBackupChunks());
+            var task = Task.Run(() => generatedChunkCoords = GenerateBackupChunkCoords());
 
             while (!task.IsCompleted)
             {
@@ -78,6 +76,7 @@ public class TerrainChunksManager : MonoBehaviour
                 var wrappedChunkCoord = GetWrappedChunkCoords(coord);
                 var terrainChunk = new TerrainChunk(wrappedChunkCoord, _detailLevels, true);
                 terrainChunk.SetChunkCoord(coord);
+                terrainChunk.Update();
                 BackupChunksDictionary.Add(coord, terrainChunk);
                 _backupChunksToCreate--;
             }
@@ -216,7 +215,7 @@ public class TerrainChunksManager : MonoBehaviour
         chunk.SetVisible(visible);
     }
 
-    private List<int2> GenerateBackupChunks()
+    private List<int2> GenerateBackupChunkCoords()
     {
         List<int2> generatedChunkCoords = new List<int2>();
 

@@ -32,11 +32,12 @@ public class TerrainChunk
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
+		private bool _isBackup;
 		private bool _objectsPlaced = false;
 		private bool _objectsVisible = false;
 		private static bool _water;
 
-		public TerrainChunk(int2 coord, LODInfo[] detailLevels, bool visible)
+		public TerrainChunk(int2 coord, LODInfo[] detailLevels, bool isBackup)
 		{
 			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
@@ -74,8 +75,8 @@ public class TerrainChunk
 				Transform,
 				WorldSize
 			);
-			
-			SetVisible(visible);
+
+			_isBackup = isBackup;
 		}
 
 		private int2 CalculateDistanceFromViewer()
@@ -170,7 +171,7 @@ public class TerrainChunk
 			GameObject.SetActive (visible);
 		}
 
-		internal void CompleteMeshGeneration()
+		private void CompleteMeshGeneration()
 		{
 			if (IsVisible())
 			{
