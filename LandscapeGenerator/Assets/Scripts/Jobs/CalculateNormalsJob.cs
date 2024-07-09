@@ -31,7 +31,6 @@ namespace Jobs
         }
     }
     
-    
     [BurstCompile]
     public struct NormalizeNormalsJob : IJobParallelFor
     {

@@ -20,7 +20,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     octaves: 5
     frequency: 0.2
-    persistence: 0.377
-    lacunarity: 2.2
-    ridgeness: 0.804
-    ridgeRoughness: 8.1
+    persistence: 0.5
+    lacunarity: 2.25
+    ridgeness: 0.608
+    ridgeRoughness: 6.95
