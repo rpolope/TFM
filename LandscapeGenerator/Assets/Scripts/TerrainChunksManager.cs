@@ -11,14 +11,14 @@ public class TerrainChunksManager : MonoBehaviour{
 	
 	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
 	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 4;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
-	
-	public static int ChunksVisibleInViewDist => _chunksVisibleInViewDst;
+
+	private static int ChunksVisibleInViewDist { get; set; } = 4;
+
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
 	private static int _wrapCountY;
@@ -27,15 +27,15 @@ public class TerrainChunksManager : MonoBehaviour{
 		// LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
-			new LODInfo(1, 3, true),
-			new LODInfo(2, 4, false)
+			new LODInfo(1, 1, true),
+			new LODInfo(2, 1, false)
 		};
 		
-		// _chunksVisibleInViewDst = 0;
-		// foreach (var detailLevel in _detailLevels)
-		// {
-		// 	_chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
-		// }
+		ChunksVisibleInViewDist = 0;
+		foreach (var detailLevel in _detailLevels)
+		{
+			ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
+		}
 		
 		UpdateVisibleChunks ();
 		/**/
@@ -69,19 +69,14 @@ public class TerrainChunksManager : MonoBehaviour{
 
         int currentChunkCoordX = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
         int currentChunkCoordY = (int)((Viewer.PositionV2.y + offset) / TerrainChunk.WorldSize);
-
-        
-        if (!new int2(currentChunkCoordX, currentChunkCoordY).Equals(Viewer.ChunkCoord))
-			Debug.Log($"Chunk Actual: {Viewer.ChunkCoord}");
         
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
 
-        for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
-            for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
+        for (int yOffset = -ChunksVisibleInViewDist; yOffset <= ChunksVisibleInViewDist; yOffset++) {
+            for (int xOffset = -ChunksVisibleInViewDist; xOffset <= ChunksVisibleInViewDist; xOffset++) {
                 var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
                 var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
-                
                 
                 TerrainChunk chunk;
                 if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
@@ -149,15 +144,20 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static void CullChunkAndSetVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
 	{
 		var visible = inDistance;
-		if (LandscapeManager.Instance.culling == CullingMode.Layer)
+		switch (LandscapeManager.Instance.culling)
 		{
-			chunk.GameObject.layer = isCulled? 
-				LayerMask.NameToLayer("Culled") : 
-				LayerMask.NameToLayer("Default");
-		}
-		else if(LandscapeManager.Instance.culling == CullingMode.Visibility)
-		{
-			visible = !isCulled && inDistance;
+			case CullingMode.Layer:
+				chunk.GameObject.layer = isCulled? 
+					LayerMask.NameToLayer("Culled") : 
+					LayerMask.NameToLayer("Default");
+				break;
+			
+			case CullingMode.Visibility:
+				visible = !isCulled && inDistance;
+				break;
+			
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
 		
 		chunk.SetVisible(visible);
@@ -243,8 +243,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			for (int i = 0; i < _detailLevels.Length - 1; i++)
 			{
 				if (i > 0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
-				if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
-				    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
+				if (chunksFromViewer.x <= _detailLevels[i].visibleChunksThreshold && 
+				    chunksFromViewer.y <= _detailLevels[i].visibleChunksThreshold )
 				{
 					break;
 				}
@@ -259,8 +259,8 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void Update()
 		{
 			var chunksFromViewer = CalculateDistanceFromViewer();
-			bool inDistance = chunksFromViewer.x < _chunksVisibleInViewDst && 
-			                  chunksFromViewer.y < _chunksVisibleInViewDst;
+			bool inDistance = chunksFromViewer.x < ChunksVisibleInViewDist && 
+			                  chunksFromViewer.y < ChunksVisibleInViewDist;
 			
 			if (inDistance)
 			{

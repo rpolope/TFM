@@ -1,3 +1,4 @@
+using System;
 using Unity.Mathematics;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
@@ -54,22 +55,28 @@ public static class NoiseGenerator
         
         return noiseHeight;
     }
-    
-    public static float GetRidgeNoiseSample(float2 sample) {
-        return 2 * (0.5f - Mathf.Abs(0.5f - Mathf.PerlinNoise(sample.x, sample.y)));
+
+    private static float GetRidgeNoiseSample(float2 sample, NoiseType type) {
+        return 1 - Mathf.Abs(SampleNoiseValue(sample, type));
     }
 
     public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters, ref float maxAmpl)
     {
         float ampl = 1f;
+        float weight = 1f;
         float freq = parameters.frequency;
         float accum = 1f;
         
         for (int o = 0; o < parameters.octaves; o++)
         {
-            accum += ampl * GetRidgeNoiseSample(sample / parameters.scale * freq) * accum;
+            var v = GetRidgeNoiseSample(sample / parameters.scale * freq, parameters.noiseType);
+            v *= v;
+            v *= weight;
+            weight = Mathf.Clamp01(v * parameters.ridgeRoughness);
+            
             maxAmpl += ampl;
 
+            accum += v * ampl;
             ampl *= parameters.persistence;
             freq *= parameters.lacunarity;
         }
@@ -89,7 +96,7 @@ public static class NoiseGenerator
                 noiseValue = (noise.snoise(sample) + 1) * 0.5f;
                 break;
             case NoiseType.Ridged:
-                noiseValue = GetRidgeNoiseSample(sample);
+                noiseValue = GetRidgeNoiseSample(sample, type);
                 break;
             case NoiseType.Voronoi:
                 float2 cellularResult = noise.cellular(sample);
