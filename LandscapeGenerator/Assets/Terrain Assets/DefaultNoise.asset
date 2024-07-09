@@ -16,11 +16,11 @@ MonoBehaviour:
   parameters:
     noiseType: 1
     seed: 1
-    scale: 10
+    scale: 240
     offset: {x: 0, y: 0}
     octaves: 5
     frequency: 0.2
     persistence: 0.5
-    lacunarity: 2.25
-    ridgeness: 0.608
-    ridgeRoughness: 6.95
+    lacunarity: 1.87
+    ridgeness: 0.036
+    ridgeRoughness: 2.88
