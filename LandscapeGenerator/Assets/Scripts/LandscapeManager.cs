@@ -89,7 +89,7 @@ public class LandscapeManager : MonoBehaviour{
                 Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunk.Resolution - 1));
             }
         }
-        // UnifyMapBorders();
+        UnifyMapBorders();
         
         MapTextures = new Texture2D[MapHeight, MapWidth];
         for (int y = 0; y < MapHeight; y++)

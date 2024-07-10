@@ -54,12 +54,12 @@ public static class NoiseGenerator
         
         return noiseHeight;
     }
-    
-    public static float GetRidgeNoiseSample(float2 sample) {
+
+    private static float GetRidgeNoiseSample(float2 sample) {
         return 2 * (0.5f - Mathf.Abs(0.5f - Mathf.PerlinNoise(sample.x, sample.y)));
     }
 
-    public static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters, ref float maxAmpl)
+    private static float GetFractalRidgeNoise(float2 sample, NoiseParameters parameters, ref float maxAmpl)
     {
         float ampl = 1f;
         float freq = parameters.frequency;

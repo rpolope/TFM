@@ -2,40 +2,40 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
 public class TerrainChunksManager : MonoBehaviour{
-	
-	private const float ViewerMoveThresholdForChunkUpdate = (TerrainChunk.Resolution - 1) * 0.25f;
-	private const float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-	private static int _chunksVisibleInViewDst = 4;
+	private static readonly float ViewerMoveThresholdForChunkUpdate = TerrainChunk.WorldSize;
+	public static readonly float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
+	public static readonly float ViewerRotateThresholdForChunkUpdate = 5f;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
-	
-	public static int ChunksVisibleInViewDist => _chunksVisibleInViewDst;
+
+	private static int ChunksVisibleInViewDist { get; set; } = 4;
+
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
 	private static int _wrapCountY;
 	public void Initialize()
 	{
-		// LandscapeManager.Instance.textureData.ApplyToMaterial (TerrainChunk.Material);
 		_detailLevels = new [] {
 			new LODInfo(0, 2, false),
-			new LODInfo(1, 3, true),
-			new LODInfo(2, 4, false)
+			new LODInfo(1, 1, true),
+			new LODInfo(2, 1, false)
 		};
 		
-		// _chunksVisibleInViewDst = 0;
-		// foreach (var detailLevel in _detailLevels)
-		// {
-		// 	_chunksVisibleInViewDst += detailLevel.visibleChunksThreshold;
-		// }
+		ChunksVisibleInViewDist = 0;
+		foreach (var detailLevel in _detailLevels)
+		{
+			ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
+		}
 		
 		UpdateVisibleChunks ();
 		/**/
@@ -69,16 +69,12 @@ public class TerrainChunksManager : MonoBehaviour{
 
         int currentChunkCoordX = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
         int currentChunkCoordY = (int)((Viewer.PositionV2.y + offset) / TerrainChunk.WorldSize);
-
-        
-        if (!new int2(currentChunkCoordX, currentChunkCoordY).Equals(Viewer.ChunkCoord))
-			Debug.Log($"Chunk Actual: {Viewer.ChunkCoord}");
         
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
 
-        for (int yOffset = -_chunksVisibleInViewDst; yOffset <= _chunksVisibleInViewDst; yOffset++) {
-            for (int xOffset = -_chunksVisibleInViewDst; xOffset <= _chunksVisibleInViewDst; xOffset++) {
+        for (int yOffset = -ChunksVisibleInViewDist; yOffset <= ChunksVisibleInViewDist; yOffset++) {
+            for (int xOffset = -ChunksVisibleInViewDist; xOffset <= ChunksVisibleInViewDist; xOffset++) {
                 var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
                 var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
                 
@@ -165,7 +161,7 @@ public class TerrainChunksManager : MonoBehaviour{
 
 	public class TerrainChunk
 	{
-		public const int Resolution = 241;
+		public const int Resolution = 233;
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public Vector3 Position { get; private set; }
@@ -240,11 +236,14 @@ public class TerrainChunksManager : MonoBehaviour{
 		private int GetLODFromDistance(int2 chunksFromViewer)
 		{
 			int lodIndex = 0;
-			for (int i = 0; i < _detailLevels.Length - 1; i++)
+			var lodThreshold = _detailLevels[0].visibleChunksThreshold;
+			
+			for (int i = 0; i < _detailLevels.Length; i++)
 			{
-				if (i > 0) _detailLevels[i].visibleChunksThreshold += _detailLevels[i - 1].visibleChunksThreshold;
-				if (chunksFromViewer.x < _detailLevels[i].visibleChunksThreshold && 
-				    chunksFromViewer.y < _detailLevels[i].visibleChunksThreshold )
+				if (i > 0) lodThreshold += _detailLevels[i - 1].visibleChunksThreshold;
+				
+				if (chunksFromViewer.x < lodThreshold && 
+				    chunksFromViewer.y < lodThreshold)
 				{
 					break;
 				}
@@ -258,9 +257,10 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		public void Update()
 		{
+
 			var chunksFromViewer = CalculateDistanceFromViewer();
-			bool inDistance = chunksFromViewer.x < _chunksVisibleInViewDst && 
-			                  chunksFromViewer.y < _chunksVisibleInViewDst;
+			bool inDistance = chunksFromViewer.x <= ChunksVisibleInViewDist && 
+			                  chunksFromViewer.y <= ChunksVisibleInViewDist;
 			
 			if (inDistance)
 			{
@@ -305,6 +305,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			}
 
 			CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
+			UnityEngine.Profiling.Profiler.EndSample();
+
 		}
 
 		public bool IsCulled(Vector2 viewerForward)
@@ -326,8 +328,6 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		internal void CompleteMeshGeneration()
 		{
-			if (IsVisible())
-			{
 				if (_lodIndex < 0)
 				{
 					_lodIndex = GetLODFromDistance(CalculateDistanceFromViewer());
@@ -345,8 +345,8 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 
-				ManageObjectsPlacement();
-			}
+				// ManageObjectsPlacement();
+			
 		}
 
 		// Caso 1: Si los objetos están colocados y visibles en el chunk actual del viewer, no hacer nada
@@ -531,21 +531,21 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 		
 		public void RequestMesh(TerrainChunksManager terrainChunksManager) {
+			RequestedMesh = true;
 			terrainChunksManager.StartCoroutine(RequestMeshCoroutine());	
 		}
 
 		private IEnumerator RequestMeshCoroutine() {
+			
 			_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 				LandscapeManager.Instance.terrainData.parameters);
 			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData, false);
-			RequestedMesh = true;
 			
 			while (!_meshJobHandle.IsCompleted) {
 				yield return null;
 			}
-
 			_chunk.CompleteMeshGeneration();
 		}
 

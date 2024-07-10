@@ -41,11 +41,11 @@ public class Viewer : MonoBehaviour
     public static void UpdateOldPosition() => _viewerOldPosition = PositionV2;
     public static void UpdateOldRotation() => _viewerOldRotationY = _rotationY;
 
-    public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 50f;
-                                     // TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
+    public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 
+                                     TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
 
-    public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 5f;
-                                     // TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
+    public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 
+                                     TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
     
     public static void SetInitialPos(float2 position)
     {
