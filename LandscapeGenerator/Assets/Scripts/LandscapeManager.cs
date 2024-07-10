@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
+using Jobs;
 using TreeEditor;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +12,7 @@ using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public const float Scale = 2.5f;
+	public const float Scale = 2f;
 	public const int MapHeight = 16;
 	public const int MapWidth = 16;
 	public static LandscapeManager Instance;
@@ -25,8 +28,8 @@ public class LandscapeManager : MonoBehaviour{
 	public MapGenerator mapGenerator;
 	public NoiseData noiseData;
 	public TerrainData terrainData;
-	public TextureData textureData;
 	public NoiseParameters moistureParameters;
+	public Texture2D moistureTexture;
 	public BiomesManager biomesManager;
 	public CullingMode culling;
 
@@ -56,7 +59,7 @@ public class LandscapeManager : MonoBehaviour{
 	    // Scale = terrainData.parameters.scale;
         Transform = transform;
         
-        GenerateMoistureMap();
+        GenerateMoistureMapFromTexture();
         InitializeLatitudeHeats();
         biomesManager.Initialize();
 
@@ -146,21 +149,47 @@ public class LandscapeManager : MonoBehaviour{
 	{
 		ChunksManager.Update();
 	}
-	
-	public void GenerateFixedMoistureMap()
-	{
-		MoistureMap = Enumerable.Repeat(FixedMoisture, MapHeight * MapWidth).ToArray();
-	}
 
 	public static void GenerateStaticMoistureMap(NoiseParameters moistureParameters)
 	{
 		MoistureMap = MapGenerator.GenerateNoiseMap(MapWidth * MapHeight, new int2(), moistureParameters);
 	}
 
-	private void GenerateMoistureMap()
+	private void GenerateMoistureMapFromTexture()
 	{
-		MoistureMap = MapGenerator.GenerateNoiseMap(MapWidth * MapHeight, new int2(), moistureParameters);
+		if (moistureTexture == null)
+		{
+			Debug.LogError("Moisture texture is not assigned!");
+			return;
+		}
+
+		int textureWidth = moistureTexture.width;
+		int textureHeight = moistureTexture.height;
+
+		MoistureMap = new float[MapWidth * MapHeight];
+
+		NativeArray<Color> moistureTextureData = new NativeArray<Color>(moistureTexture.GetPixels(), Allocator.TempJob);
+		NativeArray<float> moistureMap = new NativeArray<float>(MoistureMap, Allocator.TempJob);
+
+		var moistureJob = new MoistureComputeJob()
+		{
+			MoistureTextureData = moistureTextureData,
+			TextureWidth = textureWidth,
+			TextureHeight = textureHeight,
+			MapWidth = MapWidth,
+			MapHeight = MapHeight,
+			MoistureMap = moistureMap
+		};
+
+		JobHandle jobHandle = moistureJob.Schedule(MapWidth * MapHeight, 64);
+		jobHandle.Complete();
+
+		moistureMap.CopyTo(MoistureMap);
+
+		moistureTextureData.Dispose();
+		moistureMap.Dispose();
 	}
+
 
 	public static float GetMoisture(int2 coordinates)
 	{

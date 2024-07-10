@@ -20,7 +20,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
 
-	private const int MaxConcurrentMeshJobs = 4;
+	private const int MaxConcurrentMeshCoroutines = 4;
 	private static int ChunksVisibleInViewDist { get; set; } = 4;
 
 	private static LODInfo[] _detailLevels;
@@ -395,23 +395,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			Transform.position = _positionV3;
 		}
 
-		private struct BiomeInfo
-		{
-			public int id;
-			public float minTemp;
-			public float maxTemp;
-			public float minMoist;
-			public float maxMoist;
-
-			public BiomeInfo(int id, float minTemp, float maxTemp, float minMoist, float maxMoist)
-			{
-				this.id = id;
-				this.minTemp = minTemp;
-				this.maxTemp = maxTemp;
-				this.minMoist = minMoist;
-				this.maxMoist = maxMoist;
-			}
-		}
+		
 
 		
 		public static void InitializeMaterial(TerrainData terrainData = default)
@@ -426,25 +410,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			
 			Material.EnableKeyword("_NORMALMAP");
 			Material.SetTexture ("_NormalMap", (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Normal_Map.jpg", typeof(Texture2D)));
-			// return;
-			
-			BiomeInfo[] biomesData = new BiomeInfo[]
-			{
-				new BiomeInfo(0, -30.0f, -10.0f, 0.1f, 0.5f),  // TUNDRA
-				new BiomeInfo(1, 0.0f, 10.0f, 0.5f, 1.0f),     // FOREST
-				new BiomeInfo(2, 10.0f, 30.0f, 0.33f, 1.0f),   // TROPICAL_FOREST
-				new BiomeInfo(3, -30.0f, -10.0f, 0.0f, 0.1f),  // SCORCHED
-				new BiomeInfo(4, -10.0f, 0.0f, 0.33f, 0.66f),  // SHRUBLAND
-				new BiomeInfo(5, -30.0f, -10.0f, 0.5f, 1.0f),  // SNOW
-				new BiomeInfo(6, -30.0f, -10.0f, 0.1f, 0.2f),  // BARE
-				new BiomeInfo(7, -10.0f, 0.0f, 0.66f, 1.0f),   // TAIGA
-				new BiomeInfo(8, 0.0f, 10.0f, 0.16f, 0.5f),    // GRASSLAND_COLD
-				new BiomeInfo(9, 10.0f, 30.0f, 0.16f, 0.33f),  // GRASSLAND_HOT
-				new BiomeInfo(10, -10.0f, 0.0f, 0.0f, 0.33f),  // DESERT_COLD
-				new BiomeInfo(11, 0.0f, 10.0f, 0.0f, 0.16f),   // DESERT_WARM
-				new BiomeInfo(12, 10.0f, 30.0f, 0.0f, 0.16f)   // DESERT_HOT
-			};
 
+			var biomesData = BiomesManager.BiomesData;
 			
 			float[] biomeMinTemp = new float[biomesData.Length];
 			float[] biomeMaxTemp = new float[biomesData.Length];
@@ -539,15 +506,14 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 
 		private IEnumerator RequestMeshCoroutine() {
-			// Agregar la generación de malla a la cola
+
 			MeshGenerationQueue.Enqueue(GenerateMeshDataCoroutine());
 			yield return null;
 
-			// Procesar la cola de generación de mallas
 			while (MeshGenerationQueue.Count > 0) {
-				if (_jobCount < MaxConcurrentMeshJobs) {
-					var meshJob = MeshGenerationQueue.Dequeue();
-					LandscapeManager.Instance.StartCoroutine(meshJob);
+				if (_jobCount < MaxConcurrentMeshCoroutines) {
+					var generateMeshDataCoroutine = MeshGenerationQueue.Dequeue();
+					LandscapeManager.Instance.StartCoroutine(generateMeshDataCoroutine);
 				}
 				yield return null;
 			}

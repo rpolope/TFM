@@ -36,9 +36,9 @@ public static class MeshGenerator
             Normals = meshData.Normals
         };
         
-        var meshJobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 64);
-        var normalsJobHandle = calculateNormalsJob.Schedule(meshData.Triangles.Length / 3, 64, meshJobHandle);
-        var jobHandle = normalizeNormalsJob.Schedule(meshData.Vertices.Length,64, normalsJobHandle);
+        var meshJobHandle = generateMeshJob.Schedule(meshData.Vertices.Length, 3000);
+        var normalsJobHandle = calculateNormalsJob.Schedule(meshData.Triangles.Length / 3, 3000, meshJobHandle);
+        var jobHandle = normalizeNormalsJob.Schedule(meshData.Vertices.Length,3000, normalsJobHandle);
         
         return jobHandle;
     }

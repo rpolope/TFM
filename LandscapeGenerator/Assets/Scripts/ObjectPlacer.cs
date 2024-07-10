@@ -11,7 +11,7 @@ public static class ObjectPlacer
         { AssetSize.Medium, new List<Vector3>() },
         { AssetSize.Small, new List<Vector3>() }
     };
-
+    
     public static void PlaceObjects(TerrainChunk chunk, AssetType assetType)
     {
         var assets = BiomesAssetsManager.GetAssetsForType(chunk.Biome.Assets, assetType);
@@ -81,18 +81,20 @@ public static class ObjectPlacer
     private static List<Vector3> GetCenterPointsForSize(AssetSize size, Vector3 worldPos)
     {
         var offset = TerrainChunk.WorldSize * 0.5f;
+        var defaultCenterPoint = worldPos + new Vector3(-offset, 0, -offset);
+        
         return size switch
         {
-            AssetSize.Large => new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) },
-            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) },
-            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : (PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> { worldPos + new Vector3(-offset, 0, -offset) }),
+            AssetSize.Large => new List<Vector3> {},
+            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> {defaultCenterPoint},
+            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : (PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> {defaultCenterPoint}),
             _ => new List<Vector3>()
         };
     }
 
     private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, float raycastHeight)
     {
-        Ray ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
+        var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             hitPosition = hit.point;
@@ -108,8 +110,8 @@ public static class ObjectPlacer
     {
         var terrainParameters = LandscapeManager.Instance.terrainData.parameters;
         float height = worldPos.y;
-        return height >= asset.minHeight * terrainParameters.heightScale * terrainParameters.scale && 
-               height <= asset.maxHeight * terrainParameters.heightScale * terrainParameters.scale;
+        return height >= Water.HeightLevel + asset.minHeight  && 
+               height <= asset.maxHeight * terrainParameters.heightScale;
     }
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Transform parent)
