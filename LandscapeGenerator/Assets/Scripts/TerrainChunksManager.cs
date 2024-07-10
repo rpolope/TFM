@@ -15,14 +15,19 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
+	private static readonly Queue<IEnumerator> MeshGenerationQueue = new Queue<IEnumerator>();
+
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
 
+	private const int MaxConcurrentMeshJobs = 4;
 	private static int ChunksVisibleInViewDist { get; set; } = 4;
 
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
 	private static int _wrapCountY;
+	private static int _jobCount = 0;
+
 	public void Initialize()
 	{
 		_detailLevels = new [] {
@@ -305,8 +310,6 @@ public class TerrainChunksManager : MonoBehaviour{
 			}
 
 			CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
-			UnityEngine.Profiling.Profiler.EndSample();
-
 		}
 
 		public bool IsCulled(Vector2 viewerForward)
@@ -345,7 +348,7 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 
-				// ManageObjectsPlacement();
+				ManageObjectsPlacement();
 			
 		}
 
@@ -536,18 +539,36 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 
 		private IEnumerator RequestMeshCoroutine() {
-			
+			// Agregar la generación de malla a la cola
+			MeshGenerationQueue.Enqueue(GenerateMeshDataCoroutine());
+			yield return null;
+
+			// Procesar la cola de generación de mallas
+			while (MeshGenerationQueue.Count > 0) {
+				if (_jobCount < MaxConcurrentMeshJobs) {
+					var meshJob = MeshGenerationQueue.Dequeue();
+					LandscapeManager.Instance.StartCoroutine(meshJob);
+				}
+				yield return null;
+			}
+		}
+		
+		private IEnumerator GenerateMeshDataCoroutine() {
+			_jobCount++;
 			_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
 				LandscapeManager.Instance.terrainData.parameters);
-			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData, false);
-			
+			_meshJobHandle = MeshGenerator.ScheduleMeshGenerationJob(terrainParams, resolution, _chunk.Coord, _chunk.MapData, ref _meshData);
+
 			while (!_meshJobHandle.IsCompleted) {
 				yield return null;
 			}
+
 			_chunk.CompleteMeshGeneration();
+			_jobCount--;
 		}
+		
 
 		public void CompleteMeshGeneration()
 		{

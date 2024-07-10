@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class BiomesAssetsManager
 {
-
     private static Dictionary<ClimateType, List<BiomeAsset>> _biomesAssetsDict;
-    
+
     public BiomesAssetsManager(List<BiomeAsset> biomesAssets)
     {
         _biomesAssetsDict = new Dictionary<ClimateType, List<BiomeAsset>>();
@@ -26,13 +25,9 @@ public class BiomesAssetsManager
 
     public static List<BiomeAsset> GetAssetsForBiome(ClimateType biome)
     {
-        if (_biomesAssetsDict.TryGetValue(biome, out var assets))
-        {
-            return assets;
-        }
-        return null;
+        return _biomesAssetsDict.TryGetValue(biome, out var assets) ? assets : null;
     }
-    
+
     public static List<BiomeAsset> GetAssetsForType(List<BiomeAsset> biomeAssets, AssetType type)
     {
         return biomeAssets?.Where(b => b.type == type).ToList();

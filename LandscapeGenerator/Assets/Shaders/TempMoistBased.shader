@@ -138,10 +138,10 @@ Shader "Custom/TempMoistBased"
             float3 normalFromMap = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex * 150)).rgb;
 
             float2 uv = IN.uv_MainTex;
-            float3 worldNormal = normalFromMap;
+            float3 worldNormal = normalize(normalFromMap + IN.worldNormal);
             float height = IN.worldPos.y;
             float latitude = tex2D(_MainTex, uv).r;
-            float temperature = getTemperature(latitude, uv * _TemperatureNoiseScale, height);
+            float temperature = getTemperature(latitude, uv, height);
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
 
             float slope = dot(worldNormal, float3(0, 1, 0));
@@ -161,7 +161,8 @@ Shader "Custom/TempMoistBased"
                 }
             }
                 
-            float3 debugColor = float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture);
+            // float3 debugColor = normalize(float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture));
+            float3 debugColor = lerp(float3(0,0,1),float3(1,0,0), inverseLerp(-30, 30, temperature));
             o.Albedo = color;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
