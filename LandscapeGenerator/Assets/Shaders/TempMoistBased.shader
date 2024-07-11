@@ -144,7 +144,7 @@ Shader "Custom/TempMoistBased"
             float temperature = getTemperature(latitude, uv, height);
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
 
-            float slope = dot(worldNormal, float3(0, 1, 0));
+            float slope = dot(IN.worldNormal, float3(0, 1, 0));
             float3 color = lerpTemperatureColor(temperature, moisture, IN.worldPos, worldNormal);
 
             if (temperature > 0 && slope > 0.5)

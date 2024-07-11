@@ -358,6 +358,23 @@ public class TerrainChunksManager : MonoBehaviour{
 		// Caso 4: Si el viewer está en el chunk, los objetos están colocados pero no visibles, hacerlos visibles
 		// Caso 5: Si el viewer no está en el chunk pero los objetos están visibles, ocultarlos
 
+		private bool IsPlaceableCoordinate(int2 coord)
+		{
+			var positiveOffsetX = new int2(1, 0);
+			var negativeOffsetX = new int2(-1, 0);
+			var positiveOffsetY = new int2(0, 1);
+			var negativeOffsetY = new int2(0, -1);
+			
+			return _coord.Equals(Viewer.ChunkCoord) ||
+			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX) ||
+			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + positiveOffsetY) ||
+			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetY) ||
+			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX + positiveOffsetY) ||
+			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX) ||
+			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX + negativeOffsetY) ||
+			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetY) ||
+			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + negativeOffsetY);
+		}
 		private void ManageObjectsPlacement()
 		{
 			if (_objectsPlaced && _coord.Equals(Viewer.ChunkCoord) && _objectsVisible) return;

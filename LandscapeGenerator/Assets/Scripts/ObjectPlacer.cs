@@ -50,9 +50,9 @@ public static class ObjectPlacer
 
                     var offset = new Vector3(point.x - radius, 0, point.y - radius);
                     var worldPos = centerPoint + offset;
-                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, 100f))
+                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 100f))
                     {
-                        if (!IsPositionValid(hitPosition, asset)) continue;
+                        if (!IsPositionValid(hitPosition, asset, layer)) continue;
 
                         PlaceAsset(asset, hitPosition, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
@@ -92,31 +92,39 @@ public static class ObjectPlacer
         };
     }
 
-    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, float raycastHeight)
+    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out LayerMask layer, float raycastHeight)
     {
         var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             hitPosition = hit.point;
             rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            layer = hit.transform.gameObject.layer;
             return true;
         }
         hitPosition = Vector3.zero;
         rotation = Quaternion.identity;
+        layer = LayerMask.GetMask("Culled");
+
         return false;
     }
 
-    private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset)
+    private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset, LayerMask layer)
     {
         var terrainParameters = LandscapeManager.Instance.terrainData.parameters;
+        var isWater = ((1 << layer) & LayerMask.GetMask("Water")) != 0 ;
         float height = worldPos.y;
-        return height >= Water.HeightLevel + asset.minHeight  && 
-               height <= asset.maxHeight * terrainParameters.heightScale;
+        return !isWater;
+        // &&
+        // height >= asset.minHeight * terrainParameters.heightScale && 
+        // height <= asset.maxHeight * terrainParameters.heightScale;
     }
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Transform parent)
     {
+        
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
+        Debug.Log($"Coloco asset {asset.gameObjects[randIndex].name}");
         
         var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position);
         instance.transform.up = GetNormalAt(position);

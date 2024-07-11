@@ -1,7 +1,5 @@
-
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public static class Water
 {
@@ -16,13 +14,17 @@ public static class Water
     }
     public static void Instantiate(float waterLevel, Transform parent, float size)
     {
+        const string materialPath = "Assets/Materials/Water.mat";
+
         GameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        GameObject.layer = LayerMask.NameToLayer("Water");
+        GameObject.GetComponent<MeshRenderer>().sharedMaterial = Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+
         var transform = GameObject.transform;
         transform.localScale = new Vector3(size/10, 1, size/10);
         transform.parent = parent;
         transform.localPosition = Vector3.zero + Vector3.up * HeightLevel;
-        const string materialPath = "Assets/Materials/Water.mat";
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial = Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+        
         GameObject.isStatic = true;
     }
 

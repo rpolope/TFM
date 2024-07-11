@@ -12,7 +12,7 @@ using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public const float Scale = 2f;
+	public const float Scale = 2.5f;
 	public const int MapHeight = 16;
 	public const int MapWidth = 16;
 	public static LandscapeManager Instance;
@@ -32,8 +32,6 @@ public class LandscapeManager : MonoBehaviour{
 	public Texture2D moistureTexture;
 	public BiomesManager biomesManager;
 	public CullingMode culling;
-
-	private const float FixedMoisture = 0.1f;
 	
 	private MeshRenderer _meshRenderer;
 	private MeshFilter _meshFilter;
