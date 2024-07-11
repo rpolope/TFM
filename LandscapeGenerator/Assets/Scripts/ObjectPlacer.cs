@@ -20,12 +20,14 @@ public static class ObjectPlacer
         if (assets == null)
         {
             SetAssetsParent(chunk);
-            // Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
+            Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
             yield break;
         }
         var assetsParent = SetAssetsParent(chunk);
 
-        foreach (var key in PlacedPositions.Keys.ToList())
+        // Hacer una copia de las claves antes de iterar sobre ellas
+        var keys = PlacedPositions.Keys.ToList();
+        foreach (var key in keys)
         {
             PlacedPositions[key].Clear();
         }
@@ -71,7 +73,7 @@ public static class ObjectPlacer
     {
         var assetsParent = chunk.Transform.Find("Assets")?.transform;
 
-        if (assetsParent is null)
+        if (assetsParent == null)
         {
             assetsParent = new GameObject("Assets")
             {
@@ -90,8 +92,8 @@ public static class ObjectPlacer
         return size switch
         {
             AssetSize.Large => new List<Vector3> { defaultCenterPoint },
-            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : GetCenterPointsForSize(AssetSize.Large, worldPos),
-            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : GetCenterPointsForSize(AssetSize.Medium, worldPos),
+            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large].ToList() : GetCenterPointsForSize(AssetSize.Large, worldPos),
+            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium].ToList() : GetCenterPointsForSize(AssetSize.Medium, worldPos),
             _ => new List<Vector3>()
         };
     }

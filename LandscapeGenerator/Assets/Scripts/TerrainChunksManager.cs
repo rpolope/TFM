@@ -306,7 +306,7 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 				
-				if (LODIndex == 0 && _coord.Equals(Viewer.ChunkCoord))
+				if (LODIndex == 0 )
 				{
 					_meshCollider.enabled = true;
 					if (_colliderMesh.HasMesh)
@@ -342,6 +342,7 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		public void SetVisible(bool visible) {
 			GameObject.SetActive (visible);
+			_meshCollider.enabled = visible;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -377,7 +378,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			var positiveOffsetY = new int2(0, 1);
 			var negativeOffsetY = new int2(0, -1);
 
-			return Viewer.ChunkCoord.Equals(coord);
+			return LODIndex == 0;
 			return _coord.Equals(Viewer.ChunkCoord) ||
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX) ||
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + positiveOffsetY) ||
