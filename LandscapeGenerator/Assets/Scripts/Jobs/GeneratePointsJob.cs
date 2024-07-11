@@ -1,81 +1,91 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 namespace Jobs
 {
     [BurstCompile]
-    public struct GeneratePointsJob : IJobParallelFor
+    public struct GeneratePointsJob : IJob
     {
         public float Radius;
         public Vector2 SampleRegionSize;
         public int NumSamplesBeforeRejection;
-        public NativeArray<Vector2> Points;
+        [NativeDisableParallelForRestriction]
+        public NativeList<Vector2> Points;
+        [NativeDisableParallelForRestriction]
         public NativeArray<int> Grid;
         public float CellSize;
+        [NativeDisableParallelForRestriction]
         public NativeList<Vector2> SpawnPoints;
         public int Width, Height;
+        public uint Seed;
 
-        public void Execute(int index)
+        public void Execute()
         {
-            Vector2 sampleRegionHalfSize = SampleRegionSize / 2;
-            Vector2 spawnCenter = SpawnPoints[index];
-            bool candidateAccepted = false;
-
-            for (int i = 0; i < NumSamplesBeforeRejection; i++)
+            var random = new Random(Seed);
+            while (SpawnPoints.Length > 0)
             {
-                float angle = Random.value * Mathf.PI * 2;
-                Vector2 dir = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-                Vector2 candidate = spawnCenter + dir * Random.Range(Radius, 2 * Radius);
+                int spawnIndex = random.NextInt(SpawnPoints.Length);
+                Vector2 spawnCenter = SpawnPoints[spawnIndex];
+                bool candidateAccepted = false;
 
-                if (IsValid(candidate, SampleRegionSize, CellSize, Radius, Points, Grid, Width, Height))
+                for (int i = 0; i < NumSamplesBeforeRejection; i++)
                 {
-                    Points[index] = candidate;
-                    SpawnPoints.Add(candidate);
-                    int cellX = Mathf.FloorToInt(candidate.x / CellSize);
-                    int cellY = Mathf.FloorToInt(candidate.y / CellSize);
-                    Grid[cellX + cellY * Width] = index + 1;
-                    candidateAccepted = true;
-                    break;
-                }
-            }
+                    float angle = random.NextFloat() * Mathf.PI * 2;
+                    Vector2 dir = new Vector2(math.sin(angle), math.cos(angle));
+                    Vector2 candidate = spawnCenter + dir * random.NextFloat(Radius, 2 * Radius);
 
-            if (!candidateAccepted)
-            {
-                SpawnPoints.RemoveAt(index);
+                    if (IsValid(candidate, SampleRegionSize, CellSize, Radius, Points, Grid, Width, Height))
+                    {
+                        Points.Add(candidate);
+                        SpawnPoints.Add(candidate);
+                        int cellX = Mathf.FloorToInt(candidate.x / CellSize);
+                        int cellY = Mathf.FloorToInt(candidate.y / CellSize);
+                        Grid[cellX + cellY * Width] = Points.Length;
+                        candidateAccepted = true;
+                        break;
+                    }
+                }
+
+                if (!candidateAccepted)
+                {
+                    SpawnPoints.RemoveAtSwapBack(spawnIndex);
+                }
             }
         }
 
-        private bool IsValid(Vector2 candidate, Vector2 sampleRegionSize, float cellSize, float radius, NativeArray<Vector2> points, NativeArray<int> grid, int width, int height)
+        private static bool IsValid(Vector2 candidate, Vector2 sampleRegionSize, float cellSize, float radius, NativeList<Vector2> points, NativeArray<int> grid, int width, int height)
         {
-            if (!(candidate.x >= 0) || !(candidate.x < sampleRegionSize.x) || !(candidate.y >= 0) ||
-                !(candidate.y < sampleRegionSize.y)) return false;
-            
-            
-            int cellX = Mathf.FloorToInt(candidate.x / cellSize);
-            int cellY = Mathf.FloorToInt(candidate.y / cellSize);
-            int searchStartX = Mathf.Max(0, cellX - 2);
-            int searchEndX = Mathf.Min(cellX + 2, width - 1);
-            int searchStartY = Mathf.Max(0, cellY - 2);
-            int searchEndY = Mathf.Min(cellY + 2, height - 1);
-
-            for (int x = searchStartX; x <= searchEndX; x++)
+            if (candidate.x >= 0 && candidate.x < sampleRegionSize.x && candidate.y >= 0 && candidate.y < sampleRegionSize.y)
             {
-                for (int y = searchStartY; y <= searchEndY; y++)
+                int cellX = Mathf.FloorToInt(candidate.x / cellSize);
+                int cellY = Mathf.FloorToInt(candidate.y / cellSize);
+                int searchStartX = Mathf.Max(0, cellX - 2);
+                int searchEndX = Mathf.Min(cellX + 2, width - 1);
+                int searchStartY = Mathf.Max(0, cellY - 2);
+                int searchEndY = Mathf.Min(cellY + 2, height - 1);
+
+                for (int x = searchStartX; x <= searchEndX; x++)
                 {
-                    int pointIndex = grid[x + y * width] - 1;
-                    if (pointIndex != -1)
+                    for (int y = searchStartY; y <= searchEndY; y++)
                     {
-                        float sqrDst = (candidate - points[pointIndex]).sqrMagnitude;
-                        if (sqrDst < radius * radius)
+                        int pointIndex = grid[x + y * width] - 1;
+                        if (pointIndex != -1)
                         {
-                            return false;
+                            float sqrDst = (candidate - points[pointIndex]).sqrMagnitude;
+                            if (sqrDst < radius * radius)
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
+                return true;
             }
-            return true;
+            return false;
         }
     }
 }

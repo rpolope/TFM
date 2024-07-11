@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,15 +13,15 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
     
-    public static void PlaceObjects(TerrainChunk chunk, AssetType assetType)
+    public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk, AssetType assetType)
     {
         var assets = BiomesAssetsManager.GetAssetsForType(chunk.Biome.Assets, assetType);
 
         if (assets == null)
         {
             SetAssetsParent(chunk);
-            Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
-            return;
+            // Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
+            yield break;
         }
         var assetsParent = SetAssetsParent(chunk);
 
@@ -40,7 +41,7 @@ public static class ObjectPlacer
                 int assetsPlacedCount = 0;
 
                 var sampleArea = asset.size.Equals(AssetSize.Large) ? 
-                    new Vector2(TerrainChunk.WorldSize,TerrainChunk.WorldSize) :
+                    new Vector2(TerrainChunk.WorldSize, TerrainChunk.WorldSize) :
                     new Vector2(radius * 2.5f, radius * 2.5f);
                 var points = PoissonDiskSampler.GeneratePoints(radius, sampleArea);
 
@@ -57,6 +58,9 @@ public static class ObjectPlacer
                         PlaceAsset(asset, hitPosition, rotation, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
                         assetsPlacedCount++;
+
+                        // Yield after placing each asset to spread the load over multiple frames
+                        yield return null;
                     }
                 }
             }
@@ -67,7 +71,7 @@ public static class ObjectPlacer
     {
         var assetsParent = chunk.Transform.Find("Assets")?.transform;
 
-        if (assetsParent == null)
+        if (assetsParent is null)
         {
             assetsParent = new GameObject("Assets")
             {
@@ -85,7 +89,7 @@ public static class ObjectPlacer
         
         return size switch
         {
-            AssetSize.Large => new List<Vector3> {defaultCenterPoint},
+            AssetSize.Large => new List<Vector3> { defaultCenterPoint },
             AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : GetCenterPointsForSize(AssetSize.Large, worldPos),
             AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : GetCenterPointsForSize(AssetSize.Medium, worldPos),
             _ => new List<Vector3>()
@@ -115,8 +119,7 @@ public static class ObjectPlacer
         var isWater = ((1 << layer) & LayerMask.GetMask("Water")) != 0 ;
         float height = worldPos.y;
         return !isWater;
-        // &&
-        // height >= asset.minHeight * terrainParameters.heightScale && 
+        // && height >= asset.minHeight * terrainParameters.heightScale && 
         // height <= asset.maxHeight * terrainParameters.heightScale;
     }
 
@@ -130,7 +133,7 @@ public static class ObjectPlacer
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
         instance.transform.position -= instance.transform.up * 0.1f;
     }
-    
+
     private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)
     {
         return Vector3.Slerp(Vector3.up, rotation * Vector3.up, normalOrientation);

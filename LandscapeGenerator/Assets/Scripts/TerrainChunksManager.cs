@@ -396,8 +396,8 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			if (IsPlaceableCoordinate(_coord) && !_objectsPlaced)
 			{
-				ObjectPlacer.PlaceObjects(this, AssetType.Organic);
-				ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
+				LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Organic));
+				LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Inorganic));
 				_objectsPlaced = true;
 				_objectsVisible = true;
 				Transform.Find("Assets")?.gameObject.SetActive(true);
