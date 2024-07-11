@@ -123,8 +123,6 @@ public static class ObjectPlacer
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
     {
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
-        Debug.Log($"Coloco asset {asset.gameObjects[randIndex].name}");
-        
         var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position);
         instance.transform.up = GeUpVector(rotation, asset.normalOrientation);
         instance.transform.parent = parent;

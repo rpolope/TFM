@@ -67,7 +67,7 @@ public class TerrainChunksManager : MonoBehaviour{
 
 	private void UpdateCulledObjects()
 	{
-		throw new NotImplementedException();
+		//throw new NotImplementedException();
 	}
 
 	private void UpdateVisibleObjects()
@@ -362,10 +362,6 @@ public class TerrainChunksManager : MonoBehaviour{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
-				
-				// if (_lodIndex == 0)
-				// 	ManageObjectsPlacement();
-			
 		}
 
 		// Caso 1: Si los objetos están colocados y visibles en el chunk actual del viewer, no hacer nada
