@@ -60,4 +60,6 @@ public class BiomeAsset: ScriptableObject
     public float radius;
     [Range(0, 1)]
     public float density;
+    [Range(0, 1)]
+    public float normalOrientation;
 }

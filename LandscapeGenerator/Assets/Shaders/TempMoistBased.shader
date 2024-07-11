@@ -150,13 +150,12 @@ Shader "Custom/TempMoistBased"
             if (temperature > 0 && slope > 0.5)
             {
                 float3 beachColor;
-                float waterLevel = 1;
                 float texScale = 5;
-                if (IN.worldPos.y > waterLevel && IN.worldPos.y < waterLevel + 1) {
+                if (IN.worldPos.y > _WaterLevel && IN.worldPos.y < _WaterLevel + 1) {
                     float3 blendAxes = abs(worldNormal);
                     blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
                     beachColor = triplanar(IN.worldPos, texScale, blendAxes, DESERT_WARM) * float3(1, 0.99,0.65);
-                    float blendStrength = inverseLerp(waterLevel, waterLevel + 0.95f, IN.worldPos.y);
+                    float blendStrength = inverseLerp(_WaterLevel, _WaterLevel + 0.95f, IN.worldPos.y);
                     color = lerp(beachColor, color, blendStrength);
                 }
             }

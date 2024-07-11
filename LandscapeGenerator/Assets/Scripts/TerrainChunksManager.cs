@@ -2,14 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
 public class TerrainChunksManager : MonoBehaviour{
-	private static readonly float ViewerMoveThresholdForChunkUpdate = TerrainChunk.WorldSize;
+	private static readonly float ViewerMoveThresholdForChunkUpdate = TerrainChunk.WorldSize * 0.5f;
 	public static readonly float SqrViewerMoveThresholdForChunkUpdate = ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
 	public static readonly float ViewerRotateThresholdForChunkUpdate = 5f;
 	private static readonly Dictionary<int2, TerrainChunk> TerrainChunkDictionary = new Dictionary<int2, TerrainChunk>();
@@ -43,6 +43,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 		
 		UpdateVisibleChunks ();
+		UpdateVisibleObjects();
 		/**/
 	}
 
@@ -52,13 +53,28 @@ public class TerrainChunksManager : MonoBehaviour{
 		if (Viewer.PositionChanged()) {
 			Viewer.UpdateOldPosition();
 			UpdateVisibleChunks();
+			UpdateVisibleObjects();
 		}
 		/* */
-		
+
 		if (Viewer.RotationChanged())
 		{
 			Viewer.UpdateOldRotation();
 			UpdateCulledChunks();
+			UpdateCulledObjects();
+		}
+	}
+
+	private void UpdateCulledObjects()
+	{
+		throw new NotImplementedException();
+	}
+
+	private void UpdateVisibleObjects()
+	{
+		foreach (var chunk in TerrainChunksVisibleLastUpdate.Where(chunk => chunk.LODIndex == 0))
+		{
+			chunk.ManageObjects();
 		}
 	}
 
@@ -69,11 +85,10 @@ public class TerrainChunksManager : MonoBehaviour{
         
         TerrainChunksVisibleLastUpdate.Clear();
         SurroundTerrainChunks.Clear();
-        
-        float offset = TerrainChunk.WorldSize / 2f;
 
+        float offset = TerrainChunk.WorldSize * 0.5f;
         int currentChunkCoordX = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
-        int currentChunkCoordY = (int)((Viewer.PositionV2.y + offset) / TerrainChunk.WorldSize);
+        int currentChunkCoordY = (int)((Viewer.PositionV2.y - offset) / TerrainChunk.WorldSize);
         
         Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
         UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
@@ -174,6 +189,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public MapData MapData { get; private set; }
 		public int2 Coord => _wrappedCoord;
 		public Biome Biome { get; }
+		public int LODIndex { get; private set; } = -1;
 
 		public static Material Material;
 		private Vector3 _positionV3;
@@ -182,8 +198,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		private int2 _coord;
 		private readonly int2 _wrappedCoord;
 		private LOD[] _lods;
-		public static readonly float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
-		private int _lodIndex = -1;
+		public const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
 		private Biome _biome;
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
@@ -271,10 +286,10 @@ public class TerrainChunksManager : MonoBehaviour{
 			{
 				int lodIndex = GetLODFromDistance(chunksFromViewer);
 				
-				if (lodIndex != _lodIndex)
+				if (lodIndex != LODIndex)
 				{
 					var lodMesh = _lodMeshes[lodIndex];
-					_lodIndex = lodIndex;
+					LODIndex = lodIndex;
 
 					if (lodMesh.HasMesh)
 					{
@@ -291,7 +306,7 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 				
-				if (_lodIndex == 0 && _coord.Equals(Viewer.ChunkCoord))
+				if (LODIndex == 0 && _coord.Equals(Viewer.ChunkCoord))
 				{
 					_meshCollider.enabled = true;
 					if (_colliderMesh.HasMesh)
@@ -331,24 +346,25 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		internal void CompleteMeshGeneration()
 		{
-				if (_lodIndex < 0)
+				if (LODIndex < 0)
 				{
-					_lodIndex = GetLODFromDistance(CalculateDistanceFromViewer());
+					LODIndex = GetLODFromDistance(CalculateDistanceFromViewer());
 				}
-				var lodMesh = _lodMeshes[_lodIndex];
+				var lodMesh = _lodMeshes[LODIndex];
 				if (lodMesh.RequestedMesh)
 				{
 					lodMesh.CompleteMeshGeneration();
 					_meshFilter.mesh = lodMesh.Mesh;
 
-					if (_lodIndex == 0 && _colliderMesh.RequestedMesh)
+					if (LODIndex == 0 && _colliderMesh.RequestedMesh)
 					{
 						_colliderMesh.CompleteMeshGeneration();
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
 					}
 				}
-
-				ManageObjectsPlacement();
+				
+				// if (_lodIndex == 0)
+				// 	ManageObjectsPlacement();
 			
 		}
 
@@ -364,7 +380,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			var negativeOffsetX = new int2(-1, 0);
 			var positiveOffsetY = new int2(0, 1);
 			var negativeOffsetY = new int2(0, -1);
-			
+
+			return Viewer.ChunkCoord.Equals(coord);
 			return _coord.Equals(Viewer.ChunkCoord) ||
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX) ||
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + positiveOffsetY) ||
@@ -375,28 +392,28 @@ public class TerrainChunksManager : MonoBehaviour{
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetY) ||
 			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + negativeOffsetY);
 		}
-		private void ManageObjectsPlacement()
+		public void ManageObjects()
 		{
-			if (_objectsPlaced && _coord.Equals(Viewer.ChunkCoord) && _objectsVisible) return;
+			if (_objectsPlaced && IsPlaceableCoordinate(_coord) && _objectsVisible) return;
 
-			if (!_coord.Equals(Viewer.ChunkCoord) && !_objectsVisible) return;
+			if (!IsPlaceableCoordinate(_coord) && !_objectsVisible) return;
 
-			if (_coord.Equals(Viewer.ChunkCoord) && !_objectsPlaced)
+			if (IsPlaceableCoordinate(_coord) && !_objectsPlaced)
 			{
 				ObjectPlacer.PlaceObjects(this, AssetType.Organic);
 				ObjectPlacer.PlaceObjects(this, AssetType.Inorganic);
 				_objectsPlaced = true;
 				_objectsVisible = true;
-				Transform.GetChild(0)?.gameObject.SetActive(true);
+				Transform.Find("Assets")?.gameObject.SetActive(true);
 			}
-			else if (_coord.Equals(Viewer.ChunkCoord) && _objectsPlaced && !_objectsVisible)
+			else if (IsPlaceableCoordinate(_coord) && _objectsPlaced && !_objectsVisible)
 			{
-				Transform.GetChild(0)?.gameObject.SetActive(true);
+				Transform.Find("Assets")?.gameObject.SetActive(true);
 				_objectsVisible = true;
 			}
-			else if (!_coord.Equals(Viewer.ChunkCoord) && _objectsPlaced && _objectsVisible)
+			else if (!IsPlaceableCoordinate(_coord) && _objectsPlaced && _objectsVisible)
 			{
-				Transform.GetChild(0)?.gameObject.SetActive(false);
+				Transform.Find("Assets")?.gameObject.SetActive(false);
 				_objectsVisible = false;
 			}
 		}
@@ -411,8 +428,6 @@ public class TerrainChunksManager : MonoBehaviour{
 			_positionV3 = new Vector3(viewedChunkCoord.x,0,viewedChunkCoord.y) * WorldSize;
 			Transform.position = _positionV3;
 		}
-
-		
 
 		
 		public static void InitializeMaterial(TerrainData terrainData = default)
@@ -483,7 +498,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			};
 
 			Material.SetTexture (baseTextures, GenerateTextureArray (mockBiomesTextures.Values.ToArray()));
-			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : LandscapeManager.Instance.terrainData.parameters.waterLevel);
+			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : Water.HeightLevel);
 			Material.SetFloat("_MaxHeight", terrainData != null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
 		}
 		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {

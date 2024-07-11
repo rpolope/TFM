@@ -54,7 +54,7 @@ public static class ObjectPlacer
                     {
                         if (!IsPositionValid(hitPosition, asset, layer)) continue;
 
-                        PlaceAsset(asset, hitPosition, assetsParent);
+                        PlaceAsset(asset, hitPosition, rotation, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
                         assetsPlacedCount++;
                     }
@@ -85,9 +85,9 @@ public static class ObjectPlacer
         
         return size switch
         {
-            AssetSize.Large => new List<Vector3> {},
-            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> {defaultCenterPoint},
-            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : (PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : new List<Vector3> {defaultCenterPoint}),
+            AssetSize.Large => new List<Vector3> {defaultCenterPoint},
+            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large] : GetCenterPointsForSize(AssetSize.Large, worldPos),
+            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium] : GetCenterPointsForSize(AssetSize.Medium, worldPos),
             _ => new List<Vector3>()
         };
     }
@@ -120,22 +120,21 @@ public static class ObjectPlacer
         // height <= asset.maxHeight * terrainParameters.heightScale;
     }
 
-    private static void PlaceAsset(BiomeAsset asset, Vector3 position, Transform parent)
+    private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
     {
-        
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
         Debug.Log($"Coloco asset {asset.gameObjects[randIndex].name}");
         
         var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position);
-        instance.transform.up = GetNormalAt(position);
+        instance.transform.up = GeUpVector(rotation, asset.normalOrientation);
         instance.transform.parent = parent;
         instance.transform.rotation *= Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
         instance.transform.position -= instance.transform.up * 0.1f;
     }
     
-    private static Vector3 GetNormalAt(Vector3 position)
+    private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)
     {
-        return Vector3.up;
+        return Vector3.Slerp(Vector3.up, rotation * Vector3.up, normalOrientation);
     }
 }
