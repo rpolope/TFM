@@ -12,7 +12,7 @@ public static class Water
         HeightLevel = LandscapeManager.Instance.terrainData.parameters.waterLevel *
                       LandscapeManager.Instance.terrainData.parameters.heightScale;
     }
-    public static void Instantiate(float waterLevel, Transform parent, float size)
+    public static void Instantiate(Transform parent, float size)
     {
         const string materialPath = "Assets/Materials/Water.mat";
 

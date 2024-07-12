@@ -54,7 +54,6 @@ public class LandscapeManager : MonoBehaviour{
 
     private void Start()
     {
-	    // Scale = terrainData.parameters.scale;
         Transform = transform;
         
         GenerateMoistureMapFromTexture();

@@ -66,6 +66,9 @@ public static class ObjectPlacer
                     }
                 }
             }
+
+            chunk._objectsPlaced = true;
+            chunk._objectsVisible = true;
         }
     }
 
@@ -117,12 +120,14 @@ public static class ObjectPlacer
 
     private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset, LayerMask layer)
     {
-        var terrainParameters = LandscapeManager.Instance.terrainData.parameters;
+        var heightScale = LandscapeManager.Instance.terrainData.parameters.heightScale;
         var isWater = ((1 << layer) & LayerMask.GetMask("Water")) != 0 ;
         float height = worldPos.y;
-        return !isWater;
-        // && height >= asset.minHeight * terrainParameters.heightScale && 
-        // height <= asset.maxHeight * terrainParameters.heightScale;
+
+        return !isWater
+            // && height >= asset.minHeight * heightScale && 
+            // height <= asset.maxHeight * heightScale
+            ;
     }
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)

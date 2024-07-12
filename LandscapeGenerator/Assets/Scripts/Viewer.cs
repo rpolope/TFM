@@ -17,6 +17,7 @@ public class Viewer : MonoBehaviour
     public static Vector2 ForwardV2 => new (_transform.forward.x, _transform.forward.z);
     public static int2 ChunkCoord { get; set; }
     public static float FOV => _mainCamera.fieldOfView;
+    public static float ExtendedFOV => 100f;
     public float speed;
 
 

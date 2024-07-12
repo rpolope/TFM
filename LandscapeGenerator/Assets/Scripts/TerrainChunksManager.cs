@@ -5,8 +5,10 @@ using System.Linq;
 using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class TerrainChunksManager : MonoBehaviour{
 	private static readonly float ViewerMoveThresholdForChunkUpdate = TerrainChunk.WorldSize * 0.5f;
@@ -16,17 +18,14 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static readonly HashSet<TerrainChunk> TerrainChunksVisibleLastUpdate = new HashSet<TerrainChunk>();
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private static readonly Queue<IEnumerator> MeshGenerationQueue = new Queue<IEnumerator>();
-
-	private MeshRenderer _meshRenderer;
-	private MeshFilter _meshFilter;
-
+	
 	private const int MaxConcurrentMeshCoroutines = 4;
 	private static int ChunksVisibleInViewDist { get; set; } = 4;
 
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
 	private static int _wrapCountY;
-	private static int _jobCount = 0;
+	private static int _activeCoroutines = 0;
 
 	public void Initialize()
 	{
@@ -41,10 +40,17 @@ public class TerrainChunksManager : MonoBehaviour{
 		{
 			ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
 		}
-		
-		UpdateVisibleChunks ();
-		UpdateVisibleObjects();
+
+		UpdateVisibleChunks();
+		StartCoroutine(WaitForInitialChunksGenerationCoroutine());
 		/**/
+	}
+
+	private IEnumerator WaitForInitialChunksGenerationCoroutine()
+	{
+		yield return new WaitUntil(() => _activeCoroutines == 0);
+		
+		UpdateVisibleObjects();
 	}
 
 	public void Update() {
@@ -158,25 +164,35 @@ public class TerrainChunksManager : MonoBehaviour{
 		var viewerForward = Viewer.ForwardV2.normalized;
 		foreach (var chunk in SurroundTerrainChunks)
 		{
-			CullChunkAndSetVisibility(chunk, chunk.IsCulled(viewerForward));
+			UpdateVisibility(chunk, chunk.IsCulled(viewerForward));
 		}
 	}
 	
-	private static void CullChunkAndSetVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
+	private static void UpdateVisibility(TerrainChunk chunk, bool isCulled, bool inDistance = true)
 	{
-		var visible = inDistance;
+		var visible = !isCulled && inDistance;
+		
 		if (LandscapeManager.Instance.culling == CullingMode.Layer)
 		{
-			chunk.GameObject.layer = isCulled? 
-				LayerMask.NameToLayer("Culled") : 
-				LayerMask.NameToLayer("Default");
+			SetLayerRecursively(chunk.GameObject,
+				isCulled ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default"));
 		}
-		else if(LandscapeManager.Instance.culling == CullingMode.Visibility)
+		else
 		{
-			visible = !isCulled && inDistance;
+			chunk.SetActive(visible);
 		}
 		
-		chunk.SetVisible(visible);
+		chunk.SetColliderEnable(visible && chunk.LODIndex == 0);
+	}
+
+	private static void SetLayerRecursively(GameObject obj, int newLayer)
+	{
+		obj.layer = newLayer;
+
+		foreach (Transform child in obj.transform)
+		{
+			SetLayerRecursively(child.gameObject, newLayer);
+		}
 	}
 
 	public class TerrainChunk
@@ -192,6 +208,8 @@ public class TerrainChunksManager : MonoBehaviour{
 		public int LODIndex { get; private set; } = -1;
 
 		public static Material Material;
+		private readonly Material _debugMaterial = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/DebugMaterial.mat", typeof(Material));
+
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
 
@@ -203,8 +221,9 @@ public class TerrainChunksManager : MonoBehaviour{
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
-		private bool _objectsPlaced = false;
-		private bool _objectsVisible = false;
+		private MeshRenderer _meshRenderer;
+		internal bool _objectsPlaced = false;
+		internal bool _objectsVisible = false;
 		private static bool _water;
 
 		public TerrainChunk(int2 coord)
@@ -216,8 +235,8 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			Biome = BiomesManager.GetBiome(_wrappedCoord);
 
-			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
-			meshRenderer.material = Material;
+			_meshRenderer = GameObject.AddComponent<MeshRenderer>();
+			_meshRenderer.material = Material;
 
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 
@@ -241,7 +260,6 @@ public class TerrainChunksManager : MonoBehaviour{
 			_water = UnityEngine.Random.value >= Biome.GetWaterProbability();
 			
 			Water.Instantiate(
-				LandscapeManager.Instance.terrainData.parameters.waterLevel,
 				Transform,
 				WorldSize
 			);
@@ -296,7 +314,6 @@ public class TerrainChunksManager : MonoBehaviour{
 						_meshFilter.mesh = lodMesh.Mesh;
 						if (lodIndex == 0)
 						{
-							_meshCollider.enabled = true;
 							_meshCollider.sharedMesh = _colliderMesh.Mesh;
 						}
 					}
@@ -308,7 +325,6 @@ public class TerrainChunksManager : MonoBehaviour{
 				
 				if (LODIndex == 0 )
 				{
-					_meshCollider.enabled = true;
 					if (_colliderMesh.HasMesh)
 					{
 						_meshCollider.sharedMesh = _colliderMesh.Mesh;
@@ -318,13 +334,9 @@ public class TerrainChunksManager : MonoBehaviour{
 						_colliderMesh.RequestMesh(LandscapeManager.Instance.ChunksManager);
 					}
 				}
-				else
-				{
-					_meshCollider.enabled = false;
-				}
 			}
 
-			CullChunkAndSetVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
+			UpdateVisibility(this, IsCulled(Viewer.ForwardV2.normalized), inDistance);
 		}
 
 		public bool IsCulled(Vector2 viewerForward)
@@ -332,17 +344,39 @@ public class TerrainChunksManager : MonoBehaviour{
 			if (_coord.Equals(Viewer.ChunkCoord)) return false;
 
 			Vector2 chunkCenter = new Vector2(_positionV3.x, _positionV3.z);
-			chunkCenter += chunkCenter.normalized * (WorldSize / 2);
+			chunkCenter += chunkCenter.normalized * (WorldSize * 0.5f);
 			Vector2 chunkDirection = (chunkCenter - Viewer.PositionV2).normalized;
 			float dot = Vector2.Dot(viewerForward, chunkDirection);
 			float chunkAngle = Mathf.Acos(dot) * Mathf.Rad2Deg;
 
-			return dot < 0 && chunkAngle > Viewer.FOV;
+			return dot < 0 && chunkAngle > Viewer.ExtendedFOV;
 		}
 
-		public void SetVisible(bool visible) {
+		public void SetVisible(bool visible)
+		{
+			switch (LandscapeManager.Instance.culling)
+			{
+				case CullingMode.Layer:
+					GameObject.layer = visible ? LayerMask.NameToLayer("Default") :
+												 LayerMask.NameToLayer("Culled");
+					break;
+				case CullingMode.Visibility:
+				default:
+					SetActive(visible);
+					break;
+			}
+
+			SetColliderEnable(visible);
+		}
+
+		public void SetActive(bool visible) {
+			
 			GameObject.SetActive (visible);
-			_meshCollider.enabled = visible;
+		}
+
+		public void SetColliderEnable(bool enable)
+		{
+			_meshCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -371,47 +405,35 @@ public class TerrainChunksManager : MonoBehaviour{
 		// Caso 4: Si el viewer está en el chunk, los objetos están colocados pero no visibles, hacerlos visibles
 		// Caso 5: Si el viewer no está en el chunk pero los objetos están visibles, ocultarlos
 
-		private bool IsPlaceableCoordinate(int2 coord)
-		{
-			var positiveOffsetX = new int2(1, 0);
-			var negativeOffsetX = new int2(-1, 0);
-			var positiveOffsetY = new int2(0, 1);
-			var negativeOffsetY = new int2(0, -1);
-
-			return LODIndex == 0;
-			return _coord.Equals(Viewer.ChunkCoord) ||
-			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX) ||
-			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + positiveOffsetY) ||
-			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetY) ||
-			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX + positiveOffsetY) ||
-			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX) ||
-			       _coord.Equals(Viewer.ChunkCoord + positiveOffsetX + negativeOffsetY) ||
-			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetY) ||
-			       _coord.Equals(Viewer.ChunkCoord + negativeOffsetX + negativeOffsetY);
-		}
 		public void ManageObjects()
 		{
-			if (_objectsPlaced && IsPlaceableCoordinate(_coord) && _objectsVisible) return;
+			if (_objectsPlaced && LODIndex == 0 && _objectsVisible) return;
 
-			if (!IsPlaceableCoordinate(_coord) && !_objectsVisible) return;
+			if (LODIndex != 0 && !_objectsVisible) return;
 
-			if (IsPlaceableCoordinate(_coord) && !_objectsPlaced)
+			switch (LODIndex)
 			{
-				LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Organic));
-				LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Inorganic));
-				_objectsPlaced = true;
-				_objectsVisible = true;
-				Transform.Find("Assets")?.gameObject.SetActive(true);
-			}
-			else if (IsPlaceableCoordinate(_coord) && _objectsPlaced && !_objectsVisible)
-			{
-				Transform.Find("Assets")?.gameObject.SetActive(true);
-				_objectsVisible = true;
-			}
-			else if (!IsPlaceableCoordinate(_coord) && _objectsPlaced && _objectsVisible)
-			{
-				Transform.Find("Assets")?.gameObject.SetActive(false);
-				_objectsVisible = false;
+				case 0 when !_objectsPlaced:
+					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Organic));
+					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Inorganic));
+				
+					Transform.Find("Assets")?.gameObject.SetActive(true);
+					break;
+				case 0 when _objectsPlaced && !_objectsVisible:
+					Transform.Find("Assets")?.gameObject.SetActive(true);
+					_objectsVisible = true;
+					break;
+				
+				default:
+				{
+					if (LODIndex != 0 && _objectsPlaced && _objectsVisible)
+					{
+						Transform.Find("Assets")?.gameObject.SetActive(false);
+						_objectsVisible = false;
+					}
+
+					break;
+				}
 			}
 		}
 
@@ -540,7 +562,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			yield return null;
 
 			while (MeshGenerationQueue.Count > 0) {
-				if (_jobCount < MaxConcurrentMeshCoroutines) {
+				if (_activeCoroutines < MaxConcurrentMeshCoroutines) {
 					var generateMeshDataCoroutine = MeshGenerationQueue.Dequeue();
 					LandscapeManager.Instance.StartCoroutine(generateMeshDataCoroutine);
 				}
@@ -549,7 +571,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 		
 		private IEnumerator GenerateMeshDataCoroutine() {
-			_jobCount++;
+			_activeCoroutines++;
 			_meshData = new MeshData(TerrainChunk.Resolution, _lod);
 			var resolution = (TerrainChunk.Resolution - 1) / _meshData.LODScale + 1;
 			var terrainParams = new TerrainParameters(LandscapeManager.Instance.noiseData.parameters,
@@ -561,9 +583,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			}
 
 			_chunk.CompleteMeshGeneration();
-			_jobCount--;
+			_activeCoroutines--;
 		}
-		
 
 		public void CompleteMeshGeneration()
 		{
