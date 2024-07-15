@@ -42,13 +42,16 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 
 		UpdateVisibleChunks();
-		StartCoroutine(WaitForInitialChunksGenerationCoroutine());
+		// UpdateVisibleObjects();
+
+		// StartCoroutine(WaitForInitialChunksGenerationCoroutine());
 		/**/
 	}
 
 	private IEnumerator WaitForInitialChunksGenerationCoroutine()
 	{
-		yield return new WaitUntil(() => _activeCoroutines == 0);
+		while (_activeCoroutines != 0)
+			yield return null;
 		
 		UpdateVisibleObjects();
 	}
@@ -73,7 +76,10 @@ public class TerrainChunksManager : MonoBehaviour{
 
 	private void UpdateCulledObjects()
 	{
-		//throw new NotImplementedException();
+		// foreach (var chunk in SurroundTerrainChunks.Where(chunk => chunk.LODIndex == 0))
+		// {
+		// 	chunk.ManageObjects();
+		// }
 	}
 
 	private void UpdateVisibleObjects()
@@ -92,18 +98,14 @@ public class TerrainChunksManager : MonoBehaviour{
         TerrainChunksVisibleLastUpdate.Clear();
         SurroundTerrainChunks.Clear();
 
-        float offset = TerrainChunk.WorldSize * 0.5f;
-        int currentChunkCoordX = (int)((Viewer.PositionV2.x + offset) / TerrainChunk.WorldSize);
-        int currentChunkCoordY = (int)((Viewer.PositionV2.y - offset) / TerrainChunk.WorldSize);
-        
-        Viewer.ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
-        UpdateWrapCount(currentChunkCoordX, currentChunkCoordY);
+        Viewer.UpdateChunkCoord();
+        UpdateWrapCount(Viewer.ChunkCoord.x, Viewer.ChunkCoord.y);
 
         for (int yOffset = -ChunksVisibleInViewDist; yOffset <= ChunksVisibleInViewDist; yOffset++) {
             for (int xOffset = -ChunksVisibleInViewDist; xOffset <= ChunksVisibleInViewDist; xOffset++) {
-                var viewedChunkCoord = new int2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-                var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
                 
+	            var viewedChunkCoord = new int2(Viewer.ChunkCoord.x + xOffset,  Viewer.ChunkCoord.y + yOffset);
+                var wrappedChunkCoord = GetWrappedChunkCoords(viewedChunkCoord);
                 
                 TerrainChunk chunk;
                 if (TerrainChunkDictionary.TryGetValue(wrappedChunkCoord, out var value)) {
@@ -208,7 +210,6 @@ public class TerrainChunksManager : MonoBehaviour{
 		public int LODIndex { get; private set; } = -1;
 
 		public static Material Material;
-		private readonly Material _debugMaterial = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/DebugMaterial.mat", typeof(Material));
 
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
@@ -221,10 +222,9 @@ public class TerrainChunksManager : MonoBehaviour{
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
-		private MeshRenderer _meshRenderer;
-		internal bool _objectsPlaced = false;
-		internal bool _objectsVisible = false;
-		private static bool _water;
+		internal bool ObjectsPlaced = false;
+		internal bool ObjectsVisible = false;
+		private Water _water;
 
 		public TerrainChunk(int2 coord)
 		{
@@ -235,8 +235,8 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			Biome = BiomesManager.GetBiome(_wrappedCoord);
 
-			_meshRenderer = GameObject.AddComponent<MeshRenderer>();
-			_meshRenderer.material = Material;
+			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
+			meshRenderer.material = Material;
 
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
 
@@ -257,9 +257,9 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
 
-			_water = UnityEngine.Random.value >= Biome.GetWaterProbability();
+			// _water = UnityEngine.Random.value >= Biome.GetWaterProbability();
 			
-			Water.Instantiate(
+			_water = new Water(
 				Transform,
 				WorldSize
 			);
@@ -377,6 +377,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void SetColliderEnable(bool enable)
 		{
 			_meshCollider.enabled = enable;
+			_water.MeshCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -407,29 +408,29 @@ public class TerrainChunksManager : MonoBehaviour{
 
 		public void ManageObjects()
 		{
-			if (_objectsPlaced && LODIndex == 0 && _objectsVisible) return;
+			if (ObjectsPlaced && LODIndex == 0 && ObjectsVisible) return;
 
-			if (LODIndex != 0 && !_objectsVisible) return;
+			if (LODIndex != 0 && !ObjectsVisible) return;
 
 			switch (LODIndex)
 			{
-				case 0 when !_objectsPlaced:
+				case 0 when !ObjectsPlaced:
 					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Organic));
 					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this, AssetType.Inorganic));
 				
 					Transform.Find("Assets")?.gameObject.SetActive(true);
 					break;
-				case 0 when _objectsPlaced && !_objectsVisible:
+				case 0 when ObjectsPlaced && !ObjectsVisible:
 					Transform.Find("Assets")?.gameObject.SetActive(true);
-					_objectsVisible = true;
+					ObjectsVisible = true;
 					break;
 				
 				default:
 				{
-					if (LODIndex != 0 && _objectsPlaced && _objectsVisible)
+					if (LODIndex != 0 && ObjectsPlaced && ObjectsVisible)
 					{
 						Transform.Find("Assets")?.gameObject.SetActive(false);
-						_objectsVisible = false;
+						ObjectsVisible = false;
 					}
 
 					break;

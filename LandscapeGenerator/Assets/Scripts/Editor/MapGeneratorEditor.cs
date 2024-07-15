@@ -27,7 +27,7 @@ namespace Editor
 
 				if (mapGenerator.drawMode.Equals(DrawMode.Mesh))
 				{
-					Water.Instantiate(
+					var water = new Water (
 						mapGenerator.transform,
 						TerrainChunksManager.TerrainChunk.WorldSize);
 				}

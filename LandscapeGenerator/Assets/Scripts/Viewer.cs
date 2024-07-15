@@ -1,6 +1,7 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
+using static TerrainChunksManager;
 
 public class Viewer : MonoBehaviour
 {
@@ -11,22 +12,25 @@ public class Viewer : MonoBehaviour
     private static float _viewerOldRotationY;
     private static float _rotationY;
     private int2 _chunkCoord;
-    private Vector3 _velocity;
+    private static Vector3 _velocity;
 
     public static Vector2 PositionV2 => new (_transform.position.x, _transform.position.z);
     public static Vector2 ForwardV2 => new (_transform.forward.x, _transform.forward.z);
     public static int2 ChunkCoord { get; set; }
     public static float FOV => _mainCamera.fieldOfView;
     public static float ExtendedFOV => 100f;
-    public float speed;
+    public float speed = 200f;
+
+    private static float _speed;
 
 
     private void Awake()
     {
-        _velocity = new(0, 0, speed);
+        _speed = speed;
         _mainCamera = Camera.main;
         _transform = transform;
-
+        _velocity = _transform.forward.normalized * speed;
+        
         var rotation = _transform.rotation;
         _viewerOldRotationY = rotation.eulerAngles.y;
         _rotationY = rotation.eulerAngles.y;
@@ -43,10 +47,14 @@ public class Viewer : MonoBehaviour
     public static void UpdateOldRotation() => _viewerOldRotationY = _rotationY;
 
     public static bool PositionChanged() => (_viewerOldPosition - PositionV2).sqrMagnitude > 
-                                     TerrainChunksManager.SqrViewerMoveThresholdForChunkUpdate;
+                                     SqrViewerMoveThresholdForChunkUpdate;
 
-    public static bool RotationChanged() => Math.Abs(_rotationY - _viewerOldRotationY) > 
-                                     TerrainChunksManager.ViewerRotateThresholdForChunkUpdate;
+    public static bool RotationChanged()
+    {
+        _velocity = _transform.forward.normalized * _speed;
+        return Math.Abs(_rotationY - _viewerOldRotationY) >
+               ViewerRotateThresholdForChunkUpdate;
+    }
     
     public static void SetInitialPos(float2 position)
     {
@@ -56,5 +64,15 @@ public class Viewer : MonoBehaviour
             position.y
         );
         _viewerOldPosition = new Vector2(position.x, position.y);
+    }
+
+    public static void UpdateChunkCoord()
+    {
+        float offset = TerrainChunk.WorldSize * 0.5f;
+
+        int currentChunkCoordX = (int)((PositionV2.x + offset) / TerrainChunk.WorldSize);
+        int currentChunkCoordY = (int)((PositionV2.y - offset) / TerrainChunk.WorldSize);
+        
+        ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
     }
 }

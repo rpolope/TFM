@@ -25,7 +25,6 @@ public static class ObjectPlacer
         }
         var assetsParent = SetAssetsParent(chunk);
 
-        // Hacer una copia de las claves antes de iterar sobre ellas
         var keys = PlacedPositions.Keys.ToList();
         foreach (var key in keys)
         {
@@ -53,22 +52,21 @@ public static class ObjectPlacer
 
                     var offset = new Vector3(point.x - radius, 0, point.y - radius);
                     var worldPos = centerPoint + offset;
-                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 100f))
+                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, 100f))
                     {
-                        if (!IsPositionValid(hitPosition, asset, layer)) continue;
+                        if (!IsPositionValid(hitPosition, asset)) continue;
 
                         PlaceAsset(asset, hitPosition, rotation, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
                         assetsPlacedCount++;
 
-                        // Yield after placing each asset to spread the load over multiple frames
                         yield return null;
                     }
                 }
             }
 
-            chunk._objectsPlaced = true;
-            chunk._objectsVisible = true;
+            chunk.ObjectsPlaced = true;
+            chunk.ObjectsVisible = true;
         }
     }
 
@@ -101,33 +99,28 @@ public static class ObjectPlacer
         };
     }
 
-    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out LayerMask layer, float raycastHeight)
+    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, float raycastHeight)
     {
         var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out var hit))
         {
             hitPosition = hit.point;
             rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-            layer = hit.transform.gameObject.layer;
             return true;
         }
         hitPosition = Vector3.zero;
         rotation = Quaternion.identity;
-        layer = LayerMask.GetMask("Culled");
 
         return false;
     }
 
-    private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset, LayerMask layer)
+    private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset)
     {
         var heightScale = LandscapeManager.Instance.terrainData.parameters.heightScale;
-        var isWater = ((1 << layer) & LayerMask.GetMask("Water")) != 0 ;
-        float height = worldPos.y;
+        var height = worldPos.y;
 
-        return !isWater
-            // && height >= asset.minHeight * heightScale && 
-            // height <= asset.maxHeight * heightScale
-            ;
+        return height >= asset.minHeight * heightScale &&
+               height <= asset.maxHeight * heightScale;
     }
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
