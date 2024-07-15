@@ -22,5 +22,5 @@ MonoBehaviour:
     frequency: 0.1
     persistence: 0.45
     lacunarity: 2
-    ridgeness: 0.15
-    ridgeRoughness: 2.5
+    ridgeness: 0.737
+    ridgeRoughness: 3.79
