@@ -377,7 +377,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void SetColliderEnable(bool enable)
 		{
 			_meshCollider.enabled = enable;
-			_water.MeshCollider.enabled = enable;
+			_water.BoxCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -465,10 +465,10 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			var biomesData = BiomesManager.BiomesData;
 			
-			float[] biomeMinTemp = new float[biomesData.Length];
-			float[] biomeMaxTemp = new float[biomesData.Length];
-			float[] biomeMinMoist = new float[biomesData.Length];
-			float[] biomeMaxMoist = new float[biomesData.Length];
+			var biomeMinTemp = new float[biomesData.Length];
+			var biomeMaxTemp = new float[biomesData.Length];
+			var biomeMinMoist = new float[biomesData.Length];
+			var biomeMaxMoist = new float[biomesData.Length];
 
 			for (int i = 0; i < biomesData.Length; i++)
 			{
@@ -496,7 +496,7 @@ public class TerrainChunksManager : MonoBehaviour{
 				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
 				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
 				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Shore_Large.jpg", typeof(Texture2D))},
+				{ClimateType.TemperateDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Shore_Large.jpg", typeof(Texture2D))},
 				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))}
 			};
 			
@@ -513,7 +513,7 @@ public class TerrainChunksManager : MonoBehaviour{
 				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "grassland_texture.png", typeof(Texture2D))},
 				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D))},
 				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_1.png", typeof(Texture2D))},
-				{ClimateType.DesertWarm, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))},
+				{ClimateType.TemperateDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))},
 				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))}
 			};
 

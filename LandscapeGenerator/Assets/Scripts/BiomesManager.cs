@@ -20,11 +20,26 @@ public enum ClimateType
     Bare,
     Taiga,
     GrasslandHot,
-    DesertWarm,
+    TemperateDesert,
     DesertHot,
     GrasslandCold,
     DesertCold
 }
+
+public enum BiomeType
+{
+    Polar,
+    Tundra,
+    BorealForest,
+    TemperateConiferousForest,
+    TemperateSeasonalForest,
+    TropicalSeasonalForestSavanna,
+    TropicalRainforest,
+    WoodlandShrubland,
+    TemperateGrasslandColdDesert,
+    SubtropicalDesert
+}
+
 
 struct BiomeInfo
 {
@@ -37,6 +52,24 @@ struct BiomeInfo
     public BiomeInfo(ClimateType climate, float minTemp, float maxTemp, float minMoist, float maxMoist)
     {
         this.climate = climate;
+        this.minTemp = minTemp;
+        this.maxTemp = maxTemp;
+        this.minMoist = minMoist;
+        this.maxMoist = maxMoist;
+    }
+}
+
+struct WhittakerBiomeInfo
+{
+    public BiomeType BiomeType;
+    public float minTemp;
+    public float maxTemp;
+    public float minMoist;
+    public float maxMoist;
+
+    public WhittakerBiomeInfo(BiomeType biomeType, float minTemp, float maxTemp, float minMoist, float maxMoist)
+    {
+        this.BiomeType = biomeType;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.minMoist = minMoist;
@@ -59,9 +92,24 @@ public class BiomesManager : MonoBehaviour
         new (ClimateType.GrasslandCold, 0.0f, 10.0f, 0.16f, 0.5f),
         new (ClimateType.GrasslandHot, 10.0f, 30.0f, 0.16f, 0.33f),
         new (ClimateType.DesertCold, -10.0f, 0.0f, 0.0f, 0.33f),
-        new (ClimateType.DesertWarm, 0.0f, 10.0f, 0.0f, 0.16f),
+        new (ClimateType.TemperateDesert, 0.0f, 10.0f, 0.0f, 0.16f),
         new (ClimateType.DesertHot, 10.0f, 30.0f, 0.0f, 0.16f)
     };
+    
+    internal static readonly WhittakerBiomeInfo[] WhittakerDiagramInfo = new WhittakerBiomeInfo[]
+    {
+        new (BiomeType.Polar, -30.0f, -10.0f, 0.0f, 135.0f / 450.0f), // Blanco
+        new (BiomeType.Tundra, -10.0f, 0.0f, 0.0f, 100.0f / 450.0f), // Azul
+        new (BiomeType.BorealForest, -10.0f, 5.0f, 50.0f / 450.0f, 200.0f / 450.0f), // Verde oscuro
+        new (BiomeType.TemperateConiferousForest, 5.0f, 20.0f, 150.0f / 450.0f, 400.0f / 450.0f), // Verde
+        new (BiomeType.TemperateSeasonalForest, 5.0f, 20.0f, 50.0f / 450.0f, 200.0f / 450.0f), // Verde mar
+        new (BiomeType.TropicalSeasonalForestSavanna, 20.0f, 30.0f, 50.0f / 450.0f, 250.0f / 450.0f), // Verde oliva
+        new (BiomeType.TropicalRainforest, 20.0f, 30.0f, 250.0f / 450.0f, 400.0f / 450.0f), // Verde oscuro
+        new (BiomeType.WoodlandShrubland, 10.0f, 20.0f, 0.0f, 100.0f / 450.0f), // Caqui oscuro
+        new (BiomeType.TemperateGrasslandColdDesert, -5.0f, 10.0f, 0.0f, 50.0f / 450.0f), // Arena
+        new (BiomeType.SubtropicalDesert, 20.0f, 30.0f, 0.0f, 100.0f / 450.0f) // Bronceado
+    };
+
     
     public List<BiomeAsset> biomesAssets;
 
@@ -192,6 +240,22 @@ public class Biome
         }
         return ClimateType.Ocean;
     }
+    
+    public static BiomeType GetBiomeType(float moisture, float heat)
+    {
+        var temperature = heat * (MaxTemperature - MinTemperature) + MinTemperature;
+
+        foreach (var biome in BiomesManager.WhittakerDiagramInfo)
+        {
+            if (temperature >= biome.minTemp && temperature <= biome.maxTemp &&
+                moisture >= biome.minMoist && moisture <= biome.maxMoist)
+            {
+                return biome.BiomeType;
+            }
+        }
+
+        return BiomeType.Polar;
+    }
 
     public float GetWaterProbability()
     {
@@ -199,7 +263,7 @@ public class Biome
         {
             ClimateType.GrasslandCold or ClimateType.GrasslandHot or ClimateType.Forest => 0.5f,
             ClimateType.TropicalForest => 0.8f,
-            ClimateType.Beach or ClimateType.DesertCold or ClimateType.DesertWarm or ClimateType.DesertHot or ClimateType.Scorched or ClimateType.Shrubland => 0.1f,
+            ClimateType.Beach or ClimateType.DesertCold or ClimateType.TemperateDesert or ClimateType.DesertHot or ClimateType.Scorched or ClimateType.Shrubland => 0.1f,
             ClimateType.Tundra or ClimateType.Snow or ClimateType.Bare or ClimateType.Taiga => 0.4f,
             ClimateType.Ocean => 1.0f,
             _ => throw new ArgumentOutOfRangeException()

@@ -38,8 +38,8 @@ public class LandscapeManager : MonoBehaviour{
 	internal TerrainChunksManager ChunksManager;
 
 	private static float[] _fixedBorderHeightValues = new float[TerrainChunk.Resolution];
-	
-	 private void Awake()
+
+	private void Awake()
     {
         if (Instance == null)
         {
@@ -86,7 +86,9 @@ public class LandscapeManager : MonoBehaviour{
         {
             for (int x = 0; x < MapWidth; x++)
             {
-                Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunk.Resolution, noiseData.parameters, new float2(x, y) * (TerrainChunk.Resolution - 1));
+                Maps[x, y] = mapGenerator.GenerateMapData(TerrainChunk.Resolution, 
+														  noiseData.parameters, 
+													new float2(x, y) * (TerrainChunk.Resolution - 1));
             }
         }
         UnifyMapBorders();

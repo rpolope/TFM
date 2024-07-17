@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: PalmTree
+  m_EditorClassIdentifier: Assembly-CSharp::BiomeAsset
+  type: 0
+  size: 3
+  biomes: 06000000070000000800000005000000
+  gameObjects:
+  - {fileID: 6752495740634467234, guid: 1c08d0cac139988469b59cfb405a882e, type: 3}
+  minHeight: 0.15
+  maxHeight: 0.5
+  radius: 15
+  density: 0.15
+  normalOrientation: 0.66

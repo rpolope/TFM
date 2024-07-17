@@ -1,0 +1,214 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: NormalMap
+  m_Shader: {fileID: 4800000, guid: fefeab7360ee2bc4a9f118ef0c37526a, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _NORMALMAP
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BareTex:
+        m_Texture: {fileID: 2800000, guid: 59b6e0cd06ec2c54d851a15465d0bf83, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BeachTex:
+        m_Texture: {fileID: 2800000, guid: 6ed1125ebccf8674a8c71998c11f6bde, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DesertTex:
+        m_Texture: {fileID: 2800000, guid: 6ed1125ebccf8674a8c71998c11f6bde, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ForestTex:
+        m_Texture: {fileID: 2800000, guid: aa88c830423097c4ab2119a1e9b835e0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GradientTex:
+        m_Texture: {fileID: 2800000, guid: 53408220bff831445be4849ed9ed86d2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GrasslandTex:
+        m_Texture: {fileID: 2800000, guid: 19ff262636b2fda49817477934198bc9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HumidityNoiseTex:
+        m_Texture: {fileID: 2800000, guid: 71ab7ea908cd1a541aa412b9f33272a0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 3a1df987ca2bfa8488c6f08d520afe66, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MoistureNoiseTex:
+        m_Texture: {fileID: 2800000, guid: 19fa4c54f7643ed488d1062c1127d1b1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MositureNoiseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 2800000, guid: 19fa4c54f7643ed488d1062c1127d1b1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: bd2502485e7cef64aa714738a84b0f83, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OceanTex:
+        m_Texture: {fileID: 2800000, guid: b31531d0ba7df434195415221a7e40a7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ScorchedTex:
+        m_Texture: {fileID: 2800000, guid: aa88c830423097c4ab2119a1e9b835e0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShrublandTex:
+        m_Texture: {fileID: 2800000, guid: f393fa0df73181f419cc5f79ea7b38f6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SnowTex:
+        m_Texture: {fileID: 2800000, guid: 70da862c42f7466438786fe38c9fc1bc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SubtropicalDesertTex:
+        m_Texture: {fileID: 2800000, guid: f393fa0df73181f419cc5f79ea7b38f6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TaigaTex:
+        m_Texture: {fileID: 2800000, guid: f393fa0df73181f419cc5f79ea7b38f6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TempNoiseTex:
+        m_Texture: {fileID: 2800000, guid: 52e31d6bb83eb6241aafbe64a64979dd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperateDesertTex:
+        m_Texture: {fileID: 2800000, guid: 6ed1125ebccf8674a8c71998c11f6bde, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperateRainForestTex:
+        m_Texture: {fileID: 2800000, guid: aa88c830423097c4ab2119a1e9b835e0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperatureGradient:
+        m_Texture: {fileID: 2800000, guid: f54e9c84628a7f443a7def2c3bdf0755, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperatureNoisTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperatureNoiseTex:
+        m_Texture: {fileID: 2800000, guid: 19fa4c54f7643ed488d1062c1127d1b1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TemperatureTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TropicalForestTex:
+        m_Texture: {fileID: 2800000, guid: 19ff262636b2fda49817477934198bc9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TropicalRainForestTex:
+        m_Texture: {fileID: 2800000, guid: 19ff262636b2fda49817477934198bc9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TropicalSeasonalForestTex:
+        m_Texture: {fileID: 2800000, guid: aa88c830423097c4ab2119a1e9b835e0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TundraTex:
+        m_Texture: {fileID: 2800000, guid: 70da862c42f7466438786fe38c9fc1bc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _MaxHeight: 100
+    - _Metallic: 0
+    - _Mode: 0
+    - _MoistureNoiseScale: 6.74
+    - _NoiseScale: 0.045
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _SmoothnessTextureChannel: 0
+    - _SnowHeight: 40
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TemepratureNoiseScale: 1
+    - _TemperatureNoiseScale: 1
+    - _TextureNoiseScale: 100
+    - _UVSec: 0
+    - _WaterHeight: 1
+    - _WaterLevel: 0
+    - _ZWrite: 1
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color1: {r: 0, g: 0, b: 0, a: 1}
+    - _Color2: {r: 0.173, g: 0.357, b: 0.863, a: 1}
+    - _Color3: {r: 0.592, g: 0.941, b: 1, a: 1}
+    - _Color4: {r: 0.329, g: 0.941, b: 0.761, a: 1}
+    - _Color5: {r: 0.208, g: 0.839, b: 0.125, a: 1}
+    - _Color6: {r: 0.58, g: 0.957, b: 0.243, a: 1}
+    - _Color7: {r: 0.957, g: 0.831, b: 0.243, a: 1}
+    - _Color8: {r: 0.945, g: 0.588, b: 0.133, a: 1}
+    - _Color9: {r: 1, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []
