@@ -71,7 +71,7 @@ public class Viewer : MonoBehaviour
         float offset = TerrainChunk.WorldSize * 0.5f;
 
         int currentChunkCoordX = (int)((PositionV2.x + offset) / TerrainChunk.WorldSize);
-        int currentChunkCoordY = (int)((PositionV2.y - offset) / TerrainChunk.WorldSize);
+        int currentChunkCoordY = (int)((PositionV2.y + offset) / TerrainChunk.WorldSize);
         
         ChunkCoord = new int2(currentChunkCoordX, currentChunkCoordY);
     }

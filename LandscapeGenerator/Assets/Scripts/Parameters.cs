@@ -17,41 +17,6 @@ public struct TerrainParameters
     }
 }
 
-
-[Serializable]
-public struct BiomesParameters
-{
-    public ClimateType[] climates;
-    public Texture2D[] colorMaps;
-    
-    public BiomesParameters(string[] textureNames)
-    {
-        climates = new[]
-        {
-            ClimateType.Ocean,
-            ClimateType.Beach,
-            ClimateType.Desert,
-            ClimateType.Shrubland,
-            ClimateType.Grassland,
-            ClimateType.Forest,
-            ClimateType.TropicalForest,
-            ClimateType.Scorched,
-            ClimateType.Snow
-        };
-        
-        colorMaps = new Texture2D[textureNames.Length];
-        
-        for (int i = 0; i < textureNames.Length; i++)
-        {
-            colorMaps[i] = Resources.Load<Texture2D>($"Textures/{textureNames[i]}");
-            if (colorMaps[i] == null)
-            {
-                Debug.LogError($"Texture '{textureNames[i]}' not found in Resources/Textures");
-            }
-        }
-    }
-}
-
 [Serializable]
 public struct NoiseParameters
 {   

@@ -14,6 +14,7 @@ public class MapGenerator : MonoBehaviour
     public TextureData textureData;
     public Material terrainMaterial;
 
+    public static MapGenerator Instance;
     public MapData GenerateMapData(int resolution, NoiseParameters parameters, float2 centre = default) {
         
         centre = centre.Equals(default) ? new float2(1f, 1f) : centre;
@@ -51,6 +52,8 @@ public class MapGenerator : MonoBehaviour
     }
     
     void OnValidate() {
+        
+        Instance ??= this;
         
         if (terrainData != null) {
             terrainData.OnValuesUpdated -= OnValuesUpdated;

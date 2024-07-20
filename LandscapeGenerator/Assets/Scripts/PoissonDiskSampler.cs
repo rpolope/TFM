@@ -2,11 +2,7 @@ using System.Collections.Generic;
 using Jobs;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Burst;
 using UnityEngine;
-using Unity.Mathematics;
-
-using Random = Unity.Mathematics.Random;
 
 public static class PoissonDiskSampler
 {

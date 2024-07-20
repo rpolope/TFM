@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4ccead9fae84dc6b80ad04f91c594f3, type: 3}
+  m_Name: MedRocks
+  m_EditorClassIdentifier: 
+  type: 1
+  size: 2
+  biomes: 08000000
+  gameObjects:
+  - {fileID: 1788428310481794, guid: 37dabd90c72b00f42b1516f05b9ae93e, type: 3}
+  - {fileID: 100000, guid: 977e7278d3486f1489724a6d226b9ca0, type: 3}
+  - {fileID: 1947133227643770, guid: a07bba0f0f6b70d428d5928a74460267, type: 3}
+  - {fileID: 1381760041697914, guid: 91539656a2852a24894b1408b15af8fa, type: 3}
+  - {fileID: 1539770375662012, guid: c0a13742618afdb4cb2d9e33d51eac24, type: 3}
+  - {fileID: 1000011143488790, guid: a649302f8407dd9469e2c5b67b4a0674, type: 3}
+  minHeight: 0
+  maxHeight: 1
+  radius: 30
+  density: 0.498
+  normalOrientation: 0.993

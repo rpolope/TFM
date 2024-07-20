@@ -1,7 +1,5 @@
-using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum DrawMode
 {
@@ -11,9 +9,9 @@ public enum DrawMode
 public static class MapDisplay
 {
     private static readonly MapGenerator MapGenerator = Object.FindObjectOfType<MapGenerator>();
-    public static Renderer TextureRender = MapGenerator?.GetComponent<MeshRenderer>();
+    public static Renderer TextureRender = MapGenerator != null ? MapGenerator.GetComponent<MeshRenderer>() : null;
     public static Renderer MeshRenderer = TextureRender;
-    public static MeshFilter MeshFilter = MapGenerator?.GetComponent<MeshFilter>();
+    public static MeshFilter MeshFilter = MapGenerator != null ? MapGenerator.GetComponent<MeshFilter>() : null;
 
     private static void DrawTexture(Texture2D texture) {
         TextureRender.sharedMaterial.mainTexture = texture;
@@ -22,7 +20,6 @@ public static class MapDisplay
 
     private static void DrawMesh(MeshData meshData) {
         MeshFilter.mesh = meshData.CreateMesh ();
-        // MeshFilter.transform.localScale = Vector3.one * TerrainChunksManager.TerrainChunk.WorldSize;
     }
     
     public static void DrawMapInEditor(DrawMode drawMode, MapData mapData, TerrainParameters terrainParameters)
@@ -37,7 +34,7 @@ public static class MapDisplay
             case DrawMode.Mesh:
             {
                 var meshData = new MeshData(resolution, 0);
-                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, new int2(), mapData,ref meshData).Complete();
+                MeshGenerator.ScheduleMeshGenerationJob(terrainParameters, resolution, new int2(), mapData,ref meshData, false).Complete();
                 DrawMesh (meshData);
                 break;
             }

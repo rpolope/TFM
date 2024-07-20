@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4ccead9fae84dc6b80ad04f91c594f3, type: 3}
+  m_Name: BigRocks
+  m_EditorClassIdentifier: 
+  type: 1
+  size: 3
+  biomes: 09000000
+  gameObjects:
+  - {fileID: 100000, guid: 940d55d4117386f4f9398ea3ff52d4cd, type: 3}
+  - {fileID: 1788428310481794, guid: 37dabd90c72b00f42b1516f05b9ae93e, type: 3}
+  - {fileID: 100000, guid: 5f36b57d675b1444cb2203b7a6cac6cb, type: 3}
+  minHeight: 0
+  maxHeight: 0.6
+  radius: 50
+  density: 0.434
+  normalOrientation: 0.587

@@ -22,21 +22,19 @@ Shader "Custom/TempMoistBased"
         #pragma target 3.0
 
         // Define biomes
-        #define TUNDRA 0
-        #define FOREST 1
-        #define TROPICAL_FOREST 2
-        #define SCORCHED 3
-        #define SHRUBLAND 4
-        #define SNOW 5
-        #define BARE 6
-        #define TAIGA 7
-        #define GRASSLAND_COLD 8
-        #define GRASSLAND_HOT 9
-        #define DESERT_COLD 10
-        #define DESERT_WARM 11
-        #define DESERT_HOT 12
+        #define SNOW 0
+        #define TUNDRA 1
+        #define BOREAL_FOREST 2
+        #define TEMPERATE_CONIFEROUS_FOREST 3
+        #define TEMPERATE_SEASONAL_FOREST 4
+        #define TROPICAL_SEASONAL_FOREST_SAVANNA 5
+        #define TROPICAL_RAINFOREST 6
+        #define WOODLAND_SHRUBLAND 7
+        #define TEMPERATE_GRASSLAND_COLD_DESERT 8
+        #define SUBTROPICAL_DESERT 9
 
-        static const int NUM_BIOMES = 13;
+
+        static const int NUM_BIOMES = 10;
 
         float biomeMinTemp[NUM_BIOMES];
         float biomeMaxTemp[NUM_BIOMES];
@@ -69,7 +67,7 @@ Shader "Custom/TempMoistBased"
         float getTemperature(float latitude, float2 uv, float height) {
             float temp = lerp(-30, 30, latitude);
             float distortion = tex2D(_TempNoiseTex, uv * _TemperatureNoiseScale).r;
-            float heightPerturb = height * 0.01;
+            float heightPerturb = height * 0.5f;
             temp = temp - heightPerturb + distortion * 0.01;
             return temp;
         }
@@ -101,18 +99,18 @@ Shader "Custom/TempMoistBased"
         }
 
         float3 lerpTemperatureColor(float temperature, float moisture, float3 worldNormal, float3 worldPos) {
+
             float normalizedTempRange = inverseLerp(-30, 30, temperature);
 
-            int tempIndex = floor(normalizedTempRange * 4.0);
-            int nextTempIndex = min(tempIndex + 1, 4);
-            float tempStrength = inverseLerp(tempIndex / 4.0, (tempIndex + 1) / 4.0, normalizedTempRange);
+            int tempIndex = floor(normalizedTempRange * 3.0);
+            int nextTempIndex = min(tempIndex + 1, 3);
+            float tempStrength = inverseLerp(tempIndex / 3.0, nextTempIndex / 3.0, normalizedTempRange);
 
-            const int biomes[15] = {
+            const int biomes[12] = {
                 SNOW, SNOW, SNOW,
-                SCORCHED, BARE, TUNDRA,
-                DESERT_COLD, SHRUBLAND, TAIGA,
-                DESERT_WARM, GRASSLAND_COLD, FOREST,
-                DESERT_HOT, GRASSLAND_HOT, TROPICAL_FOREST
+                TEMPERATE_GRASSLAND_COLD_DESERT, TUNDRA, BOREAL_FOREST,
+                SUBTROPICAL_DESERT, TEMPERATE_SEASONAL_FOREST, TEMPERATE_CONIFEROUS_FOREST,
+                WOODLAND_SHRUBLAND, TROPICAL_SEASONAL_FOREST_SAVANNA, TROPICAL_RAINFOREST
             };
 
             int moistureLevelsPerTemp = 3;
@@ -133,31 +131,39 @@ Shader "Custom/TempMoistBased"
             return lerpMoistureColor(dryColor, medColor, wetColor, moisture);
         }
 
+        float3 setBeachColor(Input IN, float3 worldNormal)
+        {
+            float3 color;
+            float texScale = 5;
+                if (IN.worldPos.y > _WaterLevel && IN.worldPos.y < _WaterLevel + 1) {
+                    float3 blendAxes = abs(worldNormal);
+                    blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+                    float3 beachColor = triplanar(IN.worldPos, texScale, blendAxes, TEMPERATE_GRASSLAND_COLD_DESERT) * float3(1, 0.99,0.65);
+                    float blendStrength = inverseLerp(_WaterLevel, _WaterLevel + 0.95f, IN.worldPos.y);
+                    color = lerp(beachColor, color, blendStrength);
+                }
+        
+            return color;
+        }
+
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             float3 normalFromMap = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex * 150)).rgb;
-
+            
             float2 uv = IN.uv_MainTex;
             float3 worldNormal = normalize(normalFromMap + IN.worldNormal);
             float height = IN.worldPos.y;
             float latitude = tex2D(_MainTex, uv).r;
             float temperature = getTemperature(latitude, uv, height);
             float moisture = tex2D(_MoistureNoiseTex, uv * _MoistureNoiseScale).r;
-
+            
             float slope = dot(IN.worldNormal, float3(0, 1, 0));
             float3 color = lerpTemperatureColor(temperature, moisture, IN.worldPos, worldNormal);
-
-            if (temperature > 0 && slope > 0.5)
-            {
-                float texScale = 5;
-                if (IN.worldPos.y > _WaterLevel && IN.worldPos.y < _WaterLevel + 1) {
-                    float3 blendAxes = abs(worldNormal);
-                    blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
-                    float3 beachColor = triplanar(IN.worldPos, texScale, blendAxes, DESERT_WARM) * float3(1, 0.99,0.65);
-                    float blendStrength = inverseLerp(_WaterLevel, _WaterLevel + 0.95f, IN.worldPos.y);
-                    color = lerp(beachColor, color, blendStrength);
-                }
-            }
+            
+            // if (temperature > 0 && slope > 0.5)
+            // {
+            //     color = setBeachColor(IN, worldNormal);
+            // }
                 
             // float3 debugColor = normalize(float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture));
             float3 debugColor = lerp(float3(0,0,1),float3(1,0,0), inverseLerp(-30, 30, temperature));

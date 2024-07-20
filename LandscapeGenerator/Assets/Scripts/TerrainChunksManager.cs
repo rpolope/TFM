@@ -377,7 +377,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void SetColliderEnable(bool enable)
 		{
 			_meshCollider.enabled = enable;
-			_water.BoxCollider.enabled = enable;
+			// _water.BoxCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -483,39 +483,35 @@ public class TerrainChunksManager : MonoBehaviour{
 			Material.SetFloatArray("biomeMinMoist", biomeMinMoist);
 			Material.SetFloatArray("biomeMaxMoist", biomeMaxMoist);
 
+			// TODO: Corregir las texturas
 			var biomesTextures = new Dictionary<ClimateType, Texture2D>()
 			{
-				{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
-				{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
-				{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
-				{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D))},
-				{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D))},
-				{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 1.png", typeof(Texture2D))},
-				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D))},
-				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
-				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Grass.png", typeof(Texture2D))},
-				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))},
-				{ClimateType.TemperateDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Shore_Large.jpg", typeof(Texture2D))},
-				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Sandy grass.png", typeof(Texture2D))}
+				{ ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Snow.png", typeof(Texture2D)) },
+				{ ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Stony ground.png", typeof(Texture2D)) },
+				{ ClimateType.BorealForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "tropical_forest_1.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateConiferousForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "forest_texture.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateSeasonalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "tropical_forest_texture_2.png", typeof(Texture2D)) },
+				{ ClimateType.TropicalSeasonalForestSavanna, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "desert_texture_1.png", typeof(Texture2D)) },
+				{ ClimateType.TropicalRainforest, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "tropical_forest_texture_2.png", typeof(Texture2D)) },
+				{ ClimateType.WoodlandShrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "shrubland_texture.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateGrasslandColdDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "desert_texture_1.png", typeof(Texture2D)) },
+				{ ClimateType.SubtropicalDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "desert_texture_2.png", typeof(Texture2D)) }
 			};
 			
 			var mockBiomesTextures = new Dictionary<ClimateType, Texture2D>()
 			{
-				{ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tundra_texture.png", typeof(Texture2D))},
-				{ClimateType.Forest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "forest_texture.png", typeof(Texture2D))},
-				{ClimateType.TropicalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D))},
-				{ClimateType.Scorched, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "scorched_texture.png", typeof(Texture2D))},
-				{ClimateType.Shrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "shrubland_texture.png", typeof(Texture2D))},
-				{ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "snow_texture.png", typeof(Texture2D))},
-				{ClimateType.Bare, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "bare_texture.png", typeof(Texture2D))},
-				{ClimateType.Taiga, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "taiga_texture.png", typeof(Texture2D))},
-				{ClimateType.Grassland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "grassland_texture.png", typeof(Texture2D))},
-				{ClimateType.GrasslandHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D))},
-				{ClimateType.Desert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_1.png", typeof(Texture2D))},
-				{ClimateType.TemperateDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))},
-				{ClimateType.DesertHot, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D))}
+				{ ClimateType.Snow, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "snow_texture.png", typeof(Texture2D)) },
+				{ ClimateType.Tundra, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tundra_texture.png", typeof(Texture2D)) },
+				{ ClimateType.BorealForest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_1.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateConiferousForest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "forest_texture.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateSeasonalForest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D)) },
+				{ ClimateType.TropicalSeasonalForestSavanna, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_1.png", typeof(Texture2D)) },
+				{ ClimateType.TropicalRainforest, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "tropical_forest_texture_2.png", typeof(Texture2D)) },
+				{ ClimateType.WoodlandShrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "shrubland_texture.png", typeof(Texture2D)) },
+				{ ClimateType.TemperateGrasslandColdDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_1.png", typeof(Texture2D)) },
+				{ ClimateType.SubtropicalDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(mockTexturesPath + "desert_texture_2.png", typeof(Texture2D)) }
 			};
+			
 
 			Material.SetTexture (baseTextures, GenerateTextureArray (mockBiomesTextures.Values.ToArray()));
 			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : Water.HeightLevel);

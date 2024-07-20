@@ -12,21 +12,22 @@ public static class ObjectPlacer
         { AssetSize.Medium, new List<Vector3>() },
         { AssetSize.Small, new List<Vector3>() }
     };
-    
+
+    private const int YieldFrequency = 10;
+
     public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk, AssetType assetType)
     {
         var assets = BiomesAssetsManager.GetAssetsForType(chunk.Biome.Assets, assetType);
-
         if (assets == null)
         {
             SetAssetsParent(chunk);
             Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
             yield break;
         }
+
         var assetsParent = SetAssetsParent(chunk);
 
-        var keys = PlacedPositions.Keys.ToList();
-        foreach (var key in keys)
+        foreach (var key in PlacedPositions.Keys.ToList())
         {
             PlacedPositions[key].Clear();
         }
@@ -37,13 +38,14 @@ public static class ObjectPlacer
         {
             float radius = asset.radius;
             List<Vector3> centerPoints = GetCenterPointsForSize(asset.size, chunk.WorldPos);
+
             foreach (var centerPoint in centerPoints)
             {
                 int assetsPlacedCount = 0;
-
                 var sampleArea = asset.size.Equals(AssetSize.Large) ? 
                     new Vector2(TerrainChunk.WorldSize, TerrainChunk.WorldSize) :
                     new Vector2(radius * 2.5f, radius * 2.5f);
+
                 var points = PoissonDiskSampler.GeneratePoints(radius, sampleArea);
 
                 foreach (var point in points)
@@ -52,15 +54,20 @@ public static class ObjectPlacer
 
                     var offset = new Vector3(point.x - radius, 0, point.y - radius);
                     var worldPos = centerPoint + offset;
-                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, 100f))
+
+                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 100f))
                     {
-                        if (!IsPositionValid(hitPosition, asset)) continue;
+                        if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
                         PlaceAsset(asset, hitPosition, rotation, assetsParent);
                         PlacedPositions[asset.size].Add(worldPos);
                         assetsPlacedCount++;
 
-                        yield return null;
+                        // Yield every few objects to reduce stutter
+                        if (assetsPlacedCount % YieldFrequency  == 0)
+                        {
+                            yield return null;
+                        }
                     }
                 }
             }
@@ -99,27 +106,31 @@ public static class ObjectPlacer
         };
     }
 
-    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, float raycastHeight)
+    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out LayerMask layer, float raycastHeight)
     {
         var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
         if (Physics.Raycast(ray, out var hit))
         {
             hitPosition = hit.point;
             rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            layer = hit.transform.gameObject.layer;
+
             return true;
         }
         hitPosition = Vector3.zero;
         rotation = Quaternion.identity;
+        layer = default;
 
         return false;
     }
 
-    private static bool IsPositionValid(Vector3 worldPos, BiomeAsset asset)
+    private static bool IsPositionValid(Vector3 worldPos, LayerMask layerMask, BiomeAsset asset)
     {
         var heightScale = LandscapeManager.Instance.terrainData.parameters.heightScale;
         var height = worldPos.y;
 
-        return height >= asset.minHeight * heightScale &&
+        return !layerMask.Equals(Water.WaterLayerMask) &&
+               height >= asset.minHeight * heightScale &&
                height <= asset.maxHeight * heightScale;
     }
 
@@ -136,6 +147,6 @@ public static class ObjectPlacer
 
     private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)
     {
-        return Vector3.Slerp(Vector3.up, rotation * Vector3.up, normalOrientation);
+        return Vector3.Slerp(Vector3.up, rotation * Vector3.up, normalOrientation).normalized;
     }
 }
