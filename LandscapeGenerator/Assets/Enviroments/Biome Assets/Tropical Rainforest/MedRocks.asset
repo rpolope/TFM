@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   size: 2
-  biomes: 06000000
+  biomes: 07000000
   gameObjects:
   - {fileID: 4855156790193827194, guid: 52ee8d8bfebfe4942aa24e7fe8eed9da, type: 3}
   - {fileID: 100000, guid: d047f8be423b6b8469e320fe57de6365, type: 3}

@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   size: 3
-  biomes: 09000000
+  biomes: 0a000000
   gameObjects:
   - {fileID: 6752495740634467234, guid: 1c08d0cac139988469b59cfb405a882e, type: 3}
   - {fileID: 5984242094065613174, guid: 1d9e23a7beeca4441971b0307f7272bc, type: 3}
   minHeight: 0
   maxHeight: 0.3
-  radius: 20
+  radius: 20.7
   density: 0.12
   normalOrientation: 0.822

@@ -27,17 +27,17 @@ public static class PoissonDiskSampler
             SpawnPoints = spawnPoints,
             Width = width,
             Height = height,
-            Seed = (uint)UnityEngine.Random.Range(1, 100000)
+            Seed = (uint)Random.Range(1, 100000)
         };
 
         job.Schedule().Complete();
 
         List<Vector2> results = new List<Vector2>();
-        for (int i = 0; i < points.Length; i++)
+        for (int i = 0; i < grid.Length; i++)
         {
             if (grid[i] > 0)
             {
-                results.Add(points[i]);
+                results.Add(points[grid[i] - 1]);
             }
         }
 

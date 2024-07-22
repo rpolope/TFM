@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   size: 1
-  biomes: 06000000
-  gameObjects: []
-  minHeight: 0
-  maxHeight: 0
-  radius: 0
-  density: 0
-  normalOrientation: 0
+  biomes: 07000000
+  gameObjects:
+  - {fileID: 100000, guid: dad0b53bfba5bf148b12cdfa48770c8a, type: 3}
+  - {fileID: 100000, guid: 7c8c1d0cdb996ab4e87515489f195873, type: 3}
+  minHeight: 0.1
+  maxHeight: 0.6
+  radius: 5
+  density: 0.87
+  normalOrientation: 1

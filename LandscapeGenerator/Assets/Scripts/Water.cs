@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Water
 {
-    public readonly GameObject GameObject;
+    private readonly GameObject _gameObject;
     public readonly BoxCollider BoxCollider;
     public static readonly float HeightLevel;
-    public static LayerMask WaterLayerMask;
+    public static int WaterLayer;
 
     private static Material _material;
     private static bool _fromEditor;
@@ -28,33 +28,33 @@ public class Water
             _fromEditor = true;
         }
         
-        WaterLayerMask = LayerMask.NameToLayer("Water");
+        WaterLayer = LayerMask.NameToLayer("Water");
     }
 
     public Water(Transform parent, float size)
     {
         const string materialPath = "Assets/Materials/Water.mat";
 
-        GameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        _gameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
 
 
         if (_fromEditor)
         {
-            Object.DestroyImmediate(GameObject.GetComponent<MeshCollider>());
+            Object.DestroyImmediate(_gameObject.GetComponent<MeshCollider>());
 
         }
         else
         {
-            Object.Destroy(GameObject.GetComponent<MeshCollider>());   
+            Object.Destroy(_gameObject.GetComponent<MeshCollider>());   
         }
         // BoxCollider = GameObject.AddComponent<BoxCollider>();
 
         _material ??= (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
         
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial = _material;
-        GameObject.layer = WaterLayerMask;
+        _gameObject.GetComponent<MeshRenderer>().sharedMaterial = _material;
+        _gameObject.layer = WaterLayer;
         
-        var transform = GameObject.transform;
+        var transform = _gameObject.transform;
         transform.localScale = new Vector3(size/10, 1, size/10);
         transform.parent = parent;
         transform.localPosition = Vector3.zero + Vector3.up * HeightLevel;

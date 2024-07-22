@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   size: 3
-  biomes: 06000000
+  biomes: 07000000
   gameObjects:
   - {fileID: 6752495740634467234, guid: 1c08d0cac139988469b59cfb405a882e, type: 3}
-  - {fileID: 188006, guid: c6b7fb383a3534b039692b5485b6e739, type: 3}
-  - {fileID: 188006, guid: c6b7fb383a3534b039692b5485b6e739, type: 3}
+  - {fileID: 1970681966781816, guid: a7984f59c227d0240b9771d2797a085c, type: 3}
+  - {fileID: 1970681966781816, guid: 84bb771a8038d2648bd2421451c4018d, type: 3}
   minHeight: 0
   maxHeight: 1
   radius: 15

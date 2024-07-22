@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   size: 3
-  biomes: 01000000
+  biomes: 02000000
   gameObjects: []
   minHeight: 0
   maxHeight: 0

@@ -41,7 +41,7 @@ Shader "Custom/TempMoistBased"
         float biomeMinMoist[NUM_BIOMES];
         float biomeMaxMoist[NUM_BIOMES];
 
-        UNITY_DECLARE_TEX2DARRAY(baseTextures);
+        UNITY_DECLARE_TEX2DARRAY(groundTextures);
 
         sampler2D _MainTex;
         sampler2D _TempNoiseTex;
@@ -74,9 +74,9 @@ Shader "Custom/TempMoistBased"
 
         float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
             float3 scaledWorldPos = worldPos / scale;
-            float3 xProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.y, scaledWorldPos.z, textureIndex)) * blendAxes.x;
-            float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
-            float3 zProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)) * blendAxes.z;
+            float3 xProjection = UNITY_SAMPLE_TEX2DARRAY(groundTextures, float3(scaledWorldPos.y, scaledWorldPos.z, textureIndex)) * blendAxes.x;
+            float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(groundTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
+            float3 zProjection = UNITY_SAMPLE_TEX2DARRAY(groundTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)) * blendAxes.z;
             return xProjection + yProjection + zProjection;
         }
 
@@ -148,7 +148,7 @@ Shader "Custom/TempMoistBased"
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            float3 normalFromMap = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex * 150)).rgb;
+            float3 normalFromMap = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex * _TextureNoiseScale)).rgb;
             
             float2 uv = IN.uv_MainTex;
             float3 worldNormal = normalize(normalFromMap + IN.worldNormal);

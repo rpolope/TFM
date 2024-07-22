@@ -44,7 +44,10 @@ namespace Jobs
                         SpawnPoints.Add(candidate);
                         int cellX = Mathf.FloorToInt(candidate.x / CellSize);
                         int cellY = Mathf.FloorToInt(candidate.y / CellSize);
-                        Grid[cellX + cellY * Width] = Points.Length;
+                        if (cellX >= 0 && cellX < Width && cellY >= 0 && cellY < Height)
+                        {
+                            Grid[cellX + cellY * Width] = Points.Length;
+                        }
                         candidateAccepted = true;
                         break;
                     }
@@ -63,27 +66,31 @@ namespace Jobs
             {
                 int cellX = Mathf.FloorToInt(candidate.x / cellSize);
                 int cellY = Mathf.FloorToInt(candidate.y / cellSize);
-                int searchStartX = Mathf.Max(0, cellX - 2);
-                int searchEndX = Mathf.Min(cellX + 2, width - 1);
-                int searchStartY = Mathf.Max(0, cellY - 2);
-                int searchEndY = Mathf.Min(cellY + 2, height - 1);
 
-                for (int x = searchStartX; x <= searchEndX; x++)
+                if (cellX >= 0 && cellX < width && cellY >= 0 && cellY < height)
                 {
-                    for (int y = searchStartY; y <= searchEndY; y++)
+                    int searchStartX = Mathf.Max(0, cellX - 2);
+                    int searchEndX = Mathf.Min(cellX + 2, width - 1);
+                    int searchStartY = Mathf.Max(0, cellY - 2);
+                    int searchEndY = Mathf.Min(cellY + 2, height - 1);
+
+                    for (int x = searchStartX; x <= searchEndX; x++)
                     {
-                        int pointIndex = grid[x + y * width] - 1;
-                        if (pointIndex != -1)
+                        for (int y = searchStartY; y <= searchEndY; y++)
                         {
-                            float sqrDst = (candidate - points[pointIndex]).sqrMagnitude;
-                            if (sqrDst < radius * radius)
+                            int pointIndex = grid[x + y * width] - 1;
+                            if (pointIndex != -1 && pointIndex < points.Length)
                             {
-                                return false;
+                                float sqrDst = (candidate - points[pointIndex]).sqrMagnitude;
+                                if (sqrDst < radius * radius)
+                                {
+                                    return false;
+                                }
                             }
                         }
                     }
+                    return true;
                 }
-                return true;
             }
             return false;
         }

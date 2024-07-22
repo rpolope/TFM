@@ -13,7 +13,7 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
 
-    private const int YieldFrequency = 10;
+    private const int YieldFrequency = 5;
 
     public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk, AssetType assetType)
     {
@@ -106,7 +106,7 @@ public static class ObjectPlacer
         };
     }
 
-    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out LayerMask layer, float raycastHeight)
+    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out int layer, float raycastHeight)
     {
         var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
         if (Physics.Raycast(ray, out var hit))
@@ -124,12 +124,12 @@ public static class ObjectPlacer
         return false;
     }
 
-    private static bool IsPositionValid(Vector3 worldPos, LayerMask layerMask, BiomeAsset asset)
+    private static bool IsPositionValid(Vector3 worldPos, int layer, BiomeAsset asset)
     {
         var heightScale = LandscapeManager.Instance.terrainData.parameters.heightScale;
         var height = worldPos.y;
 
-        return !layerMask.Equals(Water.WaterLayerMask) &&
+        return layer != Water.WaterLayer &&
                height >= asset.minHeight * heightScale &&
                height <= asset.maxHeight * heightScale;
     }

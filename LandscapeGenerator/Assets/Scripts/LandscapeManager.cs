@@ -1,13 +1,9 @@
 using System;
-using System.Linq;
 using Jobs;
-using TreeEditor;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
@@ -62,8 +58,8 @@ public class LandscapeManager : MonoBehaviour{
 
         GenerateMap();
         
-        var relativeInitialLatitude = (int)(((initialLatitude + 90f) / 180f) * MapHeight);
-        var relativeInitialLongitude = (int)(((initialLongitude + 90f) / 180f) * MapWidth);
+        var relativeInitialLatitude = (int)((initialLatitude + 90f) / 180f * MapHeight);
+        var relativeInitialLongitude = (int)((initialLongitude + 90f) / 180f * MapWidth);
         Viewer.ChunkCoord = new int2(relativeInitialLongitude, relativeInitialLatitude);
         SetViewerInitPos(relativeInitialLongitude, relativeInitialLatitude);
 
@@ -147,11 +143,6 @@ public class LandscapeManager : MonoBehaviour{
 	private void Update()
 	{
 		ChunksManager.Update();
-	}
-
-	public static void GenerateStaticMoistureMap(NoiseParameters moistureParameters)
-	{
-		MoistureMap = MapGenerator.GenerateNoiseMap(MapWidth * MapHeight, new int2(), moistureParameters);
 	}
 
 	private void GenerateMoistureMapFromTexture()
