@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4ccead9fae84dc6b80ad04f91c594f3, type: 3}
+  m_Name: MedRocks
+  m_EditorClassIdentifier: 
+  type: 1
+  size: 2
+  biomes: 06000000
+  gameObjects:
+  - {fileID: 1291954423120672, guid: c6fe0381847dcbd49882de385243245a, type: 3}
+  - {fileID: 1346384188866020, guid: 69b54264a2c33f9409434d043441552c, type: 3}
+  - {fileID: 1100702819137354, guid: 32f3a0c748d309c42b4aa860d4cc92aa, type: 3}
+  - {fileID: 100010, guid: 76075d4f24491b84eb0b4ac914362e3f, type: 3}
+  - {fileID: 100010, guid: 358464627c45ed2459452fec5a7663e0, type: 3}
+  - {fileID: 100012, guid: dceeca3e930a413458913fd2f889e527, type: 3}
+  - {fileID: 100012, guid: b94f8f8da47ae2a4c81242eb6b7d3536, type: 3}
+  - {fileID: 100012, guid: 1ee76940f560f654fbbe86776c26942b, type: 3}
+  - {fileID: 100012, guid: 42b65c30a64bfc9438498b2acee449a8, type: 3}
+  - {fileID: 100012, guid: 0c076a1a077b8b04aaa5c16a2af6d4fe, type: 3}
+  - {fileID: 100012, guid: cc97f7d64a5146f49895148c51f018b2, type: 3}
+  - {fileID: 100000, guid: 940d55d4117386f4f9398ea3ff52d4cd, type: 3}
+  - {fileID: 100000, guid: d6b40ce3457ff954e8faab16436c9d29, type: 3}
+  - {fileID: 100000, guid: 129cfb255bc090342ac36842d5d2d4ef, type: 3}
+  - {fileID: 100000, guid: f282d9fb9b399dd4384b20aba08642fb, type: 3}
+  - {fileID: 100000, guid: fb5464049dae54247bf24c0e536cd6b4, type: 3}
+  - {fileID: 1000012968262300, guid: 30b99e7dc1382e346a7f9789de00de5e, type: 3}
+  - {fileID: 100000, guid: 083e56e07a6e31f47bda0bab778d3ec8, type: 3}
+  - {fileID: 1000010869019282, guid: d7ba4fe833670a140b9b6085652f0e26, type: 3}
+  - {fileID: 100000, guid: d9c3d22cdfbbcfd4f8d8019ff97a0f2e, type: 3}
+  - {fileID: 1000011949594382, guid: 75fa8bf3a73ee6b4da0c7a2c6d3db6a1, type: 3}
+  - {fileID: 100000, guid: ad1f5855a33f0694886cbd301d99cc40, type: 3}
+  - {fileID: 100000, guid: c445b94c5f10cc14db838116d8e08868, type: 3}
+  - {fileID: 100000, guid: 55f94b3dfaaba26458dbf470efc8cfa4, type: 3}
+  - {fileID: 100000, guid: 6f6a773cf2d27e24fa51d3392d6a241a, type: 3}
+  - {fileID: 100000, guid: 87983935f31cb20419d017addd855376, type: 3}
+  - {fileID: 100000, guid: 5f36b57d675b1444cb2203b7a6cac6cb, type: 3}
+  - {fileID: 100000, guid: 977e7278d3486f1489724a6d226b9ca0, type: 3}
+  - {fileID: 100000, guid: 29599744f5049f148a2f191725b6d22b, type: 3}
+  - {fileID: 100000, guid: 3cdca21e3ff972741b53a424624c9654, type: 3}
+  minHeight: 0
+  maxHeight: 1
+  radius: 10
+  density: 0.468
+  normalOrientation: 0.392

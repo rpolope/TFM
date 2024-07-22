@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4ccead9fae84dc6b80ad04f91c594f3, type: 3}
+  m_Name: BigTrees
+  m_EditorClassIdentifier: 
+  type: 0
+  size: 3
+  biomes: 06000000
+  gameObjects:
+  - {fileID: 1970681966781816, guid: 6c9e41e24d2bc6b488c927f43944457b, type: 3}
+  - {fileID: 1970681966781816, guid: 84bb771a8038d2648bd2421451c4018d, type: 3}
+  - {fileID: 1970681966781816, guid: 7d39a68237432ea41ae92c75eb21dcf4, type: 3}
+  - {fileID: 1970681966781816, guid: a7984f59c227d0240b9771d2797a085c, type: 3}
+  minHeight: 0
+  maxHeight: 1
+  radius: 15
+  density: 0.822
+  normalOrientation: 0.347
