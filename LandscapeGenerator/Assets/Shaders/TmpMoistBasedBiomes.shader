@@ -1,4 +1,4 @@
-Shader "Custom/TempMoistBased"
+Shader "Custom/TmpMoistBasedBiomes"
 {
     Properties
     {

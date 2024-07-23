@@ -455,7 +455,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			var mountainTextures = Shader.PropertyToID("mountainTextures");
 			var peakTextures = Shader.PropertyToID("peakTextures");
 			
-			const string materialPath = "Assets/Materials/TempMoistBased.mat";
+			const string materialPath = "Assets/Materials/TmpMoistBasedBiomes.mat";
 
 			
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
