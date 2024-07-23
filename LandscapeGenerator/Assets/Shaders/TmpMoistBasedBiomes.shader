@@ -98,7 +98,7 @@ Shader "Custom/TempMoistBased"
             return getInterpolatedValue(moisture, 0.3f, 0.5f, 0.66f, dryColor, medColor, wetColor);
         }
 
-        float3 lerpTemperatureColor(float temperature, float moisture, float3 worldNormal, float3 worldPos) {
+        float3 lerpTemperatureColor(float temperature, float moisture, float3 worldPos, float3 worldNormal) {
 
             float normalizedTempRange = inverseLerp(-30, 30, temperature);
 

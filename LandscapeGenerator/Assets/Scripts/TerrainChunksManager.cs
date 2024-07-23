@@ -2,13 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class TerrainChunksManager : MonoBehaviour{
 	private static readonly float ViewerMoveThresholdForChunkUpdate = TerrainChunk.WorldSize * 0.5f;
@@ -464,6 +461,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			const string debugTexturesPath = "Assets/Textures/Debugging/";
 			const string texturesPath = "Assets/Textures/Biomes/Ground/";
+			
 			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
 			
 			Material.EnableKeyword("_NORMALMAP");
@@ -589,16 +587,16 @@ public class TerrainChunksManager : MonoBehaviour{
 			};
 			
 
-			Material.SetTexture (baseTextures, GenerateTextureArray (groundTexturesDictionary.Values.ToArray()));
+			Material.SetTexture (baseTextures, GenerateTextureArray (debugBiomesTextures.Values.ToArray()));
 			// Material.SetTexture (cliffTextures, GenerateTextureArray (cliffTexturesDictionary.Values.ToArray()));
 			// Material.SetTexture (shoreTextures, GenerateTextureArray (shoreTexturesDictionary.Values.ToArray()));
 			// Material.SetTexture (mountainTextures, GenerateTextureArray (mountainTexturesDictionary.Values.ToArray()));
-			Material.SetFloat("_WaterLevel", terrainData != null ? terrainData.parameters.waterLevel : Water.HeightLevel);
-			Material.SetFloat("_MaxHeight", terrainData != null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
+			Material.SetFloat("_WaterLevel", terrainData is not null ? terrainData.parameters.waterLevel : Water.HeightLevel);
+			Material.SetFloat("_MaxHeight", terrainData is not null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
 		}
 		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {
 			
-			const int textureSize = 500;
+			const int textureSize = 512;
 			const TextureFormat textureFormat = TextureFormat.RGB565;
 
 			var textureArray = new Texture2DArray (textureSize, textureSize, textures.Length, textureFormat, true);
