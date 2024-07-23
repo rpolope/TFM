@@ -500,7 +500,7 @@ public class TerrainChunksManager : MonoBehaviour{
 				{ ClimateType.WoodlandShrubland, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Ground_Small.jpg", typeof(Texture2D)) },
 				{ ClimateType.TemperateGrasslandColdDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Desert_Shore_Large.jpg", typeof(Texture2D)) },
 				{ ClimateType.SubtropicalDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(texturesPath + "Rocks 2.png", typeof(Texture2D)) }
-			};
+			}; 
 			
 			var mockBiomesTextures = new Dictionary<ClimateType, Texture2D>()
 			{
