@@ -852,6 +852,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 797567966}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1045310100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1045310102}
+  - component: {fileID: 1045310101}
+  m_Layer: 0
+  m_Name: BiomeAssetsPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1045310101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045310100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa14ab3dc330aed4a846b0035e5f5620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawner: {fileID: 1045310102}
+--- !u!4 &1045310102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045310100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5334587, y: 140.59068, z: -22.62018}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1462233067
 GameObject:
   m_ObjectHideFlags: 0
@@ -969,6 +1014,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 16f1627e508b6c54e93fbb9ca1cac04c, type: 2}
   - {fileID: 11400000, guid: cb3570e360a28f54a902da2cebca8f19, type: 2}
   - {fileID: 11400000, guid: 626943fa5e2645c42a1e5e22458e76ce, type: 2}
+  - {fileID: 11400000, guid: b2724e138b44a0143896066ef2913b7c, type: 2}
+  - {fileID: 11400000, guid: 57deee80ba27e17479849ba5c1bb482c, type: 2}
+  - {fileID: 11400000, guid: 15465542ebc8bc241ade5eb038169e8d, type: 2}
+  - {fileID: 11400000, guid: c78d236638768034ea91a7d2f4ffe5f3, type: 2}
+  - {fileID: 11400000, guid: be34e8b67d283a542bd628299f774478, type: 2}
+  - {fileID: 11400000, guid: d6a829c02f0ae0e4193bb5b163b4d8ce, type: 2}
+  - {fileID: 11400000, guid: 1025417d750cc21419f06012cfdc8e86, type: 2}
 --- !u!1 &1916827185
 GameObject:
   m_ObjectHideFlags: 0
@@ -1009,3 +1061,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 1916827186}
   - {fileID: 716208525}
+  - {fileID: 1045310102}
