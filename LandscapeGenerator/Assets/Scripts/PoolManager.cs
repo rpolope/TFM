@@ -14,15 +14,14 @@ public class PoolManager : MonoBehaviour
         _poolParent = transform; 
     }
 
-    // Carga un cierto número de copias del prefab en el pool
     public void Load(GameObject prefab, int quantity = 1)
     {
         var goName = prefab.name;
-        if (!_pool.ContainsKey(goName)) // Si no existe el objeto a spawnear se agrega
+        if (!_pool.ContainsKey(goName)) 
         {
             _pool[goName] = new List<GameObject>();
         }
-        for (int i = 0; i < quantity; i++) // Se cargan todas las instancias requeridas
+        for (int i = 0; i < quantity; i++) 
         {
             var go = Instantiate(prefab, _poolParent, true);
             go.name = prefab.name;
@@ -32,7 +31,6 @@ public class PoolManager : MonoBehaviour
         }
     }
 
-    // Spawnea un objeto del pool
     public GameObject Spawn(GameObject prefab)
     {
         if (!_pool.ContainsKey(prefab.name) || _pool[prefab.name].Count == 0)
@@ -49,7 +47,6 @@ public class PoolManager : MonoBehaviour
         return go;
     }
 
-    // Spawnea un objeto del pool en una posición y con rotación específicas
     public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         var go = Spawn(prefab);
@@ -59,7 +56,6 @@ public class PoolManager : MonoBehaviour
         return go;
     }
     
-    // Devuelve un objeto al pool
     public void Despawn(GameObject go)
     {
         if (!_pool.ContainsKey(go.name))
