@@ -7,7 +7,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         _TemperatureNoiseScale ("Temperature Distorsion Scale", Float) = 1.0
         _MoistureNoiseTex ("Moisture Noise Texture", 2D) = "white" {}
         _MoistureNoiseScale ("Moisture Noise Scale", Float) = 1.0
-        _NormalMap ("Normal Map", 2D) = "bump" {}
+        _BumpMap ("Bump Map", 2D) = "bump" {}
         _TextureNoiseScale ("Texture Scale", Float) = 1.0
         _WaterLevel ("Water Level", Float) = 10
     }
@@ -46,7 +46,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         sampler2D _MainTex;
         sampler2D _TempNoiseTex;
         sampler2D _MoistureNoiseTex;
-        sampler2D _NormalMap;
+        sampler2D _BumpMap;
 
         float _TextureNoiseScale;
         float _TemperatureNoiseScale;
@@ -55,10 +55,12 @@ Shader "Custom/TmpMoistBasedBiomes"
 
         struct Input {
             float2 uv_MainTex;
+            float2 uv_BumpMap;
             float3 worldPos;
-            float3 worldNormal;
-            INTERNAL_DATA
+            float3 worldNormal; INTERNAL_DATA
         };
+
+
 
         float inverseLerp(float a, float b, float value) {
             return saturate((value-a)/(b-a));
@@ -78,6 +80,38 @@ Shader "Custom/TmpMoistBasedBiomes"
             float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(groundTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
             float3 zProjection = UNITY_SAMPLE_TEX2DARRAY(groundTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)) * blendAxes.z;
             return xProjection + yProjection + zProjection;
+        }
+
+        int GetBiome(float moisture, float heat)
+        {
+            float maxTemp = 30;
+            float minTemp = -30;
+            
+            float temperature = heat * (maxTemp - minTemp) + minTemp;
+
+            int closestBiome = -1;
+            float closestDistance = 10E5;
+
+            for (int biome = 0; biome < NUM_BIOMES; biome++)
+            {
+                if (temperature >= biomeMinTemp[biome] && temperature <= biomeMaxTemp[biome] &&
+                    moisture >= biomeMinMoist[biome] && moisture <= biomeMaxMoist[biome]) 
+                {
+                    return biome;
+                }
+            
+                float tempDistance = min(abs(temperature - biomeMinTemp[biome]), abs(temperature - biomeMaxTemp[biome]));
+                float moistDistance = min(abs(moisture - biomeMinMoist[biome]), abs(moisture - biomeMaxMoist[biome]));
+                float distance = tempDistance + moistDistance;
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestBiome = biome;
+                }
+            }
+
+            return closestBiome;
         }
 
         float3 getInterpolatedValue(float value, float value1, float value2, float value3, float3 color1, float3 color2, float3 color3) {
@@ -148,10 +182,11 @@ Shader "Custom/TmpMoistBasedBiomes"
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            float3 normalFromMap = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex * _TextureNoiseScale)).rgb;
+            float3 normalFromMap = UnpackNormal(tex2D(_BumpMap, IN.uv_MainTex * _TextureNoiseScale)).rgb;
+            float3 worldNormal = WorldNormalVector (IN, o.Normal);
             
             float2 uv = IN.uv_MainTex;
-            float3 worldNormal = normalize(normalFromMap + IN.worldNormal);
+            // float3 normal = normalize(normalFromMap + IN.worldNormal);
             float height = IN.worldPos.y;
             float latitude = tex2D(_MainTex, uv).r;
             float temperature = getTemperature(latitude, uv, height);
@@ -164,14 +199,15 @@ Shader "Custom/TmpMoistBasedBiomes"
             // {
             //     color = setBeachColor(IN, worldNormal);
             // }
-                
-            // float3 debugColor = normalize(float3(latitude, latitude, latitude) + lerp(float3(1,0,0),float3(0,0,1),moisture));
-            float3 debugColor = lerp(float3(0,0,1),float3(1,0,0), inverseLerp(-30, 30, temperature));
+
+            float3 blendAxes = abs(worldNormal);
+            blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+            float3 debugColor = UnpackNormal (tex2D (_BumpMap, IN.uv_BumpMap));
             o.Albedo = color;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
             o.Alpha = 1.0;
-            o.Normal = worldNormal;
+            o.Normal = UnpackNormal (tex2D (_BumpMap, IN.uv_MainTex * _TextureNoiseScale));
         }
         ENDCG
     }
