@@ -6,7 +6,7 @@ public class BiomeAsset: ScriptableObject
 {
     public AssetType type;
     public AssetSize size;
-    public ClimateType[] biomes;
+    public BiomeType[] biomes;
     public List<GameObject> gameObjects;
     public float minHeight;
     public float maxHeight;

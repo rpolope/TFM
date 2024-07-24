@@ -12,6 +12,7 @@ public static class MeshGenerator
         {
             Vertices = meshData.Vertices,
             UVs = meshData.UVs,
+            BumpUVs = meshData.BumpUVs,
             Triangles = meshData.Triangles,
             Resolution = resolution,
             ChunkFullResolution = terrainParameters.meshParameters.resolution,
@@ -50,6 +51,7 @@ public class MeshData {
     public NativeArray<Vector3> Normals;
     public NativeArray<int> Triangles;
     public NativeArray<float2> UVs;
+    public NativeArray<float2> BumpUVs;
 
     public readonly int LODScale;
 
@@ -61,8 +63,9 @@ public class MeshData {
         Normals = new NativeArray<Vector3>(resolution * resolution, Allocator.Persistent);
         Triangles = new NativeArray<int>((resolution - 1) * (resolution - 1) * 6, Allocator.Persistent);
         UVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
+        BumpUVs = new NativeArray<float2>(resolution * resolution, Allocator.Persistent);
     }
-
+    
     public Mesh CreateMesh() {
         Mesh mesh = new Mesh();
         int[] trianglesArray = new int[Triangles.Length];
@@ -71,6 +74,7 @@ public class MeshData {
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(trianglesArray, 0);
         mesh.SetUVs(0, UVs);
+        mesh.SetUVs(1, BumpUVs);
         mesh.SetNormals(Normals);
         mesh.RecalculateBounds();
         
@@ -85,6 +89,7 @@ public class MeshData {
         Normals.Dispose();
         Triangles.Dispose();
         UVs.Dispose();
+        BumpUVs.Dispose();
     }
 }
 

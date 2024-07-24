@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using static TerrainChunksManager;
 
@@ -13,15 +14,17 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
 
-    private const int YieldFrequency = 5;
+    private const int YieldFrequency = 3;
 
-    public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk, AssetType assetType)
+    
+    public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk)
     {
-        var assets = BiomesAssetsManager.GetAssetsForType(chunk.Biome.Assets, assetType);
+        var assets = BiomesAssetsManager.GetAssetsForBiome(chunk.Biome.BiomeType);
+        
         if (assets == null)
         {
             SetAssetsParent(chunk);
-            Debug.LogWarning("No assets found for biome: " + chunk.Biome.ClimateType);
+            Debug.LogWarning("No assets found for biome: " + chunk.Biome.BiomeType);
             yield break;
         }
 
@@ -37,7 +40,8 @@ public static class ObjectPlacer
         foreach (var asset in orderedAssets)
         {
             float radius = asset.radius;
-            List<Vector3> centerPoints = GetCenterPointsForSize(asset.size, chunk.WorldPos);
+            var considerLargerAssets = asset.type.Equals(AssetType.Organic);
+            List<Vector3> centerPoints = GetCenterPointsForSize(asset.size, chunk.WorldPos, considerLargerAssets);
 
             foreach (var centerPoint in centerPoints)
             {
@@ -60,10 +64,14 @@ public static class ObjectPlacer
                         if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
                         PlaceAsset(asset, hitPosition, rotation, assetsParent);
-                        PlacedPositions[asset.size].Add(worldPos);
+
+                        if (asset.type is AssetType.Organic)
+                        {
+                            PlacedPositions[asset.size].Add(worldPos);
+                        }
+                        
                         assetsPlacedCount++;
 
-                        // Yield every few objects to reduce stutter
                         if (assetsPlacedCount % YieldFrequency  == 0)
                         {
                             yield return null;
@@ -92,16 +100,18 @@ public static class ObjectPlacer
         return assetsParent;
     }
 
-    private static List<Vector3> GetCenterPointsForSize(AssetSize size, Vector3 worldPos)
+    private static List<Vector3> GetCenterPointsForSize(AssetSize size, Vector3 worldPos, bool considerLargerAssets)
     {
         var offset = TerrainChunk.WorldSize * 0.5f;
         var defaultCenterPoint = worldPos + new Vector3(-offset, 0, -offset);
+
+        if (!considerLargerAssets) return new List<Vector3> { defaultCenterPoint };
         
         return size switch
         {
             AssetSize.Large => new List<Vector3> { defaultCenterPoint },
-            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large].ToList() : GetCenterPointsForSize(AssetSize.Large, worldPos),
-            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium].ToList() : GetCenterPointsForSize(AssetSize.Medium, worldPos),
+            AssetSize.Medium => PlacedPositions[AssetSize.Large].Count > 0 ? PlacedPositions[AssetSize.Large].ToList() : GetCenterPointsForSize(AssetSize.Large, worldPos, true),
+            AssetSize.Small => PlacedPositions[AssetSize.Medium].Count > 0 ? PlacedPositions[AssetSize.Medium].ToList() : GetCenterPointsForSize(AssetSize.Medium, worldPos, true),
             _ => new List<Vector3>()
         };
     }
@@ -136,13 +146,14 @@ public static class ObjectPlacer
 
     private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
     {
+        
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
-        var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position);
-        instance.transform.up = GeUpVector(rotation, asset.normalOrientation);
+        var pivotRotation = Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
+        var upVector = GeUpVector(rotation, asset.normalOrientation);
+        var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation);
+        instance.transform.up = upVector;
         instance.transform.parent = parent;
-        instance.transform.rotation *= Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
-        instance.transform.position -= instance.transform.up * 0.1f;
     }
 
     private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)

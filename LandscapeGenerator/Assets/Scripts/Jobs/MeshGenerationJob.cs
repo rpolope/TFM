@@ -11,6 +11,7 @@ namespace Jobs
     {
         public NativeArray<Vector3> Vertices;
         public NativeArray<float2> UVs;
+        public NativeArray<float2> BumpUVs;
         [NativeDisableParallelForRestriction]
         public NativeArray<int> Triangles;
         [NativeDisableParallelForRestriction]
@@ -50,6 +51,11 @@ namespace Jobs
                     ((float)z * LODScale) / ChunkFullResolution
                 );
             }
+            
+            BumpUVs[index] = new float2(
+                ((float)x * LODScale) / ChunkFullResolution,
+                ((float)z * LODScale) / ChunkFullResolution
+            );
             
             if (index < FacesCount)
             {

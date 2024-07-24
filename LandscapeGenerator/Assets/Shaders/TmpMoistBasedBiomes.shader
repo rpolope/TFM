@@ -8,6 +8,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         _MoistureNoiseTex ("Moisture Noise Texture", 2D) = "white" {}
         _MoistureNoiseScale ("Moisture Noise Scale", Float) = 1.0
         _BumpMap ("Bump Map", 2D) = "bump" {}
+        _BumpMapScale ("Bump Map Scale", Float) = 1.0
         _TextureNoiseScale ("Texture Scale", Float) = 1.0
         _WaterLevel ("Water Level", Float) = 10
     }
@@ -49,6 +50,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         sampler2D _BumpMap;
 
         float _TextureNoiseScale;
+        float _BumpMapScale;
         float _TemperatureNoiseScale;
         float _MoistureNoiseScale;
         float _WaterLevel;
@@ -203,11 +205,11 @@ Shader "Custom/TmpMoistBasedBiomes"
             float3 blendAxes = abs(worldNormal);
             blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
             float3 debugColor = UnpackNormal (tex2D (_BumpMap, IN.uv_BumpMap));
-            o.Albedo = color;
+            o.Albedo = debugColor;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
             o.Alpha = 1.0;
-            o.Normal = UnpackNormal (tex2D (_BumpMap, IN.uv_MainTex * _TextureNoiseScale));
+            o.Normal = UnpackNormal (tex2D (_BumpMap, IN.uv_BumpMap * _BumpMapScale));
         }
         ENDCG
     }

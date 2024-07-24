@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public enum ClimateType
+public enum BiomeType
 {
     Default,
     Snow,
@@ -20,15 +20,15 @@ public enum ClimateType
 
 struct BiomeInfo
 {
-    public ClimateType climate;
+    public BiomeType Biome;
     public float minTemp;
     public float maxTemp;
     public float minMoist;
     public float maxMoist;
 
-    public BiomeInfo(ClimateType climate, float minTemp, float maxTemp, float minMoist, float maxMoist)
+    public BiomeInfo(BiomeType biome, float minTemp, float maxTemp, float minMoist, float maxMoist)
     {
-        this.climate = climate;
+        this.Biome = biome;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.minMoist = minMoist;
@@ -40,19 +40,19 @@ public class BiomesManager : MonoBehaviour
 {
     internal static readonly BiomeInfo[] BiomesData = new BiomeInfo[]
     {
-        new (ClimateType.Snow, -30.0f, -10.0f, 0.0f, 1f),
-        new (ClimateType.Tundra, -10.0f, -5.0f, 0.222f, 0.500f),
-        new (ClimateType.BorealForest, -10.0f, -5.0f, 0.444f, 0.583f),
-        new (ClimateType.TemperateConiferousForest, -5.0f, 5.0f, 0.333f, 0.889f),
-        new (ClimateType.TemperateSeasonalForest, -5.0f, 5.0f, 0.111f, 0.444f),
-        new (ClimateType.TropicalSeasonalForestSavanna, 5.0f, 10.0f, 0.111f, 0.556f),
-        new (ClimateType.TropicalRainforest, 5.0f, 10.0f, 0.556f, 0.889f),
-        new (ClimateType.WoodlandShrubland, 0.0f, 5.0f, 0.0f, 0.222f),
-        new (ClimateType.TemperateGrasslandColdDesert, -15.0f, -5.0f, 0.0f, 0.111f),
-        new (ClimateType.SubtropicalDesert, 10.0f, 30.0f, 0.0f, 0.222f)
+        new (BiomeType.Snow, -30.0f, -10.0f, 0.0f, 1f),
+        new (BiomeType.Tundra, -10.0f, -5.0f, 0.222f, 0.500f),
+        new (BiomeType.BorealForest, -10.0f, -5.0f, 0.444f, 0.583f),
+        new (BiomeType.TemperateConiferousForest, -5.0f, 5.0f, 0.333f, 0.889f),
+        new (BiomeType.TemperateSeasonalForest, -5.0f, 5.0f, 0.111f, 0.444f),
+        new (BiomeType.TropicalSeasonalForestSavanna, 5.0f, 10.0f, 0.111f, 0.556f),
+        new (BiomeType.TropicalRainforest, 5.0f, 10.0f, 0.556f, 0.889f),
+        new (BiomeType.WoodlandShrubland, 0.0f, 5.0f, 0.0f, 0.222f),
+        new (BiomeType.TemperateGrasslandColdDesert, -15.0f, -5.0f, 0.0f, 0.111f),
+        new (BiomeType.SubtropicalDesert, 10.0f, 30.0f, 0.0f, 0.222f)
     };
 
-    private static Dictionary<ClimateType, int> _biomesCount = new Dictionary<ClimateType, int>();
+    private static Dictionary<BiomeType, int> _biomesCount = new Dictionary<BiomeType, int>();
     
     public List<BiomeAsset> biomesAssets;
 
@@ -82,13 +82,13 @@ public class BiomesManager : MonoBehaviour
                 
                 _biomes[j, i] = new Biome(heat, moisture);
                 
-                if (_biomesCount.ContainsKey(_biomes[j, i].ClimateType))
+                if (_biomesCount.ContainsKey(_biomes[j, i].BiomeType))
                 {
-                    _biomesCount[_biomes[j, i].ClimateType]++;
+                    _biomesCount[_biomes[j, i].BiomeType]++;
                 }
                 else
                 {
-                    _biomesCount[_biomes[j, i].ClimateType] = 1;
+                    _biomesCount[_biomes[j, i].BiomeType] = 1;
                 }
             }
         }
@@ -107,9 +107,10 @@ public class BiomesManager : MonoBehaviour
         return _biomes[coordinates.x, coordinates.y];
     }
 
-    public static GameObject Instantiate(GameObject biomeAsset, Vector3 position)
+    public static GameObject Instantiate(GameObject biomeAsset, Vector3 position, Quaternion rotation)
     {
-        return Instantiate(biomeAsset, position, Quaternion.identity);
+        // return Instantiate(biomeAsset, position, Quaternion.identity);
+        return _assetsManager.GetAsset(biomeAsset, position, rotation);
     }
 
     private void OnValidate()
@@ -124,7 +125,7 @@ public class Biome
     public float Moisture { get; private set; }
     public float Heat { get; private set; }
     public Color[] ColorGradient { get; private set; }
-    public ClimateType ClimateType { get; set; }
+    public BiomeType BiomeType { get; set; }
     public List<BiomeAsset> Assets { get; set; }
     
     private const float MaxTemperature = 30.0f;
@@ -134,31 +135,31 @@ public class Biome
     {
         Moisture = moisture;
         Heat = heat;
-        ClimateType = GetClimateType(moisture, heat);
+        BiomeType = GetClimateType(moisture, heat);
         // TerrainParameters = new TerrainParameters(new NoiseParameters(GetNoiseType()), new MeshParameters(0.1f));
         TerrainParameters = new TerrainParameters(new NoiseParameters(NoiseType.Perlin), new MeshParameters(0.1f));
-        Assets = BiomesAssetsManager.GetAssetsForBiome(ClimateType);
+        Assets = BiomesAssetsManager.GetAssetsForBiome(BiomeType);
     }
 
     public void Update() { }
 
     private NoiseType GetNoiseType()
     {
-        return ClimateType switch
+        return BiomeType switch
         {
-            ClimateType.TropicalSeasonalForestSavanna or ClimateType.TemperateSeasonalForest or ClimateType.BorealForest => NoiseType.Perlin,
-            ClimateType.TropicalRainforest => NoiseType.Simplex,
-            ClimateType.TemperateGrasslandColdDesert or ClimateType.SubtropicalDesert or ClimateType.WoodlandShrubland => NoiseType.Voronoi,
-            ClimateType.Tundra or ClimateType.Snow or ClimateType.Snow => NoiseType.Ridged,
+            BiomeType.TropicalSeasonalForestSavanna or BiomeType.TemperateSeasonalForest or BiomeType.BorealForest => NoiseType.Perlin,
+            BiomeType.TropicalRainforest => NoiseType.Simplex,
+            BiomeType.TemperateGrasslandColdDesert or BiomeType.SubtropicalDesert or BiomeType.WoodlandShrubland => NoiseType.Voronoi,
+            BiomeType.Tundra or BiomeType.Snow or BiomeType.Snow => NoiseType.Ridged,
             _ => throw new ArgumentOutOfRangeException(),
         };
     }
 
-    private static ClimateType GetClimateType(float moisture, float heat)
+    private static BiomeType GetClimateType(float moisture, float heat)
     {
         var temperature = heat * (MaxTemperature - MinTemperature) + MinTemperature;
 
-        ClimateType? closestClimateType = null;
+        BiomeType? closestClimateType = null;
         float closestDistance = float.MaxValue;
 
         foreach (var biome in BiomesManager.BiomesData)
@@ -166,7 +167,7 @@ public class Biome
             if (temperature >= biome.minTemp && temperature <= biome.maxTemp &&
                 moisture >= biome.minMoist && moisture <= biome.maxMoist) 
             {
-                return biome.climate;
+                return biome.Biome;
             }
         
             float tempDistance = Math.Min(Math.Abs(temperature - biome.minTemp), Math.Abs(temperature - biome.maxTemp));
@@ -176,12 +177,12 @@ public class Biome
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestClimateType = biome.climate;
+                closestClimateType = biome.Biome;
             }
         }
 
         // If no exact match, return the closest climate type
-        return closestClimateType ?? ClimateType.Default;
+        return closestClimateType ?? BiomeType.Default;
     }
 
 }
