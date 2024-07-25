@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering.Universal.Internal;
 
 public class BiomesAssetsManager
 {
@@ -51,9 +50,30 @@ public class BiomesAssetsManager
         return biomeAssets?.Where(b => b.type == type).ToList();
     }
 
-    public GameObject GetAsset(GameObject biomeAsset, Vector3 position, Quaternion rotation)
+    public static GameObject SpawnAsset(GameObject biomeAsset, Vector3 position, Quaternion rotation)
     {
         return _biomeAssetsPool.Spawn(biomeAsset, position, rotation);
+    }
+    
+    public static void DespawnAsset(GameObject biomeAsset)
+    {
+        _biomeAssetsPool.Despawn(biomeAsset);
+    }
+
+    public static void SpawnAssets(List<BiomeAsset> biomeAssets)
+    {
+        foreach (var biomeAsset in biomeAssets)
+        {
+            _biomeAssetsPool.Spawn(biomeAsset.instantiatedGameObjects);
+        }
+    }
+
+    public static void DespawnAssets(List<BiomeAsset> biomeAssets)
+    {
+        foreach (var biomeAsset in biomeAssets)
+        {
+            _biomeAssetsPool.Despawn(biomeAsset.instantiatedGameObjects);
+        }
     }
 }
 

@@ -30,6 +30,14 @@ public class PoolManager : MonoBehaviour
             _pool[goName].Add(go);
         }
     }
+    
+    public void Spawn(List<GameObject> gameObjects)
+    {
+        foreach (var go in gameObjects)
+        {
+            Spawn(go);
+        }
+    }
 
     public GameObject Spawn(GameObject prefab)
     {
@@ -54,6 +62,14 @@ public class PoolManager : MonoBehaviour
         t.position = position;
         t.rotation = rotation;
         return go;
+    }
+    
+    public void Despawn(List<GameObject> gameObjects)
+    {
+        foreach (var go in gameObjects)
+        {
+            Despawn(go);
+        }
     }
     
     public void Despawn(GameObject go)

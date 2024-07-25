@@ -11,6 +11,8 @@ public class Water
 
     private static Material _material;
     private static bool _fromEditor;
+
+    public GameObject GameObject => _gameObject;
     
     static Water()
     {
@@ -47,13 +49,13 @@ public class Water
         {
             Object.Destroy(_gameObject.GetComponent<MeshCollider>());   
         }
-        // BoxCollider = GameObject.AddComponent<BoxCollider>();
+        BoxCollider = GameObject.AddComponent<BoxCollider>();
 
         _material ??= (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
         
         _gameObject.GetComponent<MeshRenderer>().sharedMaterial = _material;
-        _gameObject.layer = WaterLayer;
-        
+        _gameObject.layer = WaterLayer; // 4
+        _gameObject.isStatic = true;
         var transform = _gameObject.transform;
         transform.localScale = new Vector3(size/10, 1, size/10);
         transform.parent = parent;

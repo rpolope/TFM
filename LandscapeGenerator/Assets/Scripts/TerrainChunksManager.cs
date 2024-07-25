@@ -173,8 +173,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		
 		if (LandscapeManager.Instance.culling == CullingMode.Layer)
 		{
-			SetLayerRecursively(chunk.GameObject,
-				isCulled ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default"));
+			chunk.GameObject.layer = isCulled ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default");
 		}
 		else
 		{
@@ -183,17 +182,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		
 		chunk.SetColliderEnable(visible && chunk.LODIndex == 0);
 	}
-
-	private static void SetLayerRecursively(GameObject obj, int newLayer)
-	{
-		obj.layer = newLayer;
-
-		foreach (Transform child in obj.transform)
-		{
-			SetLayerRecursively(child.gameObject, newLayer);
-		}
-	}
-
+	
 	public class TerrainChunk
 	{
 		public const int Resolution = 129;
@@ -414,10 +403,12 @@ public class TerrainChunksManager : MonoBehaviour{
 				case 0 when !ObjectsPlaced:
 					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this));
 				
-					Transform.Find("Assets")?.gameObject.SetActive(true);
+					// Transform.Find("Assets")?.gameObject.SetActive(true);
 					break;
 				case 0 when ObjectsPlaced && !ObjectsVisible:
-					Transform.Find("Assets")?.gameObject.SetActive(true);
+
+					BiomesAssetsManager.SpawnAssets(Biome.Assets);
+					// Transform.Find("Assets")?.gameObject.SetActive(true);
 					ObjectsVisible = true;
 					break;
 				
@@ -425,7 +416,9 @@ public class TerrainChunksManager : MonoBehaviour{
 				{
 					if (LODIndex != 0 && ObjectsPlaced && ObjectsVisible)
 					{
-						Transform.Find("Assets")?.gameObject.SetActive(false);
+						// Transform.Find("Assets")?.gameObject.SetActive(false);
+						BiomesAssetsManager.DespawnAssets(Biome.Assets);
+
 						ObjectsVisible = false;
 					}
 

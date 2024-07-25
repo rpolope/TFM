@@ -107,12 +107,6 @@ public class BiomesManager : MonoBehaviour
         return _biomes[coordinates.x, coordinates.y];
     }
 
-    public static GameObject Instantiate(GameObject biomeAsset, Vector3 position, Quaternion rotation)
-    {
-        // return Instantiate(biomeAsset, position, Quaternion.identity);
-        return _assetsManager.GetAsset(biomeAsset, position, rotation);
-    }
-
     private void OnValidate()
     {
         biomesAssets?.RemoveAll(biomeAsset => biomeAsset == null || biomeAsset.gameObjects.Count == 0);

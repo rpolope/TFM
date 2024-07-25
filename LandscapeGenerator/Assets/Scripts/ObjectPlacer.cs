@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using UnityEditor.Search;
 using UnityEngine;
 using static TerrainChunksManager;
 
@@ -14,7 +14,7 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
 
-    private const int YieldFrequency = 3;
+    private const int YieldFrequency = 1;
 
     
     public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk)
@@ -23,13 +23,10 @@ public static class ObjectPlacer
         
         if (assets == null)
         {
-            SetAssetsParent(chunk);
             Debug.LogWarning("No assets found for biome: " + chunk.Biome.BiomeType);
             yield break;
         }
-
-        var assetsParent = SetAssetsParent(chunk);
-
+        
         foreach (var key in PlacedPositions.Keys.ToList())
         {
             PlacedPositions[key].Clear();
@@ -63,7 +60,7 @@ public static class ObjectPlacer
                     {
                         if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
-                        PlaceAsset(asset, hitPosition, rotation, assetsParent);
+                        PlaceAsset(asset, hitPosition, rotation);
 
                         if (asset.type is AssetType.Organic)
                         {
@@ -144,16 +141,16 @@ public static class ObjectPlacer
                height <= asset.maxHeight * heightScale;
     }
 
-    private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
+    private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation)
     {
         
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
         var pivotRotation = Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
         var upVector = GeUpVector(rotation, asset.normalOrientation);
-        var instance = BiomesManager.Instantiate(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation);
+        var instance = BiomesAssetsManager.SpawnAsset(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation);
         instance.transform.up = upVector;
-        instance.transform.parent = parent;
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
+        asset.instantiatedGameObjects.Add(instance);
     }
 
     private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)
