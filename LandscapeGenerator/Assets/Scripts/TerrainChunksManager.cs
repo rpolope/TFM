@@ -169,7 +169,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	
 	public class TerrainChunk
 	{
-		public const int Resolution = 121;
+		public const int Resolution = 105;
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public Vector3 Position { get; private set; }
