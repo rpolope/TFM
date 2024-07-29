@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -56,6 +55,7 @@ public class Water
         _gameObject.GetComponent<MeshRenderer>().sharedMaterial = _material;
         _gameObject.layer = WaterLayer; // 4
         _gameObject.isStatic = true;
+        _gameObject.name = "Water";
         var transform = _gameObject.transform;
         transform.localScale = new Vector3(size/10, 1, size/10);
         transform.parent = parent;

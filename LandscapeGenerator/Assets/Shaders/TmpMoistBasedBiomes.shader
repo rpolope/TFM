@@ -54,6 +54,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         float _TemperatureNoiseScale;
         float _MoistureNoiseScale;
         float _WaterLevel;
+        float _MaxHeight;
 
         struct Input {
             float2 uv_MainTex;
@@ -62,8 +63,6 @@ Shader "Custom/TmpMoistBasedBiomes"
             float3 worldNormal; INTERNAL_DATA
         };
 
-
-
         float inverseLerp(float a, float b, float value) {
             return saturate((value-a)/(b-a));
         }
@@ -71,7 +70,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         float getTemperature(float latitude, float2 uv, float height) {
             float temp = lerp(-30, 30, latitude);
             float distortion = tex2D(_TempNoiseTex, uv * _TemperatureNoiseScale).r;
-            float heightPerturb = height * 0.5f;
+            float heightPerturb = height * height/_MaxHeight;
             temp = temp - heightPerturb + distortion * 0.01;
             return temp;
         }
@@ -205,7 +204,7 @@ Shader "Custom/TmpMoistBasedBiomes"
             float3 blendAxes = abs(worldNormal);
             blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
             float3 debugColor = UnpackNormal (tex2D (_BumpMap, IN.uv_BumpMap));
-            o.Albedo = debugColor;
+            o.Albedo = color;
             o.Metallic = 0.0;
             o.Smoothness = 0.0;
             o.Alpha = 1.0;

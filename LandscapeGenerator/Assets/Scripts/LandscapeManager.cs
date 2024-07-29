@@ -9,8 +9,8 @@ using static TerrainChunksManager;
 public class LandscapeManager : MonoBehaviour{
 	
 	public const float Scale = 2.5f;
-	public const int MapHeight = 16;
-	public const int MapWidth = 16;
+	public const int MapHeight = 50;
+	public const int MapWidth = 50;
 	public static LandscapeManager Instance;
 	public static MapData[,] Maps { get; private set; }
 	public static Texture2D[,] MapTextures { get; private set; }

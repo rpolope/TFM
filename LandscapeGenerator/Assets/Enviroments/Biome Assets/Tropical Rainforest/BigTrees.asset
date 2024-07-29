@@ -21,6 +21,6 @@ MonoBehaviour:
   - {fileID: 1970681966781816, guid: 84bb771a8038d2648bd2421451c4018d, type: 3}
   minHeight: 0
   maxHeight: 1
-  radius: 15
-  density: 0.822
+  radius: 25
+  density: 0.7
   normalOrientation: 0.347

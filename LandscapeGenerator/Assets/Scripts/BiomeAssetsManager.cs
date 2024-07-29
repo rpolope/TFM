@@ -21,6 +21,7 @@ public class BiomesAssetsManager
                 {
                     _biomesAssetsDict[climate] = new List<BiomeAsset>();
                 }
+
                 _biomesAssetsDict[climate].Add(asset);
 
                 foreach (var gameObject in asset.gameObjects)
@@ -33,7 +34,7 @@ public class BiomesAssetsManager
                     {
                         _biomesAssetsCount[gameObject]++;
                     }
-                    
+
                     _biomeAssetsPool.Load(gameObject, 50);
                 }
             }
@@ -52,28 +53,13 @@ public class BiomesAssetsManager
 
     public static GameObject SpawnAsset(GameObject biomeAsset, Vector3 position, Quaternion rotation)
     {
+        // _biomeAssetsPool.spawner = transform;
         return _biomeAssetsPool.Spawn(biomeAsset, position, rotation);
     }
-    
+
     public static void DespawnAsset(GameObject biomeAsset)
     {
         _biomeAssetsPool.Despawn(biomeAsset);
-    }
-
-    public static void SpawnAssets(List<BiomeAsset> biomeAssets)
-    {
-        foreach (var biomeAsset in biomeAssets)
-        {
-            _biomeAssetsPool.Spawn(biomeAsset.instantiatedGameObjects);
-        }
-    }
-
-    public static void DespawnAssets(List<BiomeAsset> biomeAssets)
-    {
-        foreach (var biomeAsset in biomeAssets)
-        {
-            _biomeAssetsPool.Despawn(biomeAsset.instantiatedGameObjects);
-        }
     }
 }
 

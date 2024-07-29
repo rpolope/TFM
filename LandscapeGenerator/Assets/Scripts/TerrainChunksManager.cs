@@ -17,7 +17,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static readonly Queue<IEnumerator> MeshGenerationQueue = new Queue<IEnumerator>();
 	
 	private const int MaxConcurrentMeshCoroutines = 4;
-	private static int ChunksVisibleInViewDist { get; set; } = 0;
+	private static int ChunksVisibleInViewDist { get; set; } = 2;
 
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
@@ -32,26 +32,15 @@ public class TerrainChunksManager : MonoBehaviour{
 			new LODInfo(2, 1, true)
 		};
 		
-		// ChunksVisibleInViewDist = 0;
-		// foreach (var detailLevel in _detailLevels)
-		// {
-		// 	ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
-		// }
+		ChunksVisibleInViewDist = 0;
+		foreach (var detailLevel in _detailLevels)
+		{
+			ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
+		}
 
 		UpdateVisibleChunks();
-		// UpdateVisibleObjects();
-
-		// StartCoroutine(WaitForInitialChunksGenerationCoroutine());
-		/**/
 	}
 
-	private IEnumerator WaitForInitialChunksGenerationCoroutine()
-	{
-		while (_activeCoroutines != 0)
-			yield return null;
-		
-		UpdateVisibleObjects();
-	}
 
 	public void Update() {
 		
@@ -170,21 +159,17 @@ public class TerrainChunksManager : MonoBehaviour{
 	{
 		var visible = !isCulled && inDistance;
 		
-		if (LandscapeManager.Instance.culling == CullingMode.Layer)
-		{
-			chunk.GameObject.layer = isCulled ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default");
-		}
-		else
-		{
-			chunk.SetActive(visible);
-		}
 		
+		chunk.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default");
+		chunk._water.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Water");
+
+		chunk.UpdateObjectsVisibility(visible);
 		chunk.SetColliderEnable(visible && chunk.LODIndex == 0);
 	}
 	
 	public class TerrainChunk
 	{
-		public const int Resolution = 129;
+		public const int Resolution = 121;
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public Vector3 Position { get; private set; }
@@ -209,7 +194,8 @@ public class TerrainChunksManager : MonoBehaviour{
 		private readonly MeshCollider _meshCollider;
 		internal bool ObjectsPlaced = false;
 		internal bool ObjectsVisible = false;
-		private Water _water;
+		internal Water _water;
+		public List<GameObject> InstantiatedGameObjects;
 
 		public TerrainChunk(int2 coord)
 		{
@@ -239,7 +225,7 @@ public class TerrainChunksManager : MonoBehaviour{
 					_colliderMesh = _lodMeshes[i];
 				}
 			}
-
+			
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
 
 			// _water = UnityEngine.Random.value >= Biome.GetWaterProbability();
@@ -248,6 +234,8 @@ public class TerrainChunksManager : MonoBehaviour{
 				Transform,
 				WorldSize
 			);
+
+			InstantiatedGameObjects = new List<GameObject>();
 		}
 
 		private int2 CalculateDistanceFromViewer()
@@ -353,6 +341,17 @@ public class TerrainChunksManager : MonoBehaviour{
 
 			SetColliderEnable(visible);
 		}
+		
+		
+		public void UpdateObjectsVisibility(bool visible)
+		{
+			if (visible) return;
+
+			foreach (var gameObject in InstantiatedGameObjects)
+			{
+				BiomesAssetsManager.DespawnAsset(gameObject);
+			}
+		}
 
 		public void SetActive(bool visible) {
 			
@@ -362,27 +361,30 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void SetColliderEnable(bool enable)
 		{
 			_meshCollider.enabled = enable;
-			// _water.BoxCollider.enabled = enable;
+			if(!ObjectsPlaced )
+				_water.BoxCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
 		{
-				if (LODIndex < 0)
-				{
-					LODIndex = GetLODFromDistance(CalculateDistanceFromViewer());
-				}
-				var lodMesh = _lodMeshes[LODIndex];
-				if (lodMesh.RequestedMesh)
-				{
-					lodMesh.CompleteMeshGeneration();
-					_meshFilter.mesh = lodMesh.Mesh;
+			if (LODIndex < 0)
+			{
+				LODIndex = GetLODFromDistance(CalculateDistanceFromViewer());
+			}
+			var lodMesh = _lodMeshes[LODIndex];
+			if (lodMesh.RequestedMesh)
+			{
+				lodMesh.CompleteMeshGeneration();
+				_meshFilter.mesh = lodMesh.Mesh;
 
-					if (LODIndex == 0 && _colliderMesh.RequestedMesh)
-					{
-						_colliderMesh.CompleteMeshGeneration();
-						_meshCollider.sharedMesh = _colliderMesh.Mesh;
-					}
+				if (LODIndex == 0 && _colliderMesh.RequestedMesh)
+				{
+					_colliderMesh.CompleteMeshGeneration();
+					_meshCollider.sharedMesh = _colliderMesh.Mesh;
 				}
+			}
+			
+			PlaceObjects();
 		}
 		public void PlaceObjects()
 		{

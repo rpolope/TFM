@@ -13,7 +13,7 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
 
-    private const int YieldFrequency = 1;
+    private const int YieldFrequency = 3;
 
     
     public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk)
@@ -62,7 +62,8 @@ public static class ObjectPlacer
                     {
                         if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
-                        PlaceAsset(asset, hitPosition, rotation);
+                        var instance = PlaceAsset(asset, hitPosition, rotation);
+                        chunk.InstantiatedGameObjects.Add(instance);
 
                         if (asset.type is AssetType.Organic)
                         {
@@ -128,7 +129,7 @@ public static class ObjectPlacer
                height <= asset.maxHeight * heightScale;
     }
 
-    private static void PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation)
+    private static GameObject PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation)
     {
         
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
@@ -137,7 +138,7 @@ public static class ObjectPlacer
         var instance = BiomesAssetsManager.SpawnAsset(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation);
         instance.transform.up = upVector;
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
-        asset.instantiatedGameObjects.Add(instance);
+        return instance;
     }
 
     private static Vector3 GeUpVector(Quaternion rotation, float normalOrientation)

@@ -15,7 +15,7 @@ MonoBehaviour:
   autoUpdate: 1
   parameters:
     scale: 2.5
-    resolution: 129
+    resolution: 121
     heightScale: 250
     waterLevel: 0.1
     levelsOfDetail: 3

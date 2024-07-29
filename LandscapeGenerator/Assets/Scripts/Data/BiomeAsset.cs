@@ -16,6 +16,4 @@ public class BiomeAsset: ScriptableObject
     public float density;
     [Range(0, 1)]
     public float normalOrientation;
-
-    public List<GameObject> instantiatedGameObjects = new List<GameObject>();
 }
