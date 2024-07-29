@@ -15,9 +15,23 @@ MonoBehaviour:
   type: 0
   size: 1
   biomes: 01000000
-  gameObjects: []
+  gameObjects:
+  - {fileID: 1639987689182440, guid: 4c001ec3cbfef9446a573fe16815e9af, type: 3}
+  - {fileID: 1639987689182440, guid: 1237551950c246d43ab02b1d69e6f317, type: 3}
+  - {fileID: 108544, guid: d638ef2ca2fe20c4c9c08e125692d3f4, type: 3}
+  - {fileID: 100000, guid: f1422f5c6e1457147a73440f96e079ac, type: 3}
+  - {fileID: 199470, guid: ec78ebca7517fb745a45a931cb06d2bd, type: 3}
+  - {fileID: 100000, guid: 79ad7b59297e2b34da705d6e47326a46, type: 3}
+  - {fileID: 193742, guid: 9c74caa742791864f9c678287121e6c9, type: 3}
+  - {fileID: 100000, guid: 4955f028d29047641a25f9c22b926284, type: 3}
+  - {fileID: 162742, guid: d15b44addf30da74f946086ec0aa993c, type: 3}
+  - {fileID: 100000, guid: 21ec5fde180d55548a40d810905090fe, type: 3}
+  - {fileID: 128002, guid: bb660abd3b29d9f44866fd79795dbca4, type: 3}
+  - {fileID: 100000, guid: 7c8c1d0cdb996ab4e87515489f195873, type: 3}
+  - {fileID: 171474, guid: f62058cb710fd1745a24102fff0edd46, type: 3}
   minHeight: 0
-  maxHeight: 0
-  radius: 0
-  density: 0
-  normalOrientation: 0
+  maxHeight: 1
+  radius: 10
+  density: 0.382
+  normalOrientation: 0.928
+  instantiatedGameObjects: []

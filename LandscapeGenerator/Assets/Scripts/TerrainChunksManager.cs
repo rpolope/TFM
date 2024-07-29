@@ -17,7 +17,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static readonly Queue<IEnumerator> MeshGenerationQueue = new Queue<IEnumerator>();
 	
 	private const int MaxConcurrentMeshCoroutines = 4;
-	private static int ChunksVisibleInViewDist { get; set; } = 4;
+	private static int ChunksVisibleInViewDist { get; set; } = 0;
 
 	private static LODInfo[] _detailLevels;
 	private static int _wrapCountX;
@@ -32,11 +32,11 @@ public class TerrainChunksManager : MonoBehaviour{
 			new LODInfo(2, 1, true)
 		};
 		
-		ChunksVisibleInViewDist = 0;
-		foreach (var detailLevel in _detailLevels)
-		{
-			ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
-		}
+		// ChunksVisibleInViewDist = 0;
+		// foreach (var detailLevel in _detailLevels)
+		// {
+		// 	ChunksVisibleInViewDist += detailLevel.visibleChunksThreshold;
+		// }
 
 		UpdateVisibleChunks();
 		// UpdateVisibleObjects();
@@ -61,7 +61,6 @@ public class TerrainChunksManager : MonoBehaviour{
 			UpdateVisibleChunks();
 			UpdateVisibleObjects();
 		}
-		/* */
 
 		if (Viewer.RotationChanged())
 		{
@@ -83,7 +82,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	{
 		foreach (var chunk in TerrainChunksVisibleLastUpdate.Where(chunk => chunk.LODIndex == 0))
 		{
-			chunk.ManageObjects();
+			chunk.PlaceObjects();
 		}
 	}
 
@@ -194,7 +193,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public int2 Coord => _wrappedCoord;
 		public Biome Biome { get; }
 		public int LODIndex { get; private set; } = -1;
-
+		public Bounds Bounds;
 		public static Material Material;
 
 		private Vector3 _positionV3;
@@ -218,7 +217,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			_coord = coord;
 			_wrappedCoord = coord;
 			Position = new Vector3(_wrappedCoord.x, 0, _wrappedCoord.y) * (Resolution - 1);
-
+			Bounds = new Bounds(WorldPos, new Vector3(WorldSize, 1, WorldSize));
 			Biome = BiomesManager.GetBiome(_wrappedCoord);
 
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
@@ -385,46 +384,11 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 		}
-
-		// Caso 1: Si los objetos están colocados y visibles en el chunk actual del viewer, no hacer nada
-		// Caso 2: Si los objetos no están visibles y el viewer no está en el chunk, no hacer nada
-		// Caso 3: Si el viewer está en el chunk y los objetos no están colocados, colocarlos y hacerlos visibles
-		// Caso 4: Si el viewer está en el chunk, los objetos están colocados pero no visibles, hacerlos visibles
-		// Caso 5: Si el viewer no está en el chunk pero los objetos están visibles, ocultarlos
-
-		public void ManageObjects()
+		public void PlaceObjects()
 		{
-			if (ObjectsPlaced && LODIndex == 0 && ObjectsVisible) return;
-
-			if (LODIndex != 0 && !ObjectsVisible) return;
-
-			switch (LODIndex)
-			{
-				case 0 when !ObjectsPlaced:
-					LandscapeManager.Instance.StartCoroutine(ObjectPlacer.PlaceObjectsCoroutine(this));
-				
-					// Transform.Find("Assets")?.gameObject.SetActive(true);
-					break;
-				case 0 when ObjectsPlaced && !ObjectsVisible:
-
-					BiomesAssetsManager.SpawnAssets(Biome.Assets);
-					// Transform.Find("Assets")?.gameObject.SetActive(true);
-					ObjectsVisible = true;
-					break;
-				
-				default:
-				{
-					if (LODIndex != 0 && ObjectsPlaced && ObjectsVisible)
-					{
-						// Transform.Find("Assets")?.gameObject.SetActive(false);
-						BiomesAssetsManager.DespawnAssets(Biome.Assets);
-
-						ObjectsVisible = false;
-					}
-
-					break;
-				}
-			}
+			if (LODIndex == 0 && !ObjectsPlaced)
+				LandscapeManager.Instance.StartCoroutine(
+					ObjectPlacer.PlaceObjectsCoroutine(this));
 		}
 
 		public bool IsVisible() {

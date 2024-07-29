@@ -26,7 +26,7 @@ public class PoolManager : MonoBehaviour
             var go = Instantiate(prefab, _poolParent, true);
             go.name = prefab.name;
             // go.SetActive(false);
-            go.layer = 3;
+            SetLayerRecursively(go, 3);
             _pool[goName].Add(go);
         }
     }
@@ -50,7 +50,7 @@ public class PoolManager : MonoBehaviour
         var go = l[0];
         l.RemoveAt(0);
         // go.SetActive(true);
-        go.layer = 0;
+        SetLayerRecursively(go, 0);
         go.transform.SetParent(spawner);
         return go;
     }
@@ -79,8 +79,18 @@ public class PoolManager : MonoBehaviour
             _pool[go.name] = new List<GameObject>();
         }
         // go.SetActive(false);
-        go.layer = 3;
+        SetLayerRecursively(go, 3);
         go.transform.SetParent(_poolParent);
         _pool[go.name].Add(go);
+    }
+    
+    private static void SetLayerRecursively(GameObject go, int layer)
+    {
+        go.layer = layer;
+        
+        foreach (Transform child in go.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
     }
 }

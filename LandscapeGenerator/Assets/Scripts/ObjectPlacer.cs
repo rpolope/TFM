@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Search;
 using UnityEngine;
 using static TerrainChunksManager;
 
@@ -51,10 +50,13 @@ public static class ObjectPlacer
 
                 foreach (var point in points)
                 {
+                    
                     if (assetsPlacedCount > asset.density * points.Count) break;
 
                     var offset = new Vector3(point.x - radius, 0, point.y - radius);
                     var worldPos = centerPoint + offset;
+                    
+                    if (!chunk.Bounds.Contains(worldPos)) continue;
 
                     if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 100f))
                     {
@@ -80,21 +82,6 @@ public static class ObjectPlacer
             chunk.ObjectsPlaced = true;
             chunk.ObjectsVisible = true;
         }
-    }
-
-    private static Transform SetAssetsParent(TerrainChunk chunk)
-    {
-        var assetsParent = chunk.Transform.Find("Assets")?.transform;
-
-        if (assetsParent == null)
-        {
-            assetsParent = new GameObject("Assets")
-            {
-                transform = { parent = chunk.Transform }
-            }.transform;
-        }
-
-        return assetsParent;
     }
 
     private static List<Vector3> GetCenterPointsForSize(AssetSize size, Vector3 worldPos, bool considerLargerAssets)

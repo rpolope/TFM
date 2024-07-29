@@ -39,6 +39,7 @@ public class Viewer : MonoBehaviour
 
     private void Update()
     {
+        _velocity = _transform.forward.normalized * speed;
         _transform.position += _velocity * Time.deltaTime;
         _rotationY = _transform.rotation.eulerAngles.y;
     }
