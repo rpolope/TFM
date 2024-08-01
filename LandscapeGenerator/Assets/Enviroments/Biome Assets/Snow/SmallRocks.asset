@@ -16,8 +16,8 @@ MonoBehaviour:
   size: 1
   biomes: 01000000
   gameObjects: []
-  minHeight: 0
-  maxHeight: 0
+  minHeight: 0.2
+  maxHeight: 0.5
   radius: 0
   density: 0
   normalOrientation: 0

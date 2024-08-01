@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 using static TerrainChunksManager;
 
@@ -13,19 +14,18 @@ public static class ObjectPlacer
         { AssetSize.Small, new List<Vector3>() }
     };
 
-    private const int YieldFrequency = 3;
+    private const int YieldFrequency = 5;
 
-    
     public static IEnumerator PlaceObjectsCoroutine(TerrainChunk chunk)
     {
+
         var assets = BiomesAssetsManager.GetAssetsForBiome(chunk.Biome.BiomeType);
-        
         if (assets == null)
         {
             Debug.LogWarning("No assets found for biome: " + chunk.Biome.BiomeType);
             yield break;
         }
-        
+
         foreach (var key in PlacedPositions.Keys.ToList())
         {
             PlacedPositions[key].Clear();
@@ -50,7 +50,6 @@ public static class ObjectPlacer
 
                 foreach (var point in points)
                 {
-                    
                     if (assetsPlacedCount > asset.density * points.Count) break;
 
                     var offset = new Vector3(point.x - radius, 0, point.y - radius);
@@ -58,7 +57,7 @@ public static class ObjectPlacer
                     
                     if (!chunk.Bounds.Contains(worldPos)) continue;
 
-                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 100f))
+                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 500f))
                     {
                         if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
@@ -72,7 +71,7 @@ public static class ObjectPlacer
                         
                         assetsPlacedCount++;
 
-                        if (assetsPlacedCount % YieldFrequency  == 0)
+                        if (assetsPlacedCount % YieldFrequency == 0)
                         {
                             yield return null;
                         }
@@ -80,8 +79,7 @@ public static class ObjectPlacer
                 }
             }
 
-            chunk.ObjectsPlaced = true;
-            chunk.ObjectsVisible = true;
+            chunk.SetObjectPlaced();
         }
     }
 
@@ -131,7 +129,6 @@ public static class ObjectPlacer
 
     private static GameObject PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation)
     {
-        
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
         var pivotRotation = Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
         var upVector = GeUpVector(rotation, asset.normalOrientation);

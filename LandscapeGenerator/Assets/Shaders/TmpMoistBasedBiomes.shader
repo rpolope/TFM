@@ -70,7 +70,7 @@ Shader "Custom/TmpMoistBasedBiomes"
         float getTemperature(float latitude, float2 uv, float height) {
             float temp = lerp(-30, 30, latitude);
             float distortion = tex2D(_TempNoiseTex, uv * _TemperatureNoiseScale).r;
-            float heightPerturb = height * height/_MaxHeight;
+            float heightPerturb = height * height/_MaxHeight * 0.8;
             temp = temp - heightPerturb + distortion * 0.01;
             return temp;
         }

@@ -20,9 +20,8 @@ MonoBehaviour:
   - {fileID: 100000, guid: d047f8be423b6b8469e320fe57de6365, type: 3}
   - {fileID: 100000, guid: a1b484aa12c136c429eec46878d6a0b5, type: 3}
   - {fileID: 100000, guid: b755400b484cca746b9d712b67a158a0, type: 3}
-  minHeight: 0
-  maxHeight: 1
+  minHeight: 0.2
+  maxHeight: 0.5
   radius: 40
   density: 0.174
   normalOrientation: 1
-  instantiatedGameObjects: []

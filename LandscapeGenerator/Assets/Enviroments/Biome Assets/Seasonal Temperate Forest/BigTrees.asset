@@ -16,10 +16,12 @@ MonoBehaviour:
   size: 3
   biomes: 05000000
   gameObjects:
-  - {fileID: 100000, guid: d2afb700ab12fcc4db5b9567f3a698dd, type: 3}
-  - {fileID: 100000, guid: 6a08450e9ce0dde4a8c7594f7297582a, type: 3}
+  - {fileID: 610442767118806722, guid: 3950d3b52cefb694da6f90569295802f, type: 3}
+  - {fileID: 7418671466255328246, guid: ac31d6c2523544f40ade59eb49f7835e, type: 3}
+  - {fileID: 6184500696557444304, guid: 93144a6d19652fb4b8bccb98804a8a18, type: 3}
+  - {fileID: 2935638386711793317, guid: 5f2bc48b2075fac439c542db71626cd9, type: 3}
   minHeight: 0.5
   maxHeight: 1
   radius: 50
-  density: 0.459
+  density: 0.45
   normalOrientation: 0.698

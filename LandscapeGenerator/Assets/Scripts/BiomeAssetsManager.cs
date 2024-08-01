@@ -35,7 +35,18 @@ public class BiomesAssetsManager
                         _biomesAssetsCount[gameObject]++;
                     }
 
-                    _biomeAssetsPool.Load(gameObject, 50);
+                    var goCollider = gameObject.GetComponent<Collider>();
+                    if (goCollider)
+                        goCollider.enabled = false;
+
+                    foreach (Transform obj in gameObject.transform)
+                    {
+                        goCollider = obj.GetComponent<Collider>();
+                        if (goCollider)
+                            goCollider.enabled = false;
+                    }
+                    
+                    _biomeAssetsPool.Load(gameObject, 100);
                 }
             }
         }

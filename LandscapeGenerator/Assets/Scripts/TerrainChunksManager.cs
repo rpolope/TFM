@@ -164,7 +164,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		chunk._water.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Water");
 
 		chunk.UpdateObjectsVisibility(visible);
-		chunk.SetColliderEnable(visible && chunk.LODIndex == 0);
+		chunk.SetColliderEnable(visible && chunk.LODIndex < 2);
 	}
 	
 	public class TerrainChunk
@@ -193,7 +193,6 @@ public class TerrainChunksManager : MonoBehaviour{
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
 		internal bool ObjectsPlaced = false;
-		internal bool ObjectsVisible = false;
 		internal Water _water;
 		public List<GameObject> InstantiatedGameObjects;
 
@@ -285,10 +284,6 @@ public class TerrainChunksManager : MonoBehaviour{
 					if (lodMesh.HasMesh)
 					{
 						_meshFilter.mesh = lodMesh.Mesh;
-						if (lodIndex == 0)
-						{
-							_meshCollider.sharedMesh = _colliderMesh.Mesh;
-						}
 					}
 					else
 					{
@@ -296,7 +291,7 @@ public class TerrainChunksManager : MonoBehaviour{
 					}
 				}
 				
-				if (LODIndex == 0 )
+				if (LODIndex < 2 )
 				{
 					if (_colliderMesh.HasMesh)
 					{
@@ -377,7 +372,7 @@ public class TerrainChunksManager : MonoBehaviour{
 				lodMesh.CompleteMeshGeneration();
 				_meshFilter.mesh = lodMesh.Mesh;
 
-				if (LODIndex == 0 && _colliderMesh.RequestedMesh)
+				if (_colliderMesh.RequestedMesh)
 				{
 					_colliderMesh.CompleteMeshGeneration();
 					_meshCollider.sharedMesh = _colliderMesh.Mesh;
@@ -388,9 +383,17 @@ public class TerrainChunksManager : MonoBehaviour{
 		}
 		public void PlaceObjects()
 		{
-			if (LODIndex == 0 && !ObjectsPlaced)
+			if (LODIndex < 2 && !ObjectsPlaced)
 				LandscapeManager.Instance.StartCoroutine(
 					ObjectPlacer.PlaceObjectsCoroutine(this));
+				// ObjectPlacer.PlaceObjects(this);
+		}
+		
+		public void SetObjectPlaced()
+		{
+			ObjectsPlaced = true;
+			if (LODIndex == 1)
+				_meshCollider.enabled = false;
 		}
 
 		public bool IsVisible() {

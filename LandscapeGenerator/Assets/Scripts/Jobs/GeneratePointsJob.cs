@@ -36,7 +36,7 @@ namespace Jobs
                 {
                     float angle = random.NextFloat() * Mathf.PI * 2;
                     Vector2 dir = new Vector2(math.sin(angle), math.cos(angle));
-                    Vector2 candidate = spawnCenter + dir * random.NextFloat(Radius, 2 * Radius);
+                    Vector2 candidate = spawnCenter + dir * random.NextFloat(Radius, Radius);
 
                     if (IsValid(candidate, SampleRegionSize, CellSize, Radius, Points, Grid, Width, Height))
                     {

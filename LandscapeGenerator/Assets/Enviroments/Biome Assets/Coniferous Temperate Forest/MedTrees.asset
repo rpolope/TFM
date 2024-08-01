@@ -20,10 +20,8 @@ MonoBehaviour:
   - {fileID: 6013024405325220409, guid: 9046dd8040214c0458728201d824c41f, type: 3}
   - {fileID: 1473601184474156, guid: 67762154df3b7ca4eaaebcc646c11bbf, type: 3}
   - {fileID: 1356352691811968, guid: c1293ad6a2baf184c92d003aa923c284, type: 3}
-  - {fileID: 100000, guid: 5463c855c66b2f740b4bc4c6379e0f97, type: 3}
-  - {fileID: 100000, guid: 232a1ed44805e2d4eb99372b65201d9a, type: 3}
   minHeight: 0.1
   maxHeight: 1
   radius: 10
-  density: 0.75
+  density: 0.5
   normalOrientation: 0.75
