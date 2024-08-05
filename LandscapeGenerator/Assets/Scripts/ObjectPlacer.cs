@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Profiling;
 using UnityEngine;
 using static TerrainChunksManager;
 
@@ -57,11 +56,11 @@ public static class ObjectPlacer
                     
                     if (!chunk.Bounds.Contains(worldPos)) continue;
 
-                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, 500f))
+                    if (TryGetPositionAndRotation(worldPos, out var hitPosition, out var rotation, out var layer, out var parent, 500f))
                     {
                         if (!IsPositionValid(hitPosition, layer, asset)) continue;
 
-                        var instance = PlaceAsset(asset, hitPosition, rotation);
+                        var instance = PlaceAsset(asset, hitPosition, rotation, parent);
                         chunk.InstantiatedGameObjects.Add(instance);
 
                         if (asset.type is AssetType.Organic)
@@ -99,7 +98,7 @@ public static class ObjectPlacer
         };
     }
 
-    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out int layer, float raycastHeight)
+    private static bool TryGetPositionAndRotation(Vector3 position, out Vector3 hitPosition, out Quaternion rotation, out int layer, out Transform parent, float raycastHeight)
     {
         var ray = new Ray(position + Vector3.up * raycastHeight, Vector3.down);
         if (Physics.Raycast(ray, out var hit))
@@ -107,13 +106,15 @@ public static class ObjectPlacer
             hitPosition = hit.point;
             rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
             layer = hit.transform.gameObject.layer;
-
+            parent = hit.transform;
+            
             return true;
         }
         hitPosition = Vector3.zero;
         rotation = Quaternion.identity;
         layer = default;
-
+        parent = null;
+        
         return false;
     }
 
@@ -127,12 +128,13 @@ public static class ObjectPlacer
                height <= asset.maxHeight * heightScale;
     }
 
-    private static GameObject PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation)
+    private static GameObject PlaceAsset(BiomeAsset asset, Vector3 position, Quaternion rotation, Transform parent)
     {
         var randIndex = asset.gameObjects.Count > 1 ? Random.Range(0, asset.gameObjects.Count) : 0;
         var pivotRotation = Quaternion.Euler(0f, Random.Range(0f, 359f), 0f);
         var upVector = GeUpVector(rotation, asset.normalOrientation);
-        var instance = BiomesAssetsManager.SpawnAsset(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation);
+        
+        var instance = BiomesAssetsManager.SpawnAsset(asset.gameObjects[randIndex], position - upVector * 0.1f, pivotRotation, parent);
         instance.transform.up = upVector;
         instance.transform.localScale *= Random.Range(0.8f, 1.2f);
         return instance;

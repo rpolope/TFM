@@ -62,9 +62,9 @@ public class BiomesAssetsManager
         return biomeAssets?.Where(b => b.type == type).ToList();
     }
 
-    public static GameObject SpawnAsset(GameObject biomeAsset, Vector3 position, Quaternion rotation)
+    public static GameObject SpawnAsset(GameObject biomeAsset, Vector3 position, Quaternion rotation, Transform transform)
     {
-        // _biomeAssetsPool.spawner = transform;
+        _biomeAssetsPool.spawner = transform;
         return _biomeAssetsPool.Spawn(biomeAsset, position, rotation);
     }
 
