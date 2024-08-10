@@ -46,7 +46,7 @@ public class BiomesAssetsManager
                             goCollider.enabled = false;
                     }
                     
-                    _biomeAssetsPool.Load(gameObject, 100);
+                    _biomeAssetsPool.Load(gameObject, 300);
                 }
             }
         }
@@ -66,11 +66,6 @@ public class BiomesAssetsManager
     {
         _biomeAssetsPool.spawner = transform;
         return _biomeAssetsPool.Spawn(biomeAsset, position, rotation);
-    }
-
-    public static void DespawnAsset(GameObject biomeAsset)
-    {
-        _biomeAssetsPool.Despawn(biomeAsset);
     }
 }
 

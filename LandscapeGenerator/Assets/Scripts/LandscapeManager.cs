@@ -8,7 +8,7 @@ using static TerrainChunksManager;
 
 public class LandscapeManager : MonoBehaviour{
 	
-	public const float Scale = 2.5f;
+	public const float Scale = 3f;
 	public const int MapHeight = 50;
 	public const int MapWidth = 50;
 	public static LandscapeManager Instance;

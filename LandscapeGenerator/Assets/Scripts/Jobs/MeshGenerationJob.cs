@@ -36,7 +36,7 @@ namespace Jobs
             float zPos = LODScale * (z - offset) * Scale;
             
             var mapIndex = LODScale * (x + z * ChunkFullResolution);
-            float height = MapData.HeightMap[mapIndex] * TerrainParameters.meshParameters.heightScale;
+            float height = MapData.HeightMap[mapIndex] * TerrainParameters.meshParameters.heightScale * LandscapeManager.Scale;
             
             Vertices[index] = new Vector3((int)xPos, height, (int)zPos);
             if (GlobalUVs)

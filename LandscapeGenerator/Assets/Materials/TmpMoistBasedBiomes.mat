@@ -78,7 +78,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BumpMapScale: 100
+    - _BumpMapScale: 1000
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -100,7 +100,7 @@ Material:
     - _ThereIsWater: 1
     - _UVSec: 0
     - _WaterHeight: 1
-    - _WaterLevel: 0.1
+    - _WaterLevel: 0.12
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

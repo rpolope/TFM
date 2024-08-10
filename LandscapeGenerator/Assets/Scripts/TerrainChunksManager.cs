@@ -16,7 +16,7 @@ public class TerrainChunksManager : MonoBehaviour{
 	private static readonly List<TerrainChunk> SurroundTerrainChunks = new List<TerrainChunk>();
 	private static readonly Queue<IEnumerator> MeshGenerationQueue = new Queue<IEnumerator>();
 	
-	private const int MaxConcurrentMeshCoroutines = 4;
+	private const int MaxConcurrentMeshCoroutines = 10;
 	private static int ChunksVisibleInViewDist { get; set; } = 2;
 
 	private static LODInfo[] _detailLevels;
@@ -159,9 +159,8 @@ public class TerrainChunksManager : MonoBehaviour{
 	{
 		var visible = !isCulled && inDistance;
 		
-		
 		chunk.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Default");
-		chunk._water.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Water");
+		chunk.Water.GameObject.layer = !visible ? LayerMask.NameToLayer("Culled") : LayerMask.NameToLayer("Water");
 
 		chunk.UpdateObjectsVisibility(visible);
 		chunk.SetColliderEnable(visible && chunk.LODIndex < 2);
@@ -169,7 +168,9 @@ public class TerrainChunksManager : MonoBehaviour{
 	
 	public class TerrainChunk
 	{
-		public const int Resolution = 105;
+		public const int Resolution = 105;		
+		public const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
+
 		public GameObject GameObject { get; }
 		public Transform Transform { get; private set; }
 		public Vector3 Position { get; private set; }
@@ -179,7 +180,7 @@ public class TerrainChunksManager : MonoBehaviour{
 		public Biome Biome { get; }
 		public int LODIndex { get; private set; } = -1;
 		public Bounds Bounds;
-		public static Material Material;
+		public readonly List<GameObject> InstantiatedGameObjects;
 
 		private Vector3 _positionV3;
 		private readonly LODMesh[] _lodMeshes;
@@ -187,33 +188,34 @@ public class TerrainChunksManager : MonoBehaviour{
 		private int2 _coord;
 		private readonly int2 _wrappedCoord;
 		private LOD[] _lods;
-		public const float WorldSize = (Resolution - 1) * LandscapeManager.Scale;
+		private static Material _material;
 		private Biome _biome;
 		private readonly LODMesh _colliderMesh;
 		private readonly MeshFilter _meshFilter;
 		private readonly MeshCollider _meshCollider;
-		internal bool ObjectsPlaced = false;
-		internal Water _water;
-		public List<GameObject> InstantiatedGameObjects;
+		private bool _objectsPlaced;
+		internal readonly Water Water;
+		private bool _canPlaceObjects;
 
 		public TerrainChunk(int2 coord)
 		{
-			GameObject = new GameObject("TerrainChunk");
 			_coord = coord;
+			GameObject = new GameObject($"TerrainChunk {_coord.x},{_coord.y}");
 			_wrappedCoord = coord;
 			Position = new Vector3(_wrappedCoord.x, 0, _wrappedCoord.y) * (Resolution - 1);
 			Bounds = new Bounds(WorldPos, new Vector3(WorldSize, 1, WorldSize));
 			Biome = BiomesManager.GetBiome(_wrappedCoord);
 
 			var meshRenderer = GameObject.AddComponent<MeshRenderer>();
-			meshRenderer.material = Material;
+			meshRenderer.material = _material;
 
 			_meshFilter = GameObject.AddComponent<MeshFilter>();
-
 			_meshCollider = GameObject.AddComponent<MeshCollider>();
 
 			Transform = GameObject.transform;
 			Transform.parent = LandscapeManager.Instance.Transform;
+			_objectsPlaced = false;
+			_canPlaceObjects = false;
 
 			_lodMeshes = new LODMesh[_detailLevels.Length];
 			for (int i = 0; i < _detailLevels.Length; i++)
@@ -226,10 +228,8 @@ public class TerrainChunksManager : MonoBehaviour{
 			}
 			
 			MapData = LandscapeManager.Maps[_coord.x, _coord.y];
-
-			// _water = UnityEngine.Random.value >= Biome.GetWaterProbability();
 			
-			_water = new Water(
+			Water = new Water(
 				Transform,
 				WorldSize
 			);
@@ -340,15 +340,26 @@ public class TerrainChunksManager : MonoBehaviour{
 		
 		public void UpdateObjectsVisibility(bool visible)
 		{
-			if (visible) return;
+			int layer = visible ? 0 : 3;
 
-			foreach (var gameObject in InstantiatedGameObjects)
+			foreach (Transform child in Transform)
 			{
-				BiomesAssetsManager.DespawnAsset(gameObject);
+				if (child.gameObject.layer == 4) continue;
+				SetLayerRecursively(child.gameObject, layer);
+			}
+		}
+		
+		private static void SetLayerRecursively(GameObject go, int layer)
+		{
+			go.layer = layer;
+        
+			foreach (Transform child in go.transform)
+			{
+				SetLayerRecursively(child.gameObject, layer);
 			}
 		}
 
-		public void SetActive(bool visible) {
+		private void SetActive(bool visible) {
 			
 			GameObject.SetActive (visible);
 		}
@@ -356,8 +367,8 @@ public class TerrainChunksManager : MonoBehaviour{
 		public void SetColliderEnable(bool enable)
 		{
 			_meshCollider.enabled = enable;
-			if(!ObjectsPlaced )
-				_water.BoxCollider.enabled = enable;
+			if(!_objectsPlaced )
+				Water.BoxCollider.enabled = enable;
 		}
 
 		internal void CompleteMeshGeneration()
@@ -378,31 +389,39 @@ public class TerrainChunksManager : MonoBehaviour{
 					_meshCollider.sharedMesh = _colliderMesh.Mesh;
 				}
 			}
-			
-			PlaceObjects();
+
+			if (IsVisible())
+			{
+				PlaceObjects();
+			}
+			else
+			{
+				_canPlaceObjects = true;
+			}
 		}
 		public void PlaceObjects()
 		{
-			if (LODIndex < 2 && !ObjectsPlaced)
+			if (LODIndex < 2 && !_objectsPlaced)
 				LandscapeManager.Instance.StartCoroutine(
 					ObjectPlacer.PlaceObjectsCoroutine(this));
-				// ObjectPlacer.PlaceObjects(this);
 		}
 		
 		public void SetObjectPlaced()
 		{
-			ObjectsPlaced = true;
+			_objectsPlaced = true;
+			_canPlaceObjects = false;
 			if (LODIndex == 1)
 				_meshCollider.enabled = false;
 		}
 
 		public bool IsVisible() {
-			return GameObject.activeSelf;
+			return LandscapeManager.Instance.culling.Equals(CullingMode.Visibility) ? GameObject.activeSelf : GameObject.layer == 0;
 		}
 
 		public void SetChunkCoord(int2 viewedChunkCoord)
 		{
 			_coord = viewedChunkCoord;
+			Bounds = new Bounds(WorldPos, new Vector3(WorldSize, 1, WorldSize));
 			_positionV3 = new Vector3(viewedChunkCoord.x,0,viewedChunkCoord.y) * WorldSize;
 			Transform.position = _positionV3;
 		}
@@ -413,16 +432,15 @@ public class TerrainChunksManager : MonoBehaviour{
 			var baseTextures = Shader.PropertyToID("groundTextures");
 			
 			const string materialPath = "Assets/Materials/TmpMoistBasedBiomes.mat";
-
 			
 			const string mockTexturesPath = "Assets/Textures/MockTextures/";
 			const string debugTexturesPath = "Assets/Textures/Debugging/";
 			const string texturesPath = "Assets/Textures/Biomes/Ground/Size-512px/";
 			
-			Material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
+			_material = (Material)AssetDatabase.LoadAssetAtPath(materialPath, typeof(Material));
 			
-			Material.EnableKeyword("_NORMALMAP");
-			Material.SetTexture ("_BumpMap", (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/Biomes/Normals/" + "Normal_Map.jpg", typeof(Texture2D)));
+			_material.EnableKeyword("_NORMALMAP");
+			_material.SetTexture ("_BumpMap", (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/Biomes/Normals/" + "Normal_Map.jpg", typeof(Texture2D)));
 
 			var biomesData = BiomesManager.BiomesData;
 			
@@ -439,10 +457,10 @@ public class TerrainChunksManager : MonoBehaviour{
 				biomeMaxMoist[i] = biomesData[i].maxMoist;
 			}
 
-			Material.SetFloatArray("biomeMinTemp", biomeMinTemp);
-			Material.SetFloatArray("biomeMaxTemp", biomeMaxTemp);
-			Material.SetFloatArray("biomeMinMoist", biomeMinMoist);
-			Material.SetFloatArray("biomeMaxMoist", biomeMaxMoist);
+			_material.SetFloatArray("biomeMinTemp", biomeMinTemp);
+			_material.SetFloatArray("biomeMaxTemp", biomeMaxTemp);
+			_material.SetFloatArray("biomeMinMoist", biomeMinMoist);
+			_material.SetFloatArray("biomeMaxMoist", biomeMaxMoist);
 
 			// TODO: Correct textures
 			var groundTexturesDictionary = new Dictionary<BiomeType, Texture2D>()
@@ -487,10 +505,10 @@ public class TerrainChunksManager : MonoBehaviour{
 				{ BiomeType.SubtropicalDesert, (Texture2D)AssetDatabase.LoadAssetAtPath(debugTexturesPath + "SUBTROPICAL_DESERT.png", typeof(Texture2D)) }
 			};
 			
-			Material.SetTexture (baseTextures, GenerateTextureArray (groundTexturesDictionary.Values.ToArray()));
+			_material.SetTexture (baseTextures, GenerateTextureArray (groundTexturesDictionary.Values.ToArray()));
 			
-			Material.SetFloat("_WaterLevel", terrainData is not null ? terrainData.parameters.waterLevel : Water.HeightLevel);
-			Material.SetFloat("_MaxHeight", terrainData is not null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
+			_material.SetFloat("_WaterLevel", terrainData is not null ? terrainData.parameters.waterLevel : Water.HeightLevel);
+			_material.SetFloat("_MaxHeight", terrainData is not null ? terrainData.MaxHeight : LandscapeManager.Instance.terrainData.MaxHeight);
 		}
 		private static Texture2DArray GenerateTextureArray(Texture2D[] textures) {
 			
@@ -523,7 +541,7 @@ public class TerrainChunksManager : MonoBehaviour{
 			HasMesh = false;
 		}
 		
-		public void RequestMesh(TerrainChunksManager terrainChunksManager) {
+		public void RequestMesh(MonoBehaviour terrainChunksManager) {
 			RequestedMesh = true;
 			terrainChunksManager.StartCoroutine(RequestMeshCoroutine());	
 		}

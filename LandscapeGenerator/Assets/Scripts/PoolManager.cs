@@ -30,16 +30,8 @@ public class PoolManager : MonoBehaviour
             _pool[goName].Add(go);
         }
     }
-    
-    public void Spawn(List<GameObject> gameObjects)
-    {
-        foreach (var go in gameObjects)
-        {
-            Spawn(go);
-        }
-    }
 
-    public GameObject Spawn(GameObject prefab)
+    public GameObject Spawn(GameObject prefab, bool firstSpawn = false)
     {
         if (!_pool.ContainsKey(prefab.name) || _pool[prefab.name].Count == 0)
         {
@@ -51,38 +43,20 @@ public class PoolManager : MonoBehaviour
         l.RemoveAt(0);
         // go.SetActive(true);
         SetLayerRecursively(go, 0);
-        go.transform.SetParent(spawner);
+        if (firstSpawn)
+            go.transform.SetParent(spawner);
         return go;
     }
 
     public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        var go = Spawn(prefab);
+        var go = Spawn(prefab, true);
         var t = go.transform;
         t.position = position;
         t.rotation = rotation;
         return go;
     }
     
-    public void Despawn(List<GameObject> gameObjects)
-    {
-        foreach (var go in gameObjects)
-        {
-            Despawn(go);
-        }
-    }
-    
-    public void Despawn(GameObject go)
-    {
-        if (!_pool.ContainsKey(go.name))
-        {
-            _pool[go.name] = new List<GameObject>();
-        }
-        // go.SetActive(false);
-        SetLayerRecursively(go, 3);
-        go.transform.SetParent(_poolParent);
-        _pool[go.name].Add(go);
-    }
     
     private static void SetLayerRecursively(GameObject go, int layer)
     {
